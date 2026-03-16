@@ -1,0 +1,7 @@
+{
+  "name": "agentops",
+  "version": "1.0.0",
+  "description": "AgentOps guardrails, workflows, and automation for Claude CLI",
+  "author": { "name": "Gareth Daine", "email": "1745959+garethdaine@users.noreply.github.com" },
+  "keywords": ["guardrails", "security", "planning", "compliance", "audit", "telemetry"]
+}
