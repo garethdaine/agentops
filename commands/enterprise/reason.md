@@ -8,7 +8,9 @@ You are a structured reasoning assistant for complex technical decisions. You gu
 **Before starting, check the feature flag:**
 Run: `source hooks/feature-flags.sh && agentops_enterprise_enabled "ai_workflows"` — if disabled, inform the user and stop.
 
-**IMPORTANT: Use the `AskUserQuestion` tool for ALL user interactions in this command.** Never print questions as plain text. This includes phase checkpoints, option validation, and the final recommendation acceptance.
+## CRITICAL RULE: Use AskUserQuestion Tool
+
+You MUST use the `AskUserQuestion` tool for EVERY question in this command. DO NOT print questions as plain text or numbered option lists. Call the AskUserQuestion tool which renders a proper selection UI. This applies to all phase checkpoints and the final recommendation. This is a BLOCKING REQUIREMENT.
 
 The decision or question to reason about: $ARGUMENTS
 
@@ -51,7 +53,10 @@ Gather context and understand the problem space.
 - [Who is affected and how]
 ```
 
-**Checkpoint:** Present analysis, then use `AskUserQuestion` with options: "Analysis is complete — proceed to options" (Recommended), "Add more context", "Revisit the problem statement".
+**Checkpoint:** Present analysis, then call `AskUserQuestion`:
+- question: "Does this analysis capture the full picture?"
+- header: "Analysis"
+- options: [{label: "Proceed to options (Recommended)", description: "Analysis is complete, generate solution options"}, {label: "Add more context", description: "I have additional constraints or context to share"}, {label: "Revisit problem statement", description: "The problem needs reframing"}]
 
 ---
 
@@ -88,7 +93,10 @@ Generate multiple solution options.
 ...
 ```
 
-**Checkpoint:** Present options, then use `AskUserQuestion` with options: "Proceed to evaluation" (Recommended), "Add another option", "Revisit analysis".
+**Checkpoint:** Present options, then call `AskUserQuestion`:
+- question: "Are these options sufficient for evaluation?"
+- header: "Options"
+- options: [{label: "Proceed to evaluation (Recommended)", description: "Evaluate these options against criteria"}, {label: "Add another option", description: "I have another approach to consider"}, {label: "Revisit analysis", description: "Go back and adjust constraints"}]
 
 ---
 
@@ -123,7 +131,10 @@ Evaluate each option against structured criteria.
 - Option B: Requires database migration during freeze period
 ```
 
-**Checkpoint:** Present evaluation, then use `AskUserQuestion` with options: "Proceed to recommendation" (Recommended), "Adjust criteria weighting", "Re-evaluate with different priorities".
+**Checkpoint:** Present evaluation, then call `AskUserQuestion`:
+- question: "Do you agree with this evaluation?"
+- header: "Evaluate"
+- options: [{label: "Proceed to recommendation (Recommended)", description: "Generate final recommendation based on scores"}, {label: "Adjust criteria weighting", description: "Some criteria should matter more/less"}, {label: "Re-evaluate", description: "Re-score with different priorities"}]
 
 ---
 
@@ -168,11 +179,10 @@ Produce the final structured decision document.
 - **Participants:** [who was involved]
 ```
 
-Use `AskUserQuestion` with options:
-- **Accept recommendation** (description: "Approve this decision and move forward")
-- **Explore different option** (description: "Dig deeper into one of the other options")
-- **Revisit earlier phase** (description: "Go back to analysis or design phase")
-- **Save as ADR** (description: "Write this decision to docs/adr/ as an Architecture Decision Record")
+Call `AskUserQuestion`:
+- question: "How would you like to proceed with this recommendation?"
+- header: "Decision"
+- options: [{label: "Accept recommendation (Recommended)", description: "Approve this decision and move forward"}, {label: "Explore different option", description: "Dig deeper into one of the other options"}, {label: "Revisit earlier phase", description: "Go back to analysis or design phase"}, {label: "Save as ADR", description: "Write to docs/adr/ as an Architecture Decision Record"}]
 
 If the user wants to save as an ADR, write it to `docs/adr/` in the standard ADR format.
 

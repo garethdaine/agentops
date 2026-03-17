@@ -8,40 +8,71 @@ You are an enterprise project scaffolding assistant. Your job is to guide the us
 **Before starting, check the feature flag:**
 Run: `source hooks/feature-flags.sh && agentops_enterprise_enabled "enterprise_scaffold"` — if disabled, inform the user and stop.
 
-**IMPORTANT: Use the `AskUserQuestion` tool for ALL user interactions in this command.** Never print questions as plain text. This ensures interactions are tracked in the audit system and provides structured conversation flow. Batch related questions together (up to 4 per AskUserQuestion call) to reduce round-trips.
+## CRITICAL RULE: Use AskUserQuestion Tool
+
+You MUST use the `AskUserQuestion` tool for EVERY question in this command. DO NOT print questions as plain text. DO NOT list numbered options in your response. Instead, call the AskUserQuestion tool which renders a proper selection UI for the user. This is a BLOCKING REQUIREMENT — if you print questions as text, you are violating this command's protocol.
 
 ## Phase 1: Project Detection
 
-First, check if there's already a project in the current directory. Follow the process in `templates/utilities/project-detection.md`:
+Check if there's already a project in the current directory. Follow the process in `templates/utilities/project-detection.md`.
 
-- If an existing project is detected, use AskUserQuestion to ask whether to enhance the existing project or scaffold a new one in a subdirectory.
-- If no project detected, proceed to requirements gathering.
+If an existing project is detected, call AskUserQuestion:
+- question: "An existing project was detected. What would you like to do?"
+- options: "Enhance existing project" / "Scaffold new project in subdirectory"
+
+If no project detected, proceed to Phase 2.
 
 ## Phase 2: Requirements Gathering
 
-Follow the structured collection process from `templates/utilities/requirements-collection.md`. Use `AskUserQuestion` for each round, batching up to 4 questions per call.
+Gather requirements using 3 rounds of AskUserQuestion calls. Each round is a SINGLE AskUserQuestion call with up to 4 questions. DO NOT print the options — let the tool render them.
 
-**Round 1 — Core Decisions (use AskUserQuestion with up to 4 questions):**
+**Round 1 — call AskUserQuestion with these 4 questions:**
 
-Ask these as structured questions with options:
+Question 1: "What type of project are you building?"
+- header: "Type"
+- options: [{label: "Full-stack web application (Recommended)", description: "Frontend + backend + database"}, {label: "API service", description: "Backend only, no frontend"}, {label: "Microservice", description: "Single-purpose service"}, {label: "Library/SDK", description: "Reusable package for other projects"}]
 
-1. **Project type** — options: Full-stack web application, API service (backend only), Microservice, Library/SDK
-2. **Frontend framework** (skip if API/microservice/library) — options: Next.js (App Router) (Recommended), Remix, Astro, Vite + React
-3. **Backend framework** (skip if library) — options: Express, Fastify, Hono, NestJS
-4. **Database** — options: PostgreSQL (Recommended), MySQL, SQLite, MongoDB
+Question 2: "Which frontend framework?"
+- header: "Frontend"
+- options: [{label: "Next.js (Recommended)", description: "App Router, SSR, full-stack capable"}, {label: "Remix", description: "Nested routing, progressive enhancement"}, {label: "Astro", description: "Content-heavy sites, island architecture"}, {label: "Vite + React", description: "SPA, maximum flexibility"}]
 
-**Round 2 — Data & Auth (use AskUserQuestion):**
+Question 3: "Which backend framework?"
+- header: "Backend"
+- options: [{label: "Express", description: "Most popular, huge ecosystem"}, {label: "Fastify", description: "Performance-focused, schema validation"}, {label: "Hono", description: "Ultra-fast, edge-ready"}, {label: "NestJS", description: "Enterprise patterns, dependency injection"}]
 
-1. **ORM** (skip if no database) — options: Prisma (Recommended), Drizzle, TypeORM, Raw SQL
-2. **Authentication** — options: NextAuth.js / Auth.js, Custom JWT, Session-based, None
-3. **Cloud target** — options: AWS, Vercel, GCP, Cloud-agnostic (Docker-first)
-4. **Package manager** — options: pnpm (Recommended), npm, yarn, bun
+Question 4: "Which database?"
+- header: "Database"
+- options: [{label: "PostgreSQL (Recommended)", description: "Reliable, feature-rich, enterprise standard"}, {label: "MySQL", description: "Wide enterprise adoption"}, {label: "SQLite", description: "Development/embedded, zero config"}, {label: "MongoDB", description: "Document store, flexible schema"}]
 
-**Round 3 — Final (use AskUserQuestion):**
+**Round 2 — call AskUserQuestion with these 4 questions:**
 
-1. **Monorepo** — options: No (single package) (Recommended), Yes (Turborepo)
+Question 1: "Which ORM?"
+- header: "ORM"
+- options: [{label: "Prisma (Recommended)", description: "Type-safe, great DX, built-in migrations"}, {label: "Drizzle", description: "Lightweight, SQL-like, fast"}, {label: "TypeORM", description: "Decorator-based, enterprise patterns"}, {label: "Raw SQL", description: "Maximum control, no abstraction"}]
 
-After all selections, present a confirmation summary table and use AskUserQuestion to confirm: "Does this configuration look correct?" with options: Approve and generate, Make changes.
+Question 2: "Which authentication approach?"
+- header: "Auth"
+- options: [{label: "NextAuth.js / Auth.js", description: "OAuth providers, managed sessions"}, {label: "Custom JWT", description: "Full control, stateless tokens"}, {label: "Session-based", description: "Server-side sessions, traditional"}, {label: "None", description: "No authentication needed"}]
+
+Question 3: "Which cloud target?"
+- header: "Cloud"
+- options: [{label: "AWS", description: "Full cloud infrastructure, ECS/Lambda"}, {label: "Vercel", description: "Optimal for Next.js, edge functions"}, {label: "GCP", description: "Google Cloud Platform"}, {label: "Cloud-agnostic (Recommended)", description: "Docker-first, deploy anywhere"}]
+
+Question 4: "Which package manager?"
+- header: "Packages"
+- options: [{label: "pnpm (Recommended)", description: "Fast, disk-efficient, strict"}, {label: "npm", description: "Universal compatibility"}, {label: "yarn", description: "Workspaces, plug'n'play"}, {label: "bun", description: "Fast runtime + package manager"}]
+
+**Round 3 — call AskUserQuestion with 1 question:**
+
+Question 1: "Use a monorepo structure?"
+- header: "Monorepo"
+- options: [{label: "No — single package (Recommended)", description: "Simpler setup, suitable for most projects"}, {label: "Yes — Turborepo", description: "Multiple packages, shared config, build caching"}]
+
+**Confirmation — after all rounds, present a summary table of selections, then call AskUserQuestion:**
+
+Question: "Does this configuration look correct?"
+- header: "Confirm"
+- options: [{label: "Approve and generate", description: "Start generating the project structure"}, {label: "Make changes", description: "Go back and modify selections"}]
 
 ## Phase 3: Generation
 

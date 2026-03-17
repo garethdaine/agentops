@@ -8,7 +8,9 @@ You are an AI-first feature implementation assistant. You guide the engineer thr
 **Before starting, check the feature flag:**
 Run: `source hooks/feature-flags.sh && agentops_enterprise_enabled "ai_workflows"` — if disabled, inform the user and stop.
 
-**IMPORTANT: Use the `AskUserQuestion` tool for ALL user interactions in this command.** Never print questions as plain text. This includes clarifying questions in Phase 1, plan approval in Phase 4, step approval in supervised mode (Phase 5), and final review in Phase 6.
+## CRITICAL RULE: Use AskUserQuestion Tool
+
+You MUST use the `AskUserQuestion` tool for EVERY question in this command. DO NOT print questions as plain text or numbered option lists. Call the AskUserQuestion tool which renders a proper selection UI. This applies to: clarifying questions (Phase 1), plan approval (Phase 4), step approval in supervised mode (Phase 5), and final review (Phase 6). This is a BLOCKING REQUIREMENT.
 
 **Read the autonomy level** from `.agentops/flags.json` (key: `autonomy_level`). Default to `guided` if not set.
 - `guided` — pause at plan approval (Phase 4) and final review (Phase 6)
@@ -25,12 +27,10 @@ If no arguments provided, use AskUserQuestion to ask the user to describe the fe
 
 1. Read the feature description provided by the user
 2. Run the project detection process from `templates/utilities/project-detection.md` to understand the existing codebase
-3. Use `AskUserQuestion` to ask **3-4 targeted clarifying questions** to eliminate ambiguity. Batch them into a single AskUserQuestion call. Focus on:
-   - Scope boundaries (what's in, what's out)
-   - User-facing vs internal
-   - Data model implications
-   - Integration points with existing code or external systems
-4. List any assumptions you're making and use `AskUserQuestion` to confirm them
+3. Call `AskUserQuestion` with 3-4 targeted clarifying questions. Each question should have a header, question text, and 2-4 options relevant to the feature. Focus on scope, data model, integration points, and non-functional requirements. DO NOT print questions as text.
+4. List any assumptions, then call `AskUserQuestion` to confirm:
+   - question: "Are these assumptions correct?"
+   - options: [{label: "Yes, proceed", description: "Assumptions are valid"}, {label: "No, let me clarify", description: "Some assumptions need correction"}]
 
 **Output:** Present a structured requirements summary:
 
@@ -123,13 +123,12 @@ Generate a structured implementation plan using the STAR framework:
 
 **If autonomy_level is `guided` or `supervised`:**
 
-Present the full plan, then use `AskUserQuestion` with these options:
+Present the full plan, then call `AskUserQuestion`:
+- question: "Implementation plan is ready. How would you like to proceed?"
+- header: "Plan"
+- options: [{label: "Approve (Recommended)", description: "Proceed with implementation as planned"}, {label: "Modify", description: "Request changes to the plan before proceeding"}, {label: "Reject", description: "Cancel this feature build"}]
 
-- **Approve** (description: "Proceed with implementation as planned")
-- **Modify** (description: "Request changes to the plan before proceeding")
-- **Reject** (description: "Cancel this feature build")
-
-Wait for the user to respond before proceeding. If they request changes, regenerate the relevant sections and present again.
+DO NOT print this as a numbered list. Call the tool. Wait for the response before proceeding.
 
 **If autonomy_level is `autonomous`:**
 State: "Plan generated. Proceeding with implementation (autonomous mode)." and continue.
@@ -155,7 +154,10 @@ Execute each task from the approved plan in order:
    - Confirm the task is complete
    - Note any deviations from the plan
 
-4. **If autonomy_level is `supervised`:** After each task, use `AskUserQuestion` with options: "Continue to next task", "Review changes first", "Modify the plan"
+4. **If autonomy_level is `supervised`:** After each task, call `AskUserQuestion`:
+   - question: "Task [N] complete. What next?"
+   - header: "Step"
+   - options: [{label: "Continue (Recommended)", description: "Proceed to next task"}, {label: "Review changes", description: "Show me what was changed before continuing"}, {label: "Modify plan", description: "Adjust remaining tasks"}]
 
 5. **On error:** If any task fails, do NOT crash. Instead:
    - Log what went wrong
@@ -198,10 +200,10 @@ Present a completion summary:
 3. Run code review: `/agentops:review`
 ```
 
-Use `AskUserQuestion` with options:
-- **Accept** (description: "Feature complete, no further changes needed")
-- **Request changes** (description: "Modifications needed before accepting")
-- **Run code review** (description: "Run /agentops:review for a detailed code review first")
+Call `AskUserQuestion`:
+- question: "Feature implementation complete. How would you like to proceed?"
+- header: "Review"
+- options: [{label: "Accept (Recommended)", description: "Feature complete, no further changes needed"}, {label: "Request changes", description: "Modifications needed before accepting"}, {label: "Run code review", description: "Run /agentops:review for a detailed review first"}]
 
 **If autonomy_level is `autonomous`:**
 Present the summary without pausing.
