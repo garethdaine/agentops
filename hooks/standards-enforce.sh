@@ -42,7 +42,12 @@ if echo "$EXTENSION" | grep -qE '^(tsx|jsx|vue|svelte)$'; then
       # Could be a kebab-case file that's not a component (e.g., hooks, utils)
       if ! echo "$BASENAME" | grep -qE '^(use[A-Z]|use-|lib/|utils?/|hooks?/|stores?/)'; then
         if echo "$DIR" | grep -qiE '(component|page|layout|view|screen)'; then
-          MESSAGES+=("Component files in component directories should use PascalCase: '${BASENAME}' → '$(echo "$BASENAME" | sed -E 's/(^|-)([a-z])/\U\2/g')'")
+          PASCAL=$(echo "$BASENAME" | awk -F'[-_]' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1' OFS='')
+          # If input was camelCase (no separators), just uppercase first char
+          if [ "$PASCAL" = "$BASENAME" ]; then
+            PASCAL="$(echo "${BASENAME:0:1}" | tr '[:lower:]' '[:upper:]')${BASENAME:1}"
+          fi
+          MESSAGES+=("Component files in component directories should use PascalCase: '${BASENAME}' → '${PASCAL}'")
         fi
       fi
     fi

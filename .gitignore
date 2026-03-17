@@ -4,4 +4,6 @@
 .agentops/
 tasks/
 skills/
-docs/
+docs/interrogation/
+docs/adr/
+docs/dry-run-results.md
