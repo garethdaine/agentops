@@ -2,6 +2,8 @@
 
 An enterprise-grade guardrailing, workflow automation, and self-evolution plugin for the Claude Code CLI. AgentOps enforces security policies, structures work with the STAR methodology, auto-pilots common workflows, delegates to specialist agents, and continuously improves itself by learning from failures.
 
+**Now extended with the AI-First Enterprise Delivery Framework** — project scaffolding, structured feature builds with configurable autonomy, unified code review, architecture guardrails, delivery lifecycle management, team governance, and client communication. 25 slash commands, 35+ hooks, 6 specialist agents, and 25+ enterprise templates.
+
 **Author:** Gareth Daine | **License:** MIT | **Version:** 1.0.0
 
 ---
@@ -217,6 +219,41 @@ Displays current session cost tracking: budget, spent, remaining, and warning th
 ### `/agentops:flags`
 
 View or toggle feature flags. Displays all flags with their current values and allows modification.
+
+### Enterprise Commands
+
+The following commands extend the plugin into an AI-first enterprise delivery framework:
+
+| Command | Description |
+|---------|-------------|
+| `/agentops:scaffold` | Interactive project scaffolding with tech stack selection, enterprise patterns, and CI/CD |
+| `/agentops:feature` | Structured 6-phase feature build with configurable autonomy (guided/supervised/autonomous) |
+| `/agentops:review` | Unified code review orchestrating code-critic + security-reviewer agents |
+| `/agentops:test-gen` | AI-generated test suites with quality validation (tests must compile and pass) |
+| `/agentops:reason` | Multi-step reasoning pipeline: Analyse, Design, Validate, Recommend |
+| `/agentops:adr` | Architecture Decision Records — capture the *why* behind technical decisions |
+| `/agentops:design` | Solution design phase — architecture proposals, integration mapping, risk assessment |
+| `/agentops:qa-check` | Pre-deployment QA checklist: security, performance, accessibility, code quality |
+| `/agentops:handover` | Client handover documentation — runbooks, knowledge transfer, support procedures |
+| `/agentops:onboard` | Generate onboarding guides for new team members from actual project structure |
+| `/agentops:knowledge` | Search the project knowledge base — lessons, ADRs, patterns, templates |
+| `/agentops:status-report` | Professional client-facing status report from git history and project state |
+
+#### Configurable Autonomy
+
+Feature workflows support three autonomy levels (stored in `.agentops/flags.json`):
+
+- **guided** (default) — pause at plan approval + final review
+- **supervised** — pause after every implementation step
+- **autonomous** — proceed with minimal gates (for senior engineers)
+
+#### Enterprise Feature Flags
+
+Each capability area can be independently toggled:
+
+`enterprise_scaffold`, `ai_workflows`, `unified_review`, `architecture_guardrails`, `delivery_lifecycle`, `team_governance`, `client_comms`
+
+All default to `true`. Toggle via `/agentops:flags`.
 
 ---
 

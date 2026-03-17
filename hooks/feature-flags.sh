@@ -28,7 +28,7 @@ agentops_flag() {
   local FLAG="$1"
   local DEFAULT="${2:-true}"
   if [ -f "$FLAGS_FILE" ]; then
-    jq -r --arg key "$FLAG" --arg def "$DEFAULT" '.[$key] // $def' "$FLAGS_FILE" 2>/dev/null || echo "$DEFAULT"
+    jq -r --arg key "$FLAG" --arg def "$DEFAULT" 'if .[$key] == null then $def else (.[$key] | tostring) end' "$FLAGS_FILE" 2>/dev/null || echo "$DEFAULT"
   else
     echo "$DEFAULT"
   fi

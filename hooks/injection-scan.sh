@@ -31,7 +31,7 @@ if echo "$TOOL_INPUT" | grep -qiE "(^|\n)(IMPORTANT:|ADMIN OVERRIDE|developer mo
 fi
 
 # Delimiter/boundary attacks
-if echo "$TOOL_INPUT" | grep -qiE "---END SYSTEM---|</system>|\[/INST\]|<\|im_end\|>|<\|endoftext\|>|Human:|Assistant:"; then
+if echo "$TOOL_INPUT" | grep -qi -e '---END SYSTEM---' -e 'system>' -e 'INST]' -e 'im_end' -e 'endoftext' -e 'Human:' -e 'Assistant:'; then
   SCORE=$((SCORE + 50))
 fi
 
