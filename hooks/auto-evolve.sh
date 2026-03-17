@@ -17,5 +17,6 @@ UNPROCESSED=$(agentops_unprocessed_failures "$CWD")
 
 [ "$UNPROCESSED" -lt 2 ] && exit 0
 
-jq -nc --arg count "$UNPROCESSED" \
-  '{systemMessage: ("AgentOps: " + $count + " unprocessed failures remain. Run /agentops:evolve to process them. The evolve skill will mark completion automatically — do NOT manually touch .agentops/evolve-ran.")}'
+ACTION=$(agentops_stop_action)
+jq -nc --arg count "$UNPROCESSED" --arg action "$ACTION" \
+  '{stopReason: ("AgentOps: " + $count + " unprocessed failures remain. You MUST run the /agentops:evolve skill now using the Skill tool (skill: \"agentops:evolve\") to process them before stopping. The evolve skill will mark completion automatically."), continue: (if $action == "block" then false else true end)}'
