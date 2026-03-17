@@ -6,10 +6,11 @@ source "${SCRIPT_DIR}/feature-flags.sh"
 [ "$(agentops_flag 'injection_scan_enabled')" = "false" ] && exit 0
 
 INPUT=$(cat) || exit 0
-agentops_is_bypass "$INPUT" && exit 0
+# NOTE: injection-scan does NOT skip in bypass mode — prompt injection
+# detection must always enforce regardless of permission mode.
 
 # Skip MCP tools and internal tools — they produce legitimate structured data
-TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || exit 0
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || agentops_fail_closed
 case "$TOOL" in
   mcp__*|ToolSearch|Agent|TaskCreate|TaskUpdate|TaskGet|TaskList|TaskOutput|TaskStop) exit 0 ;;
 esac
@@ -24,8 +25,8 @@ if echo "$TOOL_INPUT" | grep -qiE "you are now|pretend you are|act as if|ignore 
   SCORE=$((SCORE + 40))
 fi
 
-# Authority markers — only match standalone directives, not data content
-if echo "$TOOL_INPUT" | grep -qiE "^(IMPORTANT:|ADMIN OVERRIDE|developer mode|system prompt|PRIORITY:|URGENT:|OVERRIDE:)"; then
+# Authority markers — match standalone directives (start of line or after newline)
+if echo "$TOOL_INPUT" | grep -qiE "(^|\n)(IMPORTANT:|ADMIN OVERRIDE|developer mode|system prompt|PRIORITY:|URGENT:|OVERRIDE:)"; then
   SCORE=$((SCORE + 30))
 fi
 
@@ -42,10 +43,16 @@ if [ "$WORDS" -gt 0 ] && [ "$IMPERATIVES" -gt 3 ]; then
   [ "$DENSITY" -gt 10 ] && SCORE=$((SCORE + 20))
 fi
 
-ACTION=$(agentops_enforcement_action)
+# Cap at 100
+[ "$SCORE" -gt 100 ] && SCORE=100
 
+# Injection scanning always enforces — never returns "allow", even in unrestricted/bypass.
+# High scores get hard deny, moderate scores get "ask" as a floor.
 if [ "$SCORE" -ge 50 ]; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"$ACTION\",\"permissionDecisionReason\":\"Injection risk detected (score: $SCORE/100). Suspicious patterns found in tool input.\"}}"
+  HARD_DENY=$(agentops_hard_deny)
+  jq -nc --arg action "$HARD_DENY" --arg score "$SCORE" \
+    '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:("Injection risk detected (score: " + $score + "/100). Suspicious patterns found in tool input. (hard deny)")}}'
 elif [ "$SCORE" -ge 25 ]; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"Moderate injection risk (score: $SCORE/100). Review before proceeding.\"}}"
+  jq -nc --arg score "$SCORE" \
+    '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"ask",permissionDecisionReason:("Moderate injection risk (score: " + $score + "/100). Review before proceeding.")}}'
 fi

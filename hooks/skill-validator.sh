@@ -23,5 +23,6 @@ echo "$CONTENT" | grep -qE "https?://[^ ]*\.(xyz|tk|ml|ga|cf)\b" && \
   WARNINGS="${WARNINGS}Contains suspicious external URLs. "
 
 if [ -n "$WARNINGS" ]; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"AgentOps SkillValidator WARNING: $WARNINGS Review this skill file for security risks before using it.\"}}"
+  jq -nc --arg warnings "$WARNINGS" \
+    '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:("AgentOps SkillValidator WARNING: " + $warnings + "Review this skill file for security risks before using it.")}}'
 fi

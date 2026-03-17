@@ -33,4 +33,7 @@ For each accepted proposal:
 ### Step 6: Report
 Output a summary: how many failures analyzed, proposals made, skills created/edited, frontier changes.
 
+### Step 7: Mark Completion
+After the evolve loop completes (even if no skills were created), create the sentinel file `.agentops/evolve-ran` to signal that failures have been processed this session. This MUST be done by the skill — agents should NEVER manually create this file.
+
 Arguments: $ARGUMENTS (optional: --max-iterations N, --frontier-size K, --dry-run)

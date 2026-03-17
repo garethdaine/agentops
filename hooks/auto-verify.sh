@@ -25,4 +25,6 @@ TESTS_RAN="${CWD}/.agentops/tests-ran"
 TEST_STATUS="NOT RUN"
 [ -f "$TESTS_RAN" ] && TEST_STATUS="ran at $(cat "$TESTS_RAN" 2>/dev/null)"
 
-echo "{\"decision\":\"block\",\"reason\":\"AgentOps auto-verify: Completion ${CHECKED}/${TOTAL} items (${UNCHECKED} unchecked). Tests: ${TEST_STATUS}. Before finishing: 1) Review tasks/todo.md and complete or check off remaining items, 2) Run the test suite if not yet run, 3) Verify the STAR Result criteria are met. Only stop when all items are checked and tests pass.\"}"
+ACTION=$(agentops_stop_action)
+jq -nc --arg checked "$CHECKED" --arg total "$TOTAL" --arg unchecked "$UNCHECKED" --arg tests "$TEST_STATUS" --arg action "$ACTION" \
+  '{stopReason: ("AgentOps auto-verify: Completion " + $checked + "/" + $total + " items (" + $unchecked + " unchecked). Tests: " + $tests + ". Before finishing: 1) Review tasks/todo.md and complete or check off remaining items, 2) Run the test suite if not yet run, 3) Verify the STAR Result criteria are met."), continue: (if $action == "block" then false else true end)}'

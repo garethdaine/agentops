@@ -13,16 +13,19 @@ SESSION=$(echo "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null) || SESSI
 case "$TOOL" in
   WebFetch)
     URL=$(echo "$INPUT" | jq -r '.tool_input.url // "unknown"' 2>/dev/null) || URL="unknown"
-    echo "{\"ts\":\"$TS\",\"session\":\"$SESSION\",\"source\":\"web\",\"url\":\"$URL\",\"trust\":\"untrusted\"}" >> "$LOG_FILE" 2>/dev/null
+    jq -nc --arg ts "$TS" --arg session "$SESSION" --arg url "$URL" \
+      '{ts:$ts, session:$session, source:"web", url:$url, trust:"untrusted"}' >> "$LOG_FILE" 2>/dev/null
     ;;
   Read)
     FP=$(echo "$INPUT" | jq -r '.tool_input.file_path // "unknown"' 2>/dev/null) || FP="unknown"
     TRUST="contextual"
     echo "$FP" | grep -qE "^/(tmp|var/tmp)" && TRUST="untrusted"
-    echo "{\"ts\":\"$TS\",\"session\":\"$SESSION\",\"source\":\"file\",\"path\":\"$FP\",\"trust\":\"$TRUST\"}" >> "$LOG_FILE" 2>/dev/null
+    jq -nc --arg ts "$TS" --arg session "$SESSION" --arg fp "$FP" --arg trust "$TRUST" \
+      '{ts:$ts, session:$session, source:"file", path:$fp, trust:$trust}' >> "$LOG_FILE" 2>/dev/null
     ;;
   Write)
     FP=$(echo "$INPUT" | jq -r '.tool_input.file_path // "unknown"' 2>/dev/null) || FP="unknown"
-    echo "{\"ts\":\"$TS\",\"session\":\"$SESSION\",\"source\":\"write\",\"path\":\"$FP\",\"trust\":\"trusted\"}" >> "$LOG_FILE" 2>/dev/null
+    jq -nc --arg ts "$TS" --arg session "$SESSION" --arg fp "$FP" \
+      '{ts:$ts, session:$session, source:"write", path:$fp, trust:"trusted"}' >> "$LOG_FILE" 2>/dev/null
     ;;
 esac

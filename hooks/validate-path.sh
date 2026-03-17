@@ -6,9 +6,7 @@ source "${SCRIPT_DIR}/feature-flags.sh"
 [ "$(agentops_flag 'path_validation_enabled')" = "false" ] && exit 0
 
 INPUT=$(cat) || exit 0
-agentops_is_bypass "$INPUT" && exit 0
-TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || exit 0
-ACTION=$(agentops_enforcement_action)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || agentops_fail_closed
 
 # Extract path based on tool
 case "$TOOL" in
@@ -19,32 +17,62 @@ esac
 
 [ -z "$FILE_PATH" ] && exit 0
 
+# --- Hard-deny rules (always enforce, even in bypass mode) ---
+
 # 1. Must be absolute
 if [[ "$FILE_PATH" != /* ]]; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"PathPolicy: path must be absolute (got: $FILE_PATH)\"}}"
+  jq -nc --arg fp "$FILE_PATH" \
+    '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:("PathPolicy: path must be absolute (got: " + $fp + ")")}}'
   exit 0
 fi
 
 # 2. Path traversal
 if echo "$FILE_PATH" | grep -qE '\.\.(/|$)'; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"PathPolicy: path traversal (..) blocked\"}}"
+  jq -nc '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"PathPolicy: path traversal (..) blocked"}}'
   exit 0
 fi
 
 # 3. Length limit (1024 chars)
 if [ ${#FILE_PATH} -gt 1024 ]; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"PathPolicy: path exceeds 1024 character limit\"}}"
+  jq -nc '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"PathPolicy: path exceeds 1024 character limit"}}'
   exit 0
 fi
 
-# 4. System directory confinement
-if echo "$FILE_PATH" | grep -qE "^/(etc|proc|sys|dev|boot|root|sbin)(/|$)"; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"$ACTION\",\"permissionDecisionReason\":\"PathPolicy: access to system directory blocked ($FILE_PATH)\"}}"
-  exit 0
+# Canonicalize for symlink resolution (for Write/Edit, resolve existing paths)
+CANONICAL="$FILE_PATH"
+if [ "$TOOL" = "Write" ] || [ "$TOOL" = "Edit" ]; then
+  PARENT_DIR=$(dirname "$FILE_PATH")
+  if [ -d "$PARENT_DIR" ]; then
+    RESOLVED=$(realpath -m "$FILE_PATH" 2>/dev/null) || RESOLVED="$FILE_PATH"
+    CANONICAL="$RESOLVED"
+  fi
 fi
 
-# 5. Sensitive dotfiles
-if echo "$FILE_PATH" | grep -qE "/\.(ssh|gnupg|aws|docker/config\.json|kube/config)"; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"$ACTION\",\"permissionDecisionReason\":\"PathPolicy: sensitive dotfile/directory access ($FILE_PATH)\"}}"
+# 4. Protect plugin state files from agent writes (hard deny)
+if [ "$TOOL" = "Write" ] || [ "$TOOL" = "Edit" ]; then
+  if echo "$CANONICAL" | grep -qE "$AGENTOPS_PROTECTED_PATHS"; then
+    jq -nc --arg fp "$CANONICAL" \
+      '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:("PathPolicy: protected AgentOps state file (" + $fp + ")")}}'
+    exit 0
+  fi
+fi
+
+# --- Soft rules (bypass/unrestricted can downgrade) ---
+agentops_is_bypass "$INPUT" && agentops_bypass_advisory "validate-path"
+ACTION=$(agentops_enforcement_action)
+
+# 5. System directory confinement (check both raw and canonical)
+for CHECK_PATH in "$FILE_PATH" "$CANONICAL"; do
+  if echo "$CHECK_PATH" | grep -qE "^/(etc|proc|sys|dev|boot|root|sbin)(/|$)"; then
+    jq -nc --arg fp "$CHECK_PATH" --arg action "$ACTION" \
+      '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:("PathPolicy: access to system directory blocked (" + $fp + ")")}}'
+    exit 0
+  fi
+done
+
+# 6. Sensitive dotfiles
+if echo "$CANONICAL" | grep -qE "/\.(ssh|gnupg|aws|docker/config\.json|kube/config)"; then
+  jq -nc --arg fp "$CANONICAL" --arg action "$ACTION" \
+    '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:("PathPolicy: sensitive dotfile/directory access (" + $fp + ")")}}'
   exit 0
 fi

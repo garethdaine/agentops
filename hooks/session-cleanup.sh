@@ -11,13 +11,64 @@ mkdir -p "$STATE_DIR" 2>/dev/null
 date -u +%FT%TZ > "${STATE_DIR}/session-start" 2>/dev/null
 
 # Reset per-session state markers from previous sessions
-rm -f "${STATE_DIR}/consecutive-failures" 2>/dev/null
-rm -f "${STATE_DIR}/delegate-sent" 2>/dev/null
-rm -f "${STATE_DIR}/test-nudge-sent" 2>/dev/null
-rm -f "${STATE_DIR}/code-files-since-test.txt" 2>/dev/null
-rm -f "${STATE_DIR}/evolve-ran" 2>/dev/null
-rm -f "${STATE_DIR}/evolve-batch-count" 2>/dev/null
-rm -f "${STATE_DIR}/modified-files.txt" 2>/dev/null
-rm -f "${STATE_DIR}/star-obs-count" 2>/dev/null
+# All session-scoped files are listed here; add new ones as needed
+SESSION_FILES=(
+  "consecutive-failures"
+  "delegate-sent"
+  "test-nudge-sent"
+  "code-files-since-test.txt"
+  "evolve-ran"
+  "evolve-batch-count"
+  "modified-files.txt"
+  "star-obs-count"
+  "star-plan-active"
+  "tests-ran"
+)
+for f in "${SESSION_FILES[@]}"; do
+  rm -f "${STATE_DIR}/${f}" 2>/dev/null
+done
+
+# Provision .gitignore files in plugin-created folders.
+# Rules:
+#   - .agentops/ always gets .gitignore (always plugin-created)
+#   - tasks/, skills/, docs/ only get .gitignore if the plugin has created content in them
+#   - Skip if directory doesn't exist, .gitignore already exists, or directory is git-tracked
+IS_GIT_REPO=false
+git -C "$CWD" rev-parse --git-dir &>/dev/null && IS_GIT_REPO=true
+
+agentops_provision_gitignore() {
+  local dir="$1"
+  local DIR_PATH="${CWD}/${dir}"
+  local GITIGNORE_PATH="${DIR_PATH}/.gitignore"
+
+  [ ! -d "$DIR_PATH" ] && return
+  [ -f "$GITIGNORE_PATH" ] && return
+
+  if [ "$IS_GIT_REPO" = true ]; then
+    local TRACKED
+    TRACKED=$(git -C "$CWD" ls-files -- "${dir}/" 2>/dev/null | head -1)
+    [ -n "$TRACKED" ] && return
+  fi
+
+  echo "*" > "$GITIGNORE_PATH" 2>/dev/null
+}
+
+# .agentops/ — always provision (this plugin creates it)
+agentops_provision_gitignore ".agentops"
+
+# tasks/ — only if plugin has created todo.md, lessons.md, or archive/
+if [ -f "${CWD}/tasks/todo.md" ] || [ -f "${CWD}/tasks/lessons.md" ] || [ -d "${CWD}/tasks/archive" ]; then
+  agentops_provision_gitignore "tasks"
+fi
+
+# skills/ — only if plugin-generated SKILL.md files exist
+if [ -d "${CWD}/skills" ] && [ -n "$(find "${CWD}/skills" -name 'SKILL.md' -maxdepth 2 2>/dev/null | head -1)" ]; then
+  agentops_provision_gitignore "skills"
+fi
+
+# docs/ — only if the plugin's code-analysis output directory exists
+if [ -d "${CWD}/docs/discovery/code-analysis" ]; then
+  agentops_provision_gitignore "docs"
+fi
 
 exit 0

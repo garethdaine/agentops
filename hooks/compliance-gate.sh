@@ -44,5 +44,7 @@ if [ "$(agentops_flag 'test_gate_enabled')" = "true" ]; then
 fi
 
 if [ -n "$ISSUES" ]; then
-  echo "{\"decision\":\"block\",\"reason\":\"AgentOps compliance: ${ISSUES}Address these before finishing.\"}"
+  ACTION=$(agentops_stop_action)
+  jq -nc --arg issues "$ISSUES" --arg action "$ACTION" \
+    '{stopReason: ("AgentOps compliance: " + $issues + "Address these before finishing."), continue: (if $action == "block" then false else true end)}'
 fi

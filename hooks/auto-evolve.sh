@@ -8,32 +8,14 @@ source "${SCRIPT_DIR}/feature-flags.sh"
 INPUT=$(cat) || exit 0
 CWD=$(echo "$INPUT" | jq -r '.cwd // "."' 2>/dev/null) || CWD="."
 
-FAILURES_FILE="${CWD}/.agentops/failures.jsonl"
 EVOLVE_RAN="${CWD}/.agentops/evolve-ran"
-FEEDBACK_FILE="${CWD}/.agentops/feedback-history.jsonl"
-
-# No failures to process
-[ ! -f "$FAILURES_FILE" ] && exit 0
-[ ! -s "$FAILURES_FILE" ] && exit 0
 
 # Already ran evolve this session
 [ -f "$EVOLVE_RAN" ] && exit 0
 
-# Count unprocessed failures
-if [ -f "$FEEDBACK_FILE" ] && [ -s "$FEEDBACK_FILE" ]; then
-  ADDRESSED=$(grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z' "$FEEDBACK_FILE" 2>/dev/null | sort -u)
-  UNPROCESSED=0
-  while IFS= read -r line; do
-    TS=$(echo "$line" | jq -r '.ts // empty' 2>/dev/null)
-    [ -z "$TS" ] && continue
-    if ! echo "$ADDRESSED" | grep -qF "$TS"; then
-      UNPROCESSED=$((UNPROCESSED + 1))
-    fi
-  done < "$FAILURES_FILE"
-else
-  UNPROCESSED=$(wc -l < "$FAILURES_FILE" 2>/dev/null | tr -d ' ')
-fi
+UNPROCESSED=$(agentops_unprocessed_failures "$CWD")
 
 [ "$UNPROCESSED" -lt 2 ] && exit 0
 
-echo "{\"decision\":\"block\",\"reason\":\"AgentOps: ${UNPROCESSED} unprocessed failures remain. Run /agentops:evolve to process them, then touch .agentops/evolve-ran when done.\"}"
+jq -nc --arg count "$UNPROCESSED" \
+  '{systemMessage: ("AgentOps: " + $count + " unprocessed failures remain. Run /agentops:evolve to process them. The evolve skill will mark completion automatically — do NOT manually touch .agentops/evolve-ran.")}'
