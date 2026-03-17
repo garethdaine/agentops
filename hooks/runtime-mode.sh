@@ -3,10 +3,15 @@ set -uo pipefail
 
 MODE=${AGENTOPS_MODE:-standard}
 
-# Unrestricted mode: skip all permission gates (use with --dangerously-ignore-permissions)
+# Unrestricted mode: skip all permission gates
 [ "$MODE" = "unrestricted" ] && exit 0
 
 INPUT=$(cat) || exit 0
+
+# Respect --dangerously-skip-permissions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/feature-flags.sh"
+agentops_is_bypass "$INPUT" && exit 0
 
 # Inject mode context at session start
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // empty' 2>/dev/null) || exit 0

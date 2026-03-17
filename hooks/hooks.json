@@ -20,6 +20,12 @@
         ]
       },
       {
+        "matcher": "Bash|Read|Write|Edit|Glob|Grep|WebFetch|WebSearch|Agent|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/star-gate.sh", "timeout": 5 }
+        ]
+      },
+      {
         "matcher": "Write|Edit",
         "hooks": [
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-plan.sh", "timeout": 5 }
@@ -56,7 +62,8 @@
         "matcher": "Bash",
         "hooks": [
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/credential-redact.sh", "timeout": 5 },
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ci-guard.sh", "timeout": 5 }
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ci-guard.sh", "timeout": 5 },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/detect-test-run.sh", "timeout": 5 }
         ]
       },
       {
@@ -88,6 +95,7 @@
         "hooks": [
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/failure-collector.sh", "timeout": 5, "async": true },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-lesson.sh", "timeout": 5 },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/evolve-gate.sh", "timeout": 10 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh", "timeout": 10, "async": true }
         ]
       }

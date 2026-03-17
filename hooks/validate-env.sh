@@ -6,6 +6,7 @@ source "${SCRIPT_DIR}/feature-flags.sh"
 [ "$(agentops_flag 'env_validation_enabled')" = "false" ] && exit 0
 
 INPUT=$(cat) || exit 0
+agentops_is_bypass "$INPUT" && exit 0
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) || exit 0
 [ -z "$COMMAND" ] && exit 0
 

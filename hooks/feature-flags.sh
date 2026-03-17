@@ -4,6 +4,15 @@
 
 FLAGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.agentops/flags.json"
 
+# Check if Claude Code is running with --dangerously-skip-permissions
+# Pass the hook's JSON input as $1; returns 0 (true) if bypass is active
+agentops_is_bypass() {
+  local INPUT="$1"
+  local perm_mode
+  perm_mode=$(echo "$INPUT" | jq -r '.permission_mode // "default"' 2>/dev/null)
+  [ "$perm_mode" = "bypassPermissions" ]
+}
+
 agentops_flag() {
   local FLAG="$1"
   local DEFAULT="${2:-true}"

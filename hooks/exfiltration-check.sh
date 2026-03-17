@@ -6,6 +6,7 @@ source "${SCRIPT_DIR}/feature-flags.sh"
 [ "$(agentops_flag 'exfiltration_detection_enabled')" = "false" ] && exit 0
 
 INPUT=$(cat) || exit 0
+agentops_is_bypass "$INPUT" && exit 0
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || exit 0
 [ "$TOOL" != "Bash" ] && exit 0
 
