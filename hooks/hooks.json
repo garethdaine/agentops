@@ -69,6 +69,8 @@
       {
         "matcher": "Write|Edit",
         "hooks": [
+          { "type": "command", "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/standards-enforce.sh", "timeout": 5 },
+          { "type": "command", "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/ai-guardrails.sh", "timeout": 5 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/plan-gate.sh", "timeout": 5 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/skill-validator.sh", "timeout": 5 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-test.sh", "timeout": 5 },

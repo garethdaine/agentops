@@ -27,4 +27,14 @@ Available flags:
 - `auto_delegate_enabled` (bool) — Auto-delegate to code-critic and security-reviewer after 5+ source files modified
 - `enforcement_mode` ("advisory"|"blocking") — Advisory uses "ask", blocking uses "deny"
 
-If `.agentops/flags.json` doesn't exist, create it with all flags set to their defaults (all true, mode advisory).
+Enterprise extension flags:
+- `enterprise_scaffold` (bool) — Enable project scaffolding system
+- `ai_workflows` (bool) — Enable AI-first workflow commands
+- `unified_review` (bool) — Enable unified code review system
+- `architecture_guardrails` (bool) — Enable architecture pattern enforcement
+- `delivery_lifecycle` (bool) — Enable delivery phase management
+- `team_governance` (bool) — Enable team scalability features
+- `client_comms` (bool) — Enable client communication templates
+- `autonomy_level` ("guided"|"supervised"|"autonomous") — Configurable autonomy for workflow gates
+
+If `.agentops/flags.json` doesn't exist, create it with all flags set to their defaults (all true, mode advisory, autonomy guided).

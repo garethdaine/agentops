@@ -100,6 +100,27 @@ agentops_redact() {
     -e 's/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/[REDACTED_JWT]/g'
 }
 
+# ── Enterprise Extension Flags ──────────────────────────────────────────────
+# These flags gate the enterprise delivery framework capabilities.
+# All default to "true" via agentops_flag's default mechanism.
+# Toggle via /agentops:flags or by editing .agentops/flags.json directly.
+#
+# Flag name                      Phase   Description
+# enterprise_scaffold            2       Project scaffolding system
+# ai_workflows                   3       AI-first workflow commands
+# unified_review                 4       Unified code review system
+# architecture_guardrails        5       Architecture pattern enforcement
+# delivery_lifecycle             6       Delivery phase management
+# team_governance                7       Team scalability features
+# client_comms                   8       Client communication templates
+
+# Check an enterprise feature flag — convenience wrapper with consistent defaults.
+# Usage: agentops_enterprise_enabled "enterprise_scaffold" && run_scaffold
+agentops_enterprise_enabled() {
+  local FLAG="$1"
+  [ "$(agentops_flag "$FLAG" "true")" = "true" ]
+}
+
 # Count unprocessed failures in .agentops/failures.jsonl.
 # Usage: COUNT=$(agentops_unprocessed_failures "$CWD")
 agentops_unprocessed_failures() {
