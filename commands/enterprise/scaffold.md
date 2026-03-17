@@ -24,53 +24,32 @@ If no project detected, proceed to Phase 2.
 
 ## Phase 2: Requirements Gathering
 
-Gather requirements using 3 rounds of AskUserQuestion calls. Each round is a SINGLE AskUserQuestion call with up to 4 questions. DO NOT print the options — let the tool render them.
+**Read the technology catalog** from `templates/tech-catalog.json`. This is your source of truth for all technology options. DO NOT hardcode options — always read them from the catalog. The catalog is extensible and user-maintainable via `/agentops:tech-catalog`.
 
-**Round 1 — call AskUserQuestion with these 4 questions:**
+### How to build questions from the catalog
 
-Question 1: "What type of project are you building?"
-- header: "Type"
-- options: [{label: "Full-stack web application (Recommended)", description: "Frontend + backend + database"}, {label: "API service", description: "Backend only, no frontend"}, {label: "Microservice", description: "Single-purpose service"}, {label: "Library/SDK", description: "Reusable package for other projects"}]
+For each relevant category in the catalog:
 
-Question 2: "Which frontend framework?"
-- header: "Frontend"
-- options: [{label: "Next.js (Recommended)", description: "App Router, SSR, full-stack capable"}, {label: "Remix", description: "Nested routing, progressive enhancement"}, {label: "Astro", description: "Content-heavy sites, island architecture"}, {label: "Vite + React", description: "SPA, maximum flexibility"}]
+1. Read the category's `question`, `label`, and `options` array
+2. Select up to 4 options from the category to present (pick the most popular/relevant — the user can always type a custom answer via the built-in "Other" freeform option)
+3. Use the category's `label` as the AskUserQuestion `header`
+4. Use the category's `question` as the AskUserQuestion `question`
+5. Map each option to `{label: option.name, description: option.description}`
+6. If `allowMultiple` is true, set `multiSelect: true`
+7. Respect `appliesWhen` — skip categories that don't apply to the user's previous answers
 
-Question 3: "Which backend framework?"
-- header: "Backend"
-- options: [{label: "Express", description: "Most popular, huge ecosystem"}, {label: "Fastify", description: "Performance-focused, schema validation"}, {label: "Hono", description: "Ultra-fast, edge-ready"}, {label: "NestJS", description: "Enterprise patterns, dependency injection"}]
+### Gather in rounds of up to 4 questions per AskUserQuestion call
 
-Question 4: "Which database?"
-- header: "Database"
-- options: [{label: "PostgreSQL (Recommended)", description: "Reliable, feature-rich, enterprise standard"}, {label: "MySQL", description: "Wide enterprise adoption"}, {label: "SQLite", description: "Development/embedded, zero config"}, {label: "MongoDB", description: "Document store, flexible schema"}]
+**Round 1** — Ask about: `language`, `frontend`, `backend`, `database` (skip categories that don't apply based on project type)
 
-**Round 2 — call AskUserQuestion with these 4 questions:**
+**Round 2** — Ask about: `orm`, `auth`, `cloud`, `package_manager` (skip categories that don't apply)
 
-Question 1: "Which ORM?"
-- header: "ORM"
-- options: [{label: "Prisma (Recommended)", description: "Type-safe, great DX, built-in migrations"}, {label: "Drizzle", description: "Lightweight, SQL-like, fast"}, {label: "TypeORM", description: "Decorator-based, enterprise patterns"}, {label: "Raw SQL", description: "Maximum control, no abstraction"}]
+**Round 3** — Ask about: `monorepo`, `ci_cd`, `testing`, and any other relevant categories
 
-Question 2: "Which authentication approach?"
-- header: "Auth"
-- options: [{label: "NextAuth.js / Auth.js", description: "OAuth providers, managed sessions"}, {label: "Custom JWT", description: "Full control, stateless tokens"}, {label: "Session-based", description: "Server-side sessions, traditional"}, {label: "None", description: "No authentication needed"}]
+The user can ALWAYS select "Other" on any question to type a custom technology not in the catalog. If they do, treat their input as the selection and proceed.
 
-Question 3: "Which cloud target?"
-- header: "Cloud"
-- options: [{label: "AWS", description: "Full cloud infrastructure, ECS/Lambda"}, {label: "Vercel", description: "Optimal for Next.js, edge functions"}, {label: "GCP", description: "Google Cloud Platform"}, {label: "Cloud-agnostic (Recommended)", description: "Docker-first, deploy anywhere"}]
-
-Question 4: "Which package manager?"
-- header: "Packages"
-- options: [{label: "pnpm (Recommended)", description: "Fast, disk-efficient, strict"}, {label: "npm", description: "Universal compatibility"}, {label: "yarn", description: "Workspaces, plug'n'play"}, {label: "bun", description: "Fast runtime + package manager"}]
-
-**Round 3 — call AskUserQuestion with 1 question:**
-
-Question 1: "Use a monorepo structure?"
-- header: "Monorepo"
-- options: [{label: "No — single package (Recommended)", description: "Simpler setup, suitable for most projects"}, {label: "Yes — Turborepo", description: "Multiple packages, shared config, build caching"}]
-
-**Confirmation — after all rounds, present a summary table of selections, then call AskUserQuestion:**
-
-Question: "Does this configuration look correct?"
+**Confirmation** — After all rounds, present a summary table of all selections, then call AskUserQuestion:
+- question: "Does this configuration look correct?"
 - header: "Confirm"
 - options: [{label: "Approve and generate", description: "Start generating the project structure"}, {label: "Make changes", description: "Go back and modify selections"}]
 

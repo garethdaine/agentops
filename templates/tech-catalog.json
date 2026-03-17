@@ -1,0 +1,210 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "lastUpdated": "2026-03-17",
+    "description": "Technology catalog for project scaffolding. Update via /agentops:tech-catalog. Categories are extensible — add new ones as needed."
+  },
+  "categories": {
+    "language": {
+      "label": "Programming Language",
+      "question": "Which programming language?",
+      "allowMultiple": false,
+      "options": [
+        { "name": "TypeScript", "description": "Typed JavaScript, dominant for web", "docs": "https://www.typescriptlang.org/docs/" },
+        { "name": "JavaScript", "description": "Dynamic, universal web language", "docs": "https://developer.mozilla.org/en-US/docs/Web/JavaScript" },
+        { "name": "Python", "description": "Data science, ML, scripting, web", "docs": "https://docs.python.org/3/" },
+        { "name": "Go", "description": "Systems, microservices, CLIs", "docs": "https://go.dev/doc/" },
+        { "name": "Rust", "description": "Systems, performance-critical, WASM", "docs": "https://doc.rust-lang.org/book/" },
+        { "name": "Java", "description": "Enterprise, Android, Spring ecosystem", "docs": "https://docs.oracle.com/en/java/" },
+        { "name": "Kotlin", "description": "Modern JVM, Android, Spring", "docs": "https://kotlinlang.org/docs/home.html" },
+        { "name": "C#", "description": ".NET ecosystem, enterprise, Unity", "docs": "https://learn.microsoft.com/en-us/dotnet/csharp/" },
+        { "name": "Swift", "description": "Apple platforms, server-side Swift", "docs": "https://www.swift.org/documentation/" },
+        { "name": "PHP", "description": "Web, Laravel/Symfony ecosystem", "docs": "https://www.php.net/docs.php" },
+        { "name": "Ruby", "description": "Web, Rails ecosystem, scripting", "docs": "https://ruby-doc.org/" },
+        { "name": "Elixir", "description": "Functional, real-time, fault-tolerant", "docs": "https://elixir-lang.org/docs.html" }
+      ]
+    },
+    "frontend": {
+      "label": "Frontend Framework",
+      "question": "Which frontend framework or approach?",
+      "allowMultiple": false,
+      "appliesWhen": "project requires a user interface",
+      "options": [
+        { "name": "Next.js", "description": "React, SSR/SSG, App Router, full-stack", "docs": "https://nextjs.org/docs" },
+        { "name": "Remix", "description": "React, nested routing, progressive enhancement", "docs": "https://remix.run/docs" },
+        { "name": "Nuxt", "description": "Vue.js, SSR/SSG, full-stack", "docs": "https://nuxt.com/docs" },
+        { "name": "SvelteKit", "description": "Svelte, SSR/SSG, file-based routing", "docs": "https://kit.svelte.dev/docs" },
+        { "name": "Astro", "description": "Content-heavy, island architecture, multi-framework", "docs": "https://docs.astro.build" },
+        { "name": "Vite + React", "description": "SPA, fast builds, maximum flexibility", "docs": "https://vite.dev/guide/" },
+        { "name": "Vite + Vue", "description": "SPA, Vue 3 Composition API", "docs": "https://vuejs.org/guide/introduction" },
+        { "name": "Vite + Svelte", "description": "SPA, compiled, minimal runtime", "docs": "https://svelte.dev/docs" },
+        { "name": "Angular", "description": "Enterprise SPA, dependency injection, RxJS", "docs": "https://angular.dev/overview" },
+        { "name": "Expo (React Native)", "description": "Cross-platform mobile, managed workflow", "docs": "https://docs.expo.dev/" },
+        { "name": "Flutter", "description": "Cross-platform mobile/web/desktop, Dart", "docs": "https://docs.flutter.dev/" },
+        { "name": "None", "description": "No frontend — API/CLI/library only", "docs": null }
+      ]
+    },
+    "backend": {
+      "label": "Backend Framework",
+      "question": "Which backend framework or runtime?",
+      "allowMultiple": false,
+      "appliesWhen": "project requires server-side logic",
+      "options": [
+        { "name": "Express", "description": "Node.js, minimal, huge ecosystem", "docs": "https://expressjs.com/" },
+        { "name": "Fastify", "description": "Node.js, performance-focused, schema validation", "docs": "https://fastify.dev/docs/latest/" },
+        { "name": "Hono", "description": "Edge-first, ultra-fast, multi-runtime", "docs": "https://hono.dev/docs/" },
+        { "name": "NestJS", "description": "Node.js, enterprise patterns, DI, decorators", "docs": "https://docs.nestjs.com/" },
+        { "name": "Elysia", "description": "Bun-native, end-to-end type safety", "docs": "https://elysiajs.com/introduction" },
+        { "name": "Django", "description": "Python, batteries-included, ORM, admin", "docs": "https://docs.djangoproject.com/" },
+        { "name": "FastAPI", "description": "Python, async, auto OpenAPI docs", "docs": "https://fastapi.tiangolo.com/" },
+        { "name": "Flask", "description": "Python, minimal, flexible", "docs": "https://flask.palletsprojects.com/" },
+        { "name": "Spring Boot", "description": "Java/Kotlin, enterprise, microservices", "docs": "https://spring.io/projects/spring-boot" },
+        { "name": "ASP.NET Core", "description": "C#, high-performance, enterprise", "docs": "https://learn.microsoft.com/en-us/aspnet/core/" },
+        { "name": "Rails", "description": "Ruby, convention over configuration", "docs": "https://guides.rubyonrails.org/" },
+        { "name": "Laravel", "description": "PHP, elegant, full-featured", "docs": "https://laravel.com/docs" },
+        { "name": "Phoenix", "description": "Elixir, real-time, LiveView", "docs": "https://hexdocs.pm/phoenix/" },
+        { "name": "Gin", "description": "Go, fast HTTP router", "docs": "https://gin-gonic.com/docs/" },
+        { "name": "Fiber", "description": "Go, Express-inspired, fast", "docs": "https://docs.gofiber.io/" },
+        { "name": "Actix Web", "description": "Rust, high-performance, actor model", "docs": "https://actix.rs/docs/" },
+        { "name": "Next.js API Routes", "description": "Full-stack in one framework", "docs": "https://nextjs.org/docs/app/building-your-application/routing/route-handlers" },
+        { "name": "None", "description": "No backend — frontend/library only", "docs": null }
+      ]
+    },
+    "database": {
+      "label": "Database",
+      "question": "Which database?",
+      "allowMultiple": true,
+      "appliesWhen": "project requires data persistence",
+      "options": [
+        { "name": "PostgreSQL", "description": "Relational, feature-rich, enterprise standard", "docs": "https://www.postgresql.org/docs/" },
+        { "name": "MySQL", "description": "Relational, widely adopted, managed options", "docs": "https://dev.mysql.com/doc/" },
+        { "name": "SQLite", "description": "Embedded, zero-config, file-based", "docs": "https://www.sqlite.org/docs.html" },
+        { "name": "MongoDB", "description": "Document store, flexible schema, Atlas", "docs": "https://www.mongodb.com/docs/" },
+        { "name": "Redis", "description": "In-memory, cache, pub/sub, streams", "docs": "https://redis.io/docs/" },
+        { "name": "DynamoDB", "description": "AWS managed, key-value/document, serverless", "docs": "https://docs.aws.amazon.com/dynamodb/" },
+        { "name": "Supabase", "description": "Managed Postgres, auth, realtime, storage", "docs": "https://supabase.com/docs" },
+        { "name": "PlanetScale", "description": "Managed MySQL, branching, serverless", "docs": "https://planetscale.com/docs" },
+        { "name": "Turso", "description": "Edge SQLite, libSQL, distributed", "docs": "https://docs.turso.tech/" },
+        { "name": "Neo4j", "description": "Graph database, relationship queries", "docs": "https://neo4j.com/docs/" },
+        { "name": "Elasticsearch", "description": "Search engine, full-text, analytics", "docs": "https://www.elastic.co/guide/en/elasticsearch/reference/current/" },
+        { "name": "None", "description": "No database needed", "docs": null }
+      ]
+    },
+    "orm": {
+      "label": "ORM / Data Access",
+      "question": "Which ORM or data access layer?",
+      "allowMultiple": false,
+      "appliesWhen": "project uses a database",
+      "options": [
+        { "name": "Prisma", "description": "Type-safe, schema-first, migrations, JS/TS", "docs": "https://www.prisma.io/docs" },
+        { "name": "Drizzle", "description": "Lightweight, SQL-like, fast, TS-first", "docs": "https://orm.drizzle.team/docs/overview" },
+        { "name": "TypeORM", "description": "Decorator-based, Active Record/Data Mapper, TS", "docs": "https://typeorm.io/" },
+        { "name": "Kysely", "description": "Type-safe SQL query builder, no codegen", "docs": "https://kysely.dev/docs/intro" },
+        { "name": "Sequelize", "description": "Promise-based, mature, JS/TS", "docs": "https://sequelize.org/docs/v6/" },
+        { "name": "SQLAlchemy", "description": "Python, mature, flexible, async support", "docs": "https://docs.sqlalchemy.org/" },
+        { "name": "Django ORM", "description": "Python, integrated with Django", "docs": "https://docs.djangoproject.com/en/stable/topics/db/" },
+        { "name": "Mongoose", "description": "MongoDB ODM, schema validation, JS/TS", "docs": "https://mongoosejs.com/docs/" },
+        { "name": "GORM", "description": "Go ORM, associations, migrations", "docs": "https://gorm.io/docs/" },
+        { "name": "Raw SQL", "description": "Direct queries, maximum control", "docs": null },
+        { "name": "None", "description": "Not applicable", "docs": null }
+      ]
+    },
+    "auth": {
+      "label": "Authentication",
+      "question": "Which authentication approach?",
+      "allowMultiple": false,
+      "options": [
+        { "name": "NextAuth.js / Auth.js", "description": "OAuth providers, managed sessions, Next.js", "docs": "https://authjs.dev/getting-started" },
+        { "name": "Clerk", "description": "Managed auth, drop-in UI, user management", "docs": "https://clerk.com/docs" },
+        { "name": "Supabase Auth", "description": "Managed, integrates with Supabase DB", "docs": "https://supabase.com/docs/guides/auth" },
+        { "name": "Firebase Auth", "description": "Google managed, social providers, phone", "docs": "https://firebase.google.com/docs/auth" },
+        { "name": "Auth0 / Okta", "description": "Enterprise SSO, SAML, OIDC", "docs": "https://auth0.com/docs" },
+        { "name": "Keycloak", "description": "Self-hosted, enterprise IAM, OIDC/SAML", "docs": "https://www.keycloak.org/documentation" },
+        { "name": "Passport.js", "description": "Node.js middleware, strategy-based", "docs": "https://www.passportjs.org/docs/" },
+        { "name": "Custom JWT", "description": "Self-managed tokens, full control", "docs": "https://jwt.io/introduction" },
+        { "name": "Session-based", "description": "Server-side sessions, cookies", "docs": null },
+        { "name": "None", "description": "No authentication needed", "docs": null }
+      ]
+    },
+    "cloud": {
+      "label": "Cloud / Hosting",
+      "question": "Where will this be deployed?",
+      "allowMultiple": false,
+      "options": [
+        { "name": "AWS", "description": "Full cloud — ECS, Lambda, RDS, S3", "docs": "https://docs.aws.amazon.com/" },
+        { "name": "GCP", "description": "Google Cloud — Cloud Run, GKE, Cloud SQL", "docs": "https://cloud.google.com/docs" },
+        { "name": "Azure", "description": "Microsoft — App Service, AKS, SQL Database", "docs": "https://learn.microsoft.com/en-us/azure/" },
+        { "name": "Vercel", "description": "Frontend/full-stack, edge functions, Next.js optimised", "docs": "https://vercel.com/docs" },
+        { "name": "Netlify", "description": "Frontend/Jamstack, serverless functions", "docs": "https://docs.netlify.com/" },
+        { "name": "Cloudflare", "description": "Edge, Workers, D1, R2, Pages", "docs": "https://developers.cloudflare.com/" },
+        { "name": "Railway", "description": "Simple deployment, managed infra, Postgres", "docs": "https://docs.railway.com/" },
+        { "name": "Fly.io", "description": "Edge VMs, global deployment, Postgres", "docs": "https://fly.io/docs/" },
+        { "name": "DigitalOcean", "description": "Simple cloud, App Platform, managed DB", "docs": "https://docs.digitalocean.com/" },
+        { "name": "Kubernetes (self-managed)", "description": "Container orchestration, any cloud", "docs": "https://kubernetes.io/docs/" },
+        { "name": "Docker-only (cloud-agnostic)", "description": "Containerised, deploy anywhere", "docs": "https://docs.docker.com/" },
+        { "name": "On-premise", "description": "Self-hosted, bare metal or VMs", "docs": null }
+      ]
+    },
+    "ci_cd": {
+      "label": "CI/CD",
+      "question": "Which CI/CD pipeline?",
+      "allowMultiple": false,
+      "options": [
+        { "name": "GitHub Actions", "description": "GitHub-native, YAML workflows, marketplace", "docs": "https://docs.github.com/en/actions" },
+        { "name": "GitLab CI", "description": "GitLab-native, .gitlab-ci.yml", "docs": "https://docs.gitlab.com/ee/ci/" },
+        { "name": "CircleCI", "description": "Cloud CI, Docker-first, orbs", "docs": "https://circleci.com/docs/" },
+        { "name": "Jenkins", "description": "Self-hosted, extensible, Jenkinsfile", "docs": "https://www.jenkins.io/doc/" },
+        { "name": "AWS CodePipeline", "description": "AWS-native, CodeBuild, CodeDeploy", "docs": "https://docs.aws.amazon.com/codepipeline/" },
+        { "name": "Azure DevOps", "description": "Microsoft, YAML pipelines, boards", "docs": "https://learn.microsoft.com/en-us/azure/devops/" },
+        { "name": "Bitbucket Pipelines", "description": "Atlassian, integrated with Jira", "docs": "https://support.atlassian.com/bitbucket-cloud/docs/get-started-with-bitbucket-pipelines/" },
+        { "name": "None", "description": "No CI/CD yet", "docs": null }
+      ]
+    },
+    "testing": {
+      "label": "Testing Framework",
+      "question": "Which testing framework?",
+      "allowMultiple": true,
+      "options": [
+        { "name": "Vitest", "description": "Vite-native, fast, Jest-compatible API", "docs": "https://vitest.dev/guide/" },
+        { "name": "Jest", "description": "Meta, widely adopted, snapshot testing", "docs": "https://jestjs.io/docs/getting-started" },
+        { "name": "Playwright", "description": "E2E, cross-browser, auto-waiting", "docs": "https://playwright.dev/docs/intro" },
+        { "name": "Cypress", "description": "E2E, component testing, time-travel", "docs": "https://docs.cypress.io/" },
+        { "name": "Testing Library", "description": "DOM testing, user-centric queries", "docs": "https://testing-library.com/docs/" },
+        { "name": "pytest", "description": "Python, fixtures, parametrize, plugins", "docs": "https://docs.pytest.org/" },
+        { "name": "Go test", "description": "Go standard library testing", "docs": "https://pkg.go.dev/testing" },
+        { "name": "JUnit", "description": "Java/Kotlin, enterprise standard", "docs": "https://junit.org/junit5/docs/current/user-guide/" },
+        { "name": "RSpec", "description": "Ruby, BDD-style, expressive", "docs": "https://rspec.info/documentation/" },
+        { "name": "PHPUnit", "description": "PHP, xUnit architecture", "docs": "https://docs.phpunit.de/" }
+      ]
+    },
+    "package_manager": {
+      "label": "Package Manager",
+      "question": "Which package manager?",
+      "allowMultiple": false,
+      "options": [
+        { "name": "pnpm", "description": "Fast, disk-efficient, strict", "docs": "https://pnpm.io/motivation" },
+        { "name": "npm", "description": "Node default, universal", "docs": "https://docs.npmjs.com/" },
+        { "name": "yarn", "description": "Workspaces, plug'n'play, Berry", "docs": "https://yarnpkg.com/getting-started" },
+        { "name": "bun", "description": "Fast runtime + bundler + package manager", "docs": "https://bun.sh/docs" },
+        { "name": "pip / uv", "description": "Python package management", "docs": "https://docs.astral.sh/uv/" },
+        { "name": "cargo", "description": "Rust package manager", "docs": "https://doc.rust-lang.org/cargo/" },
+        { "name": "go modules", "description": "Go dependency management", "docs": "https://go.dev/ref/mod" },
+        { "name": "Maven", "description": "Java/Kotlin build + dependency management", "docs": "https://maven.apache.org/guides/" },
+        { "name": "Gradle", "description": "Java/Kotlin, flexible, Groovy/Kotlin DSL", "docs": "https://docs.gradle.org/" },
+        { "name": "Composer", "description": "PHP dependency management", "docs": "https://getcomposer.org/doc/" }
+      ]
+    },
+    "monorepo": {
+      "label": "Monorepo Tool",
+      "question": "Monorepo structure?",
+      "allowMultiple": false,
+      "options": [
+        { "name": "No monorepo", "description": "Single package, simpler setup", "docs": null },
+        { "name": "Turborepo", "description": "Incremental builds, caching, task pipelines", "docs": "https://turbo.build/repo/docs" },
+        { "name": "Nx", "description": "Smart rebuilds, generators, plugins", "docs": "https://nx.dev/getting-started/intro" },
+        { "name": "pnpm workspaces", "description": "Native workspace support, no extra tool", "docs": "https://pnpm.io/workspaces" },
+        { "name": "Lerna", "description": "Multi-package publishing, versioning", "docs": "https://lerna.js.org/docs/introduction" }
+      ]
+    }
+  }
+}
