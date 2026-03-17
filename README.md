@@ -220,6 +220,22 @@ Displays current session cost tracking: budget, spent, remaining, and warning th
 
 View or toggle feature flags. Displays all flags with their current values and allows modification.
 
+### `/agentops:configure`
+
+Unified configuration interface for the entire plugin. View all settings at once or update individual values:
+
+```bash
+/agentops:configure                          # Show full configuration
+/agentops:configure autonomy autonomous      # Set autonomy level
+/agentops:configure enforcement blocking     # Set enforcement mode
+/agentops:configure budget 10                # Set session budget to $10
+/agentops:configure auto_test_enabled off    # Disable auto-test
+/agentops:configure preset minimal           # Apply minimal preset (security only, no automation)
+/agentops:configure preset enterprise        # Apply enterprise preset (all features, guided autonomy)
+```
+
+Available presets: `minimal`, `standard`, `security-only`, `enterprise`, `autonomous`.
+
 ### Enterprise Commands
 
 The following commands extend the plugin into an AI-first enterprise delivery framework:
