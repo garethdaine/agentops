@@ -25,6 +25,9 @@ Available flags:
 - `auto_verify_enabled` (bool) — Auto-verify task completion before session stop
 - `auto_evolve_enabled` (bool) — Auto-run EvoSkill loop if unprocessed failures exist at stop
 - `auto_delegate_enabled` (bool) — Auto-delegate to code-critic and security-reviewer after 5+ source files modified
+- `unicode_firewall_enabled` (bool) — Glassworm/Trojan Source defense: auto-strip on write, warn on read
+- `integrity_verification_enabled` (bool) — SHA-256 manifest of agent-written files, verify on session start
+- `lockfile_audit_enabled` (bool) — Scan lockfiles for Unicode anomalies and suspicious registries
 - `enforcement_mode` ("advisory"|"blocking") — Advisory uses "ask", blocking uses "deny"
 
 Enterprise extension flags:

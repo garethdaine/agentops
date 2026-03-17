@@ -49,11 +49,14 @@ if [ "$TOOL" = "Write" ] || [ "$TOOL" = "Edit" ]; then
 fi
 
 # 4. Protect plugin state files from agent writes (hard deny)
+#    Exception: AGENTOPS_WRITABLE_STATE paths (e.g. flags.json) are whitelisted
 if [ "$TOOL" = "Write" ] || [ "$TOOL" = "Edit" ]; then
   if echo "$CANONICAL" | grep -qE "$AGENTOPS_PROTECTED_PATHS"; then
-    jq -nc --arg fp "$CANONICAL" \
-      '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:("PathPolicy: protected AgentOps state file (" + $fp + ")")}}'
-    exit 0
+    if ! echo "$CANONICAL" | grep -qE "$AGENTOPS_WRITABLE_STATE"; then
+      jq -nc --arg fp "$CANONICAL" \
+        '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:("PathPolicy: protected AgentOps state file (" + $fp + ")")}}'
+      exit 0
+    fi
   fi
 fi
 

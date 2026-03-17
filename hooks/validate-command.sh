@@ -35,6 +35,7 @@ fi
 
 # 4. Tampering with .agentops/ state files via Bash (always deny)
 # Covers: writes, deletions, permission changes, symlink replacement
+# Exception: AGENTOPS_WRITABLE_STATE paths (e.g. flags.json) are whitelisted
 if echo "$COMMAND" | grep -qE '>\s*[^ ]*\.agentops/' \
    || echo "$COMMAND" | grep -qE '(tee|cp|mv|install)\s+[^ ]*\s+[^ ]*\.agentops/' \
    || echo "$COMMAND" | grep -qE '(tee|cp|mv|install)\s+[^ ]*\.agentops/' \
@@ -43,9 +44,11 @@ if echo "$COMMAND" | grep -qE '>\s*[^ ]*\.agentops/' \
    || echo "$COMMAND" | grep -qE '(rm|unlink|shred|truncate)\s+[^ ]*\.agentops/' \
    || echo "$COMMAND" | grep -qE '(chmod|chown)\s+[^ ]*\s+[^ ]*\.agentops/' \
    || echo "$COMMAND" | grep -qE '(ln)\s+[^ ]*\s+[^ ]*\.agentops/'; then
-  jq -nc --arg action "$HARD_DENY" \
-    '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:"Tampering with .agentops/ state files via Bash is blocked by AgentOps CommandPolicy (hard deny)"}}'
-  exit 0
+  if ! echo "$COMMAND" | grep -qE "$AGENTOPS_WRITABLE_STATE"; then
+    jq -nc --arg action "$HARD_DENY" \
+      '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:"Tampering with .agentops/ state files via Bash is blocked by AgentOps CommandPolicy (hard deny)"}}'
+    exit 0
+  fi
 fi
 
 # 4b. Tampering with hooks/ directory via Bash (always deny — prevent hook tampering)

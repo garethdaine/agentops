@@ -7,7 +7,10 @@
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/todo-prune.sh", "timeout": 5 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/star-preamble.sh", "timeout": 5 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lessons-check.sh", "timeout": 5 },
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/budget-check.sh", "timeout": 10 }
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/budget-check.sh", "timeout": 10 },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/unicode-scan-session.sh", "timeout": 30 },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/integrity-verify.sh", "timeout": 15 },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lockfile-audit.sh", "timeout": 15 }
         ]
       }
     ],
@@ -57,6 +60,18 @@
             "model": "claude-haiku-4-5",
             "timeout": 20
           }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|Read|Bash|Agent|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/unicode-firewall.sh", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/integrity-verify.sh", "timeout": 5 }
         ]
       },
       {

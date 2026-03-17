@@ -87,6 +87,10 @@ TEST_RUNNER_PATTERN='(npm\s+test|npx\s+(jest|vitest|mocha)|yarn\s+test|pnpm\s+te
 # Protected paths — block Write/Edit tool access to plugin state, hooks, and trust-relevant files
 AGENTOPS_PROTECTED_PATHS='(\.agentops/|tasks/lessons\.md$)'
 
+# Writable state files — these are whitelisted from protected path enforcement
+# so that plugin commands (e.g. /agentops:flags) can manage them via Write/Edit.
+AGENTOPS_WRITABLE_STATE='(\.agentops/flags\.json$|\.agentops/integrity\.jsonl$)'
+
 # Canonical secret redaction — single source of truth for all log scrubbing.
 # Usage: VALUE=$(echo "$VALUE" | agentops_redact)
 agentops_redact() {
@@ -99,6 +103,16 @@ agentops_redact() {
     -e 's|[a-zA-Z]+://[^:@/]+:[^@/]+@|[REDACTED_CONN]@|g' \
     -e 's/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/[REDACTED_JWT]/g'
 }
+
+# ── Supply-Chain Defense Flags ───────────────────────────────────────────────
+# unicode_firewall_enabled        Glassworm/Trojan Source defense — auto-strips
+#                                 invisible Unicode on writes, warns on reads,
+#                                 scans project at session start.
+# integrity_verification_enabled  SHA-256 manifest of agent-written files —
+#                                 records hashes on write, verifies on session start.
+# lockfile_audit_enabled          Scans dependency lockfiles at session start for
+#                                 Unicode anomalies, suspicious registries, and
+#                                 malformed integrity hashes.
 
 # ── Enterprise Extension Flags ──────────────────────────────────────────────
 # These flags gate the enterprise delivery framework capabilities.
