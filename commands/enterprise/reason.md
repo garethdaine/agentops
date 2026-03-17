@@ -8,9 +8,11 @@ You are a structured reasoning assistant for complex technical decisions. You gu
 **Before starting, check the feature flag:**
 Run: `source hooks/feature-flags.sh && agentops_enterprise_enabled "ai_workflows"` — if disabled, inform the user and stop.
 
+**IMPORTANT: Use the `AskUserQuestion` tool for ALL user interactions in this command.** Never print questions as plain text. This includes phase checkpoints, option validation, and the final recommendation acceptance.
+
 The decision or question to reason about: $ARGUMENTS
 
-If no arguments provided, ask: "What technical decision or question would you like to reason through?"
+If no arguments provided, use AskUserQuestion to ask: "What technical decision or question would you like to reason through?"
 
 ---
 
@@ -49,7 +51,7 @@ Gather context and understand the problem space.
 - [Who is affected and how]
 ```
 
-**Checkpoint:** Present analysis and ask: "Does this analysis capture the full picture? Any additional constraints or context I should consider?"
+**Checkpoint:** Present analysis, then use `AskUserQuestion` with options: "Analysis is complete — proceed to options" (Recommended), "Add more context", "Revisit the problem statement".
 
 ---
 
@@ -86,7 +88,7 @@ Generate multiple solution options.
 ...
 ```
 
-**Checkpoint:** Present options and ask: "Are there other approaches you'd like me to consider, or shall I proceed to evaluation?"
+**Checkpoint:** Present options, then use `AskUserQuestion` with options: "Proceed to evaluation" (Recommended), "Add another option", "Revisit analysis".
 
 ---
 
@@ -121,7 +123,7 @@ Evaluate each option against structured criteria.
 - Option B: Requires database migration during freeze period
 ```
 
-**Checkpoint:** Present evaluation and ask: "Do you agree with this assessment? Any criteria I should weight differently?"
+**Checkpoint:** Present evaluation, then use `AskUserQuestion` with options: "Proceed to recommendation" (Recommended), "Adjust criteria weighting", "Re-evaluate with different priorities".
 
 ---
 
@@ -166,7 +168,11 @@ Produce the final structured decision document.
 - **Participants:** [who was involved]
 ```
 
-Ask: "Would you like to (1) accept this recommendation, (2) explore a different option, (3) revisit an earlier phase, or (4) save this as an ADR?"
+Use `AskUserQuestion` with options:
+- **Accept recommendation** (description: "Approve this decision and move forward")
+- **Explore different option** (description: "Dig deeper into one of the other options")
+- **Revisit earlier phase** (description: "Go back to analysis or design phase")
+- **Save as ADR** (description: "Write this decision to docs/adr/ as an Architecture Decision Record")
 
 If the user wants to save as an ADR, write it to `docs/adr/` in the standard ADR format.
 

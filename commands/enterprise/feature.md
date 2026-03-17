@@ -8,6 +8,8 @@ You are an AI-first feature implementation assistant. You guide the engineer thr
 **Before starting, check the feature flag:**
 Run: `source hooks/feature-flags.sh && agentops_enterprise_enabled "ai_workflows"` — if disabled, inform the user and stop.
 
+**IMPORTANT: Use the `AskUserQuestion` tool for ALL user interactions in this command.** Never print questions as plain text. This includes clarifying questions in Phase 1, plan approval in Phase 4, step approval in supervised mode (Phase 5), and final review in Phase 6.
+
 **Read the autonomy level** from `.agentops/flags.json` (key: `autonomy_level`). Default to `guided` if not set.
 - `guided` — pause at plan approval (Phase 4) and final review (Phase 6)
 - `supervised` — pause after every implementation step
@@ -15,7 +17,7 @@ Run: `source hooks/feature-flags.sh && agentops_enterprise_enabled "ai_workflows
 
 The user's feature request is: $ARGUMENTS
 
-If no arguments provided, ask the user to describe the feature they want to build.
+If no arguments provided, use AskUserQuestion to ask the user to describe the feature they want to build.
 
 ---
 
@@ -23,13 +25,12 @@ If no arguments provided, ask the user to describe the feature they want to buil
 
 1. Read the feature description provided by the user
 2. Run the project detection process from `templates/utilities/project-detection.md` to understand the existing codebase
-3. Ask **3-5 targeted clarifying questions** to eliminate ambiguity. Focus on:
+3. Use `AskUserQuestion` to ask **3-4 targeted clarifying questions** to eliminate ambiguity. Batch them into a single AskUserQuestion call. Focus on:
    - Scope boundaries (what's in, what's out)
    - User-facing vs internal
    - Data model implications
    - Integration points with existing code or external systems
-   - Non-functional requirements (performance, security, accessibility)
-4. List any assumptions you're making and ask the user to confirm
+4. List any assumptions you're making and use `AskUserQuestion` to confirm them
 
 **Output:** Present a structured requirements summary:
 
@@ -122,16 +123,11 @@ Generate a structured implementation plan using the STAR framework:
 
 **If autonomy_level is `guided` or `supervised`:**
 
-Present the full plan and ask:
+Present the full plan, then use `AskUserQuestion` with these options:
 
-> The implementation plan is ready for your review.
->
-> **Options:**
-> 1. **Approve** — proceed with implementation
-> 2. **Modify** — tell me what to change
-> 3. **Reject** — cancel this feature build
->
-> Your choice:
+- **Approve** (description: "Proceed with implementation as planned")
+- **Modify** (description: "Request changes to the plan before proceeding")
+- **Reject** (description: "Cancel this feature build")
 
 Wait for the user to respond before proceeding. If they request changes, regenerate the relevant sections and present again.
 
@@ -159,8 +155,7 @@ Execute each task from the approved plan in order:
    - Confirm the task is complete
    - Note any deviations from the plan
 
-4. **If autonomy_level is `supervised`:** After each task, pause and ask:
-   > Task [N] complete. Continue to next task? (yes / review changes / modify plan)
+4. **If autonomy_level is `supervised`:** After each task, use `AskUserQuestion` with options: "Continue to next task", "Review changes first", "Modify the plan"
 
 5. **On error:** If any task fails, do NOT crash. Instead:
    - Log what went wrong
@@ -203,7 +198,10 @@ Present a completion summary:
 3. Run code review: `/agentops:review`
 ```
 
-Ask: "Feature implementation is ready for your review. Would you like to (1) accept, (2) request changes, or (3) run `/agentops:review` for a detailed code review?"
+Use `AskUserQuestion` with options:
+- **Accept** (description: "Feature complete, no further changes needed")
+- **Request changes** (description: "Modifications needed before accepting")
+- **Run code review** (description: "Run /agentops:review for a detailed code review first")
 
 **If autonomy_level is `autonomous`:**
 Present the summary without pausing.

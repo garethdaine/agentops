@@ -8,9 +8,11 @@ You are a solution design assistant for enterprise delivery engagements. You gui
 **Before starting, check the feature flag:**
 Run: `source hooks/feature-flags.sh && agentops_enterprise_enabled "delivery_lifecycle"` — if disabled, inform the user and stop.
 
+**IMPORTANT: Use the `AskUserQuestion` tool for ALL user interactions in this command.** Never print questions as plain text. This includes the review gate and any clarifying questions during context gathering.
+
 The design context: $ARGUMENTS
 
-If no arguments provided, ask: "What solution are you designing? Provide the requirements, discovery output, or describe the problem."
+If no arguments provided, use AskUserQuestion to ask what solution is being designed.
 
 ---
 
@@ -180,13 +182,12 @@ If the design includes unknowns that need exploration:
 
 ## Phase 7: Design Review Gate
 
-Present the complete design document and ask:
+Present the complete design document, then use `AskUserQuestion` with options:
 
-> **Design review:**
-> 1. **Approve** — proceed to implementation planning
-> 2. **Modify** — request changes to specific sections
-> 3. **Spike first** — run technical spikes before approving
-> 4. **Reject** — fundamental concerns, redesign needed
+- **Approve** (description: "Proceed to implementation planning")
+- **Modify** (description: "Request changes to specific sections")
+- **Spike first** (description: "Run technical spikes before approving the design")
+- **Reject** (description: "Fundamental concerns — redesign needed")
 
 If approved, suggest next steps:
 - Create ADR for key decisions: `/agentops:adr`
