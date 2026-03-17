@@ -233,4 +233,31 @@ Present the plan to the user for review. Do not proceed to execution.
 - Always store artifacts in `./docs/interrogation/{name}/` as specified.
 - Update `interrogation.md` after every Q&A round, not just at the end.
 
+## Enterprise Extensions
+
+When working on an enterprise delivery engagement, also interrogate these dimensions:
+
+### Stakeholder Questions
+- Who are the end users? How many? What are their technical capabilities?
+- Who is the project sponsor / decision maker?
+- Who approves scope changes? What is the change request process?
+- Are there existing systems this replaces or integrates with?
+
+### Scope Definition
+- What is explicitly IN scope for this engagement?
+- What is explicitly OUT of scope?
+- What is deferred to a future phase?
+- What are the hard constraints (budget, timeline, compliance)?
+
+### Assumption Logging
+- Document every assumption explicitly in the interrogation log
+- Tag assumptions as: [CONFIRMED] / [UNCONFIRMED] / [RISKY]
+- Flag assumptions that could change the estimate if wrong
+
+### Risk Identification
+- What could go wrong technically?
+- What could go wrong from a business/stakeholder perspective?
+- What external dependencies could fail or change?
+- What compliance/regulatory constraints exist?
+
 Arguments: $ARGUMENTS
