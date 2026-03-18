@@ -12,7 +12,7 @@ if [ "$(agentops_flag 'plan_gate_enabled')" = "true" ]; then
   TRACKER="${CWD}/.agentops/modified-files.txt"
   if [ -f "$TRACKER" ]; then
     FILE_COUNT=$(sort -u "$TRACKER" | wc -l | tr -d ' ')
-    if [ "$FILE_COUNT" -ge 3 ]; then
+    if [ "$FILE_COUNT" -ge "$AGENTOPS_PLAN_THRESHOLD" ]; then
       if [ ! -f "${CWD}/tasks/todo.md" ] || [ ! -s "${CWD}/tasks/todo.md" ]; then
         ISSUES="${ISSUES}Plan gate: ${FILE_COUNT} files modified but no plan in tasks/todo.md. "
       fi
@@ -37,7 +37,7 @@ if [ "$(agentops_flag 'test_gate_enabled')" = "true" ]; then
   TEST_RAN="${CWD}/.agentops/tests-ran"
   if [ -f "$TRACKER" ] && [ ! -f "$TEST_RAN" ]; then
     FILE_COUNT=$(sort -u "$TRACKER" | wc -l | tr -d ' ')
-    if [ "$FILE_COUNT" -ge 3 ]; then
+    if [ "$FILE_COUNT" -ge "$AGENTOPS_TEST_THRESHOLD" ]; then
       ISSUES="${ISSUES}Test gate: ${FILE_COUNT} files modified but no tests were run. "
     fi
   fi

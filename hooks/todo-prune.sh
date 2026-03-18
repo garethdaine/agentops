@@ -69,6 +69,7 @@ fi
 if [ "$HAS_UNCHECKED" = true ]; then
   # Replace with pruned version containing only incomplete items
   mv "$TEMP" "$TODO"
+  trap - EXIT
   REMAINING=$(grep -cE '^\s*- \[ \]' "$TODO" 2>/dev/null || echo 0)
   jq -nc --arg remaining "$REMAINING" \
     '{systemMessage: ("AgentOps: Pruned completed todos from previous session. " + $remaining + " incomplete item(s) remain in tasks/todo.md — review them before planning new work.")}'
@@ -78,5 +79,6 @@ else
   mkdir -p "$ARCHIVE_DIR" 2>/dev/null
   TIMESTAMP=$(date -u +%Y%m%dT%H%M%SZ)
   mv "$TODO" "${ARCHIVE_DIR}/todo-${TIMESTAMP}.md"
+  trap - EXIT
   jq -nc '{systemMessage: "AgentOps: Previous session'\''s todo was fully completed. Archived to tasks/archive/. A fresh STAR plan is required for new work."}'
 fi

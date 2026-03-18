@@ -3,7 +3,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/feature-flags.sh"
 
-[ "$(agentops_flag 'auto_test_enabled')" != "true" ] && exit 0
+agentops_automation_enabled 'auto_test_enabled' || exit 0
 
 INPUT=$(cat) || exit 0
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || exit 0
@@ -39,7 +39,7 @@ echo "$FILE" >> "$CODE_TRACKER" 2>/dev/null
 CODE_COUNT=$(sort -u "$CODE_TRACKER" 2>/dev/null | wc -l | tr -d ' ')
 
 # After 3+ source files modified since last test, inject instruction (once)
-if [ "$CODE_COUNT" -ge 3 ] && [ ! -f "$TEST_NUDGE" ]; then
+if [ "$CODE_COUNT" -ge "$AGENTOPS_TEST_THRESHOLD" ] && [ ! -f "$TEST_NUDGE" ]; then
   date -u +%FT%TZ > "$TEST_NUDGE" 2>/dev/null
   jq -nc --arg count "$CODE_COUNT" \
     '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:("AgentOps auto-test: " + $count + " source code files modified since tests were last run. Run the project'\''s test suite NOW before making further changes. Detect the test framework (jest, pytest, go test, cargo test, phpunit, rspec, etc.) from project config and execute it.")}}'

@@ -1,11 +1,12 @@
 #!/bin/bash
+set -uo pipefail
 # AI guardrails hook — detects common AI-assisted development pitfalls.
 # PostToolUse on Write/Edit. Non-blocking: additionalContext guidance only.
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/feature-flags.sh"
 
-INPUT=$(cat)
+INPUT=$(cat) || exit 0
 
 # Check feature flag
 agentops_enterprise_enabled "ai_workflows" || exit 0

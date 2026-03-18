@@ -13,6 +13,6 @@ TRACKER="${CWD_PG}/.agentops/modified-files.txt"
 
 # File tracking is handled by auto-plan.sh (PreToolUse) — just read the count
 COUNT=$(sort -u "$TRACKER" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$COUNT" -eq 5 ]; then
+if [ "$COUNT" -ge 5 ]; then
   jq -nc '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:"AgentOps: 5+ files modified. If you have not already, write a plan to tasks/todo.md with checkable items. Run tests before finishing."}}'
 fi

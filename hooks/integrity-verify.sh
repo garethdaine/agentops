@@ -50,13 +50,11 @@ if [ "$EVENT" = "SessionStart" ]; then
   CHECKED=0
   MISSING=0
 
-  # Build a map of latest hash per absolute path (last entry wins)
+  # Build a map of latest hash per absolute path (single jq invocation — last entry wins)
   declare -A LATEST_HASH
-  while IFS= read -r line; do
-    ABS=$(echo "$line" | jq -r '.abs_path // empty' 2>/dev/null)
-    HASH=$(echo "$line" | jq -r '.sha256 // empty' 2>/dev/null)
+  while IFS=$'\t' read -r ABS HASH; do
     [ -n "$ABS" ] && [ -n "$HASH" ] && LATEST_HASH["$ABS"]="$HASH"
-  done < "$MANIFEST"
+  done < <(jq -r '[., inputs] | group_by(.abs_path) | .[] | last | [.abs_path, .sha256] | @tsv' "$MANIFEST" 2>/dev/null)
 
   for ABS in "${!LATEST_HASH[@]}"; do
     EXPECTED="${LATEST_HASH[$ABS]}"

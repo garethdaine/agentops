@@ -3,7 +3,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/feature-flags.sh"
 
-[ "$(agentops_flag 'auto_plan_enabled')" != "true" ] && exit 0
+agentops_automation_enabled 'auto_plan_enabled' || exit 0
 
 INPUT=$(cat) || exit 0
 agentops_is_bypass "$INPUT" && exit 0
@@ -46,7 +46,7 @@ if [ -f "$TRACKER" ]; then
 fi
 # Include this file in count check without persisting to tracker
 FILE_COUNT=$((FILE_COUNT + 1))
-[ "${FILE_COUNT:-0}" -lt 3 ] && exit 0
+[ "${FILE_COUNT:-0}" -lt "$AGENTOPS_PLAN_THRESHOLD" ] && exit 0
 
 if [ "$REASON" = "stale" ]; then
   REASON="AgentOps auto-plan: ${FILE_COUNT} files modified but tasks/todo.md is stale (from a previous session). Update tasks/todo.md with a plan covering the current changes BEFORE continuing."

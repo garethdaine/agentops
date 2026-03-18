@@ -26,8 +26,9 @@ if echo "$COMMAND" | grep -qE "curl.*(-d|--data|--upload-file|-F)|wget.*--post|n
   fi
 fi
 
-# 2. Piping secrets to network
-if echo "$COMMAND" | grep -qE "(cat|less|head|tail|base64|xxd).*${SENSITIVE_FILES}.*\|.*(curl|wget|nc|ssh|scp|rsync|sftp)"; then
+# 2. Piping secrets to network (including command substitution: curl -d "$(cat .env)")
+if echo "$COMMAND" | grep -qE "(cat|less|head|tail|base64|xxd).*${SENSITIVE_FILES}.*\|.*(curl|wget|nc|ssh|scp|rsync|sftp)" || \
+   echo "$COMMAND" | grep -qE "(curl|wget|nc|ssh|scp|rsync|sftp).*\\$\(.*${SENSITIVE_FILES}"; then
   jq -nc --arg action "$HARD_DENY" \
     '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:"ExfiltrationDetector: piping sensitive file to network command (hard deny)"}}'
   exit 0

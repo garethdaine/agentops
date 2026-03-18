@@ -1,11 +1,12 @@
 #!/bin/bash
+set -uo pipefail
 # Standards enforcement hook — fires on Write/Edit to provide enterprise standards guidance.
 # Non-blocking: uses additionalContext only, never denies writes.
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/feature-flags.sh"
 
-INPUT=$(cat)
+INPUT=$(cat) || exit 0
 
 # Check feature flag — if disabled, exit silently
 agentops_enterprise_enabled "enterprise_scaffold" || exit 0
