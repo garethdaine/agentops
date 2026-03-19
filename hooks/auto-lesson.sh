@@ -15,5 +15,12 @@ if [ "$TOOL" = "Read" ] || [ "$TOOL" = "Glob" ]; then
   echo "$ERROR" | grep -qi "does not exist\|no such file\|not found\|no matches" && exit 0
 fi
 
+# Skip when the failing command is itself a lesson-capture operation
+# to prevent infinite loop: Bash fails → auto-lesson → lesson Bash fails → auto-lesson …
+if [ "$TOOL" = "Bash" ]; then
+  TOOL_INPUT=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) || TOOL_INPUT=""
+  echo "$TOOL_INPUT" | grep -qi "lessons\.\|/agentops:lesson\|lesson.*learned" && exit 0
+fi
+
 jq -nc --arg tool "$TOOL" --arg error "$ERROR" \
   '{systemMessage: ("AgentOps: Tool failure (" + $tool + "). Capture a lesson NOW using /agentops:lesson — describe what failed, the pattern behind it, and a rule to prevent recurrence. Error: " + $error)}'

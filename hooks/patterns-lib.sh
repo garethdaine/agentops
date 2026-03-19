@@ -19,4 +19,4 @@ AGENTOPS_PROTECTED_PATHS='(\.agentops/|tasks/lessons\.md$)'
 
 # Writable state files — whitelisted from protected path enforcement
 # so that plugin commands (e.g. /agentops:flags) can manage them via Write/Edit.
-AGENTOPS_WRITABLE_STATE='(\.agentops/flags\.json$|\.agentops/integrity\.jsonl$)'
+AGENTOPS_WRITABLE_STATE='(\.agentops/flags\.json$|\.agentops/integrity\.jsonl$|tasks/lessons\.md$)'
