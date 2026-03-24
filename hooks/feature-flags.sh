@@ -43,3 +43,22 @@ source "${_AGENTOPS_LIB_DIR}/evolve-lib.sh"
 # delivery_lifecycle             6       Delivery phase management
 # team_governance                7       Team scalability features
 # client_comms                   8       Client communication templates
+
+# ── Build Lifecycle Flags ────────────────────────────────────────────────────
+# Flags for the /agentops:build master lifecycle command.
+# Gated by: agentops_enterprise_enabled "ai_workflows"
+# Default values shown below — override in .agentops/flags.json.
+#
+# Flag name                      Default  Description
+# build_tdd_enforced             true     Enforce RED→GREEN→REFACTOR TDD cycle
+# build_parallel_research        true     Run Phase 2 researcher subagents in parallel
+# build_xml_plans                true     Produce XML plan (docs/build/{slug}/plan.xml)
+# build_linear_sync              false    Push tasks to Linear and update status
+# build_fresh_context            true     Spawn fresh subagent per execution task
+# build_wave_parallel            true     Execute independent tasks in parallel within waves
+# build_nyquist_enforce          true     Require <test>/<verify>/<done> on every plan task
+# build_persuasion               true     Embed persuasion prompts in human gate messages
+# build_quick_mode               false    Lightweight mode: brainstorm→plan→execute→verify
+# build_scaffold_auto            true     Auto-run scaffold on new projects (Phase 4.5)
+# build_standards_inject         true     Inject engineering-standards.md into execution agents
+# standards_enforcement_mode     advisory Advisory or blocking mode for standards violations
