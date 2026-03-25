@@ -16,6 +16,7 @@ docs/build/
 docs/dry-run-results.md
 docs/plans/
 docs/demo-script.md
+docs/ARCHITECTURE.md
 
 # Build artifacts
 node_modules/

@@ -4,7 +4,7 @@ A plugin for [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) t
 
 37 slash commands | 44 hooks | 12 specialist agents | 49 templates | 32+ feature flags
 
-**License:** MIT | **Version:** 1.0.0
+**License:** MIT | **Version:** 0.9.0
 
 ---
 
@@ -35,7 +35,7 @@ On first session, the plugin auto-initializes `.agentops/` with default flags an
 | **Agents** | 12 specialist agents | 4 parallel researchers + planner | Code reviewer agent |
 | **Security** | 7 layers (injection, exfiltration, supply-chain, Unicode, credential, path, env) | Minimal | None |
 | **Self-evolution** | EvoSkill (failures → proposer → skill-builder → feedback loop) | KNOWLEDGE.md (manual) | Skill extraction (manual) |
-| **TDD enforcement** | Mandatory RED→GREEN→REFACTOR in build; auto-test hook in sessions | Nyquist rule (verify required) | Code without tests = deleted |
+| **TDD enforcement** | Mandatory RED→GREEN→REFACTOR + Nyquist rule (`<test>`/`<verify>`/`<done>` on every task); auto-test hook in sessions | Nyquist rule (verify required) | Code without tests = deleted |
 | **Context strategy** | Fresh subagent per task (build_fresh_context) + session hooks | Fresh 200K context per subagent | Fresh context per subagent |
 | **Parallel execution** | Wave-based with dependency graphs + 4 parallel researchers | Wave-based parallel execution | N/A |
 | **Persuasion psychology** | 5 Cialdini techniques embedded in human gates | None | 5 Cialdini techniques |
