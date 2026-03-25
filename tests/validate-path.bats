@@ -48,6 +48,16 @@ teardown() {
   [ "$(get_decision "$result")" != "deny" ]
 }
 
+@test "Rule 4: allows Write to .agentops/build-state.json (writable state)" {
+  result=$(file_tool_input "Write" "$TEST_PROJECT_DIR/.agentops/build-state.json" | bash "$HOOKS_DIR/validate-path.sh")
+  [ "$(get_decision "$result")" != "deny" ]
+}
+
+@test "Rule 4: allows Write to .agentops/build-execution.jsonl (writable state)" {
+  result=$(file_tool_input "Write" "$TEST_PROJECT_DIR/.agentops/build-execution.jsonl" | bash "$HOOKS_DIR/validate-path.sh")
+  [ "$(get_decision "$result")" != "deny" ]
+}
+
 @test "Rule 4: allows Read of .agentops/ (not write-protected)" {
   result=$(file_tool_input "Read" "$TEST_PROJECT_DIR/.agentops/audit.jsonl" | bash "$HOOKS_DIR/validate-path.sh")
   [ "$(get_decision "$result")" != "deny" ]
