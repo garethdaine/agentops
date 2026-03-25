@@ -8,7 +8,7 @@ A plugin for [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) t
 
 37 slash commands | 44 hooks | 12 specialist agents | 49 templates | 32+ feature flags
 
-**License:** MIT | **Version:** 0.10.0
+**License:** MIT | **Version:** 0.9.2
 
 ---
 
