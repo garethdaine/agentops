@@ -389,6 +389,16 @@ bats tests/feature-flags.bats
 
 ---
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report bugs, suggest features, and submit PRs.
+
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+Found a vulnerability? See [.github/SECURITY.md](.github/SECURITY.md) for responsible disclosure instructions. Do not open a public issue.
+
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
