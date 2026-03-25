@@ -1,0 +1,48 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unicode scan (Trojan Source defense)
+        run: |
+          echo "Scanning for dangerous invisible Unicode characters..."
+          FOUND=0
+          while IFS= read -r -d '' file; do
+            if grep -Pn '[\x{200B}\x{200C}\x{200D}\x{2060}\x{FEFF}\x{00AD}\x{034F}\x{061C}\x{115F}\x{1160}\x{17B4}\x{17B5}\x{180E}\x{2000}-\x{200F}\x{202A}-\x{202E}\x{2062}-\x{2064}\x{2066}-\x{2069}\x{FFA0}\x{FFFC}]' "$file" 2>/dev/null; then
+              echo "::error file=$file::Dangerous Unicode characters detected"
+              FOUND=1
+            fi
+          done < <(find . -type f \( -name '*.sh' -o -name '*.js' -o -name '*.ts' -o -name '*.json' -o -name '*.md' \) -not -path './.git/*' -print0)
+          if [ "$FOUND" -eq 1 ]; then
+            echo "::error::Dangerous Unicode characters found — possible Trojan Source attack"
+            exit 1
+          fi
+          echo "No dangerous Unicode characters found."
+
+      - name: Injection pattern scan
+        run: |
+          echo "Scanning for injection patterns in shell scripts..."
+          FOUND=0
+          for file in hooks/*.sh; do
+            if grep -Pn 'eval\s+"\$' "$file" 2>/dev/null; then
+              echo "::warning file=$file::Potential eval injection"
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" -eq 1 ]; then
+            echo "::warning::Potential injection patterns found — review flagged files"
+          else
+            echo "No injection patterns found."
+          fi
+
+      - name: npm audit
+        run: npm audit --audit-level=high || true

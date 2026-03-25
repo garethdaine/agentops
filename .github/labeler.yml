@@ -1,0 +1,48 @@
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'hooks/injection-scan.sh'
+          - 'hooks/exfiltration-check.sh'
+          - 'hooks/unicode-firewall.sh'
+          - 'hooks/credential-redact.sh'
+          - 'hooks/validate-*.sh'
+          - 'hooks/content-trust.sh'
+          - '.github/SECURITY.md'
+
+hooks:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'hooks/**'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'tests/**'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.md'
+          - 'docs/**'
+          - 'CONTRIBUTING.md'
+          - 'CODE_OF_CONDUCT.md'
+
+commands:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'commands/**'
+
+agents:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'agents/**'
+
+templates:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'templates/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'

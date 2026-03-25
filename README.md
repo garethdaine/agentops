@@ -8,7 +8,11 @@ A plugin for [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) t
 
 37 slash commands | 44 hooks | 12 specialist agents | 49 templates | 32+ feature flags
 
-**License:** MIT | **Version:** 0.9.2
+[![Tests](https://github.com/garethdaine/agentops/actions/workflows/tests.yml/badge.svg)](https://github.com/garethdaine/agentops/actions/workflows/tests.yml)
+[![Lint](https://github.com/garethdaine/agentops/actions/workflows/lint.yml/badge.svg)](https://github.com/garethdaine/agentops/actions/workflows/lint.yml)
+[![Security](https://github.com/garethdaine/agentops/actions/workflows/security.yml/badge.svg)](https://github.com/garethdaine/agentops/actions/workflows/security.yml)
+[![npm version](https://img.shields.io/npm/v/@garethdaine/agentops)](https://www.npmjs.com/package/@garethdaine/agentops)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
