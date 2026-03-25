@@ -1,10 +1,14 @@
+<p align="center">
+  <img src="assets/banner.png" alt="AgentOps Banner" width="100%"/>
+</p>
+
 # AgentOps — Enterprise Guardrails & Delivery Lifecycle for Claude Code
 
 A plugin for [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) that wraps every session in 7 security layers, structures work with the STAR methodology, auto-pilots workflows, delegates to 12 specialist agents, learns from failures via self-evolution, and orchestrates full project builds from vision to merged PR.
 
 37 slash commands | 44 hooks | 12 specialist agents | 49 templates | 32+ feature flags
 
-**License:** MIT | **Version:** 0.9.0
+**License:** MIT | **Version:** 0.10.0
 
 ---
 
