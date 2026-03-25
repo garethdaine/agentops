@@ -43,9 +43,9 @@ teardown() {
   [ "$(get_decision "$result")" != "deny" ]
 }
 
-@test "Rule 4: blocks Edit to tasks/lessons.md (protected)" {
+@test "Rule 4: allows Edit to tasks/lessons.md (whitelisted writable state)" {
   result=$(file_tool_input "Edit" "$TEST_PROJECT_DIR/tasks/lessons.md" | bash "$HOOKS_DIR/validate-path.sh")
-  [ "$(get_decision "$result")" = "deny" ]
+  [ "$(get_decision "$result")" != "deny" ]
 }
 
 @test "Rule 4: allows Read of .agentops/ (not write-protected)" {
