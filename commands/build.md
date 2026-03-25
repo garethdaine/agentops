@@ -68,7 +68,14 @@ If "Start fresh": delete `.agentops/build-state.json` and proceed from Phase 1.
 
 ## State Management
 
-After each phase completes (including human gates), write to `.agentops/build-state.json`:
+After each phase completes (including human gates), you MUST do ALL of the following:
+
+1. **Update `build-state.json`** — add the completed phase to `phase_completed`, set `phase` to the NEXT phase, update `updated_at`.
+2. **Update `tasks/todo.md`** — check off the completed phase checkbox (`- [x] Phase N: NAME`).
+3. **Update `docs/build/{slug}/requirements.md`** — after execution tasks complete, check off each requirement that has been satisfied by the implemented code (`- [x] **REQ-NNN**`). Do this incrementally as tasks complete during Phase 5, and do a final sweep during Phase 6 review.
+4. **Proceed to the next phase** — do NOT skip phases. The sequence is: 1 → 2 → 3 → 4 → 4.5 → 5 → 6 → 7 → 8. After Phase 5 completes, you MUST proceed to Phase 6 (Review). After Phase 6, proceed to Phase 7. Never jump ahead.
+
+Write to `.agentops/build-state.json`:
 
 ```json
 {
@@ -252,7 +259,9 @@ Write two files (both under the build artifact root, NOT under `docs/interrogati
 
 ### 2.4 — HUMAN GATE: Requirements Approval
 
-Present the requirements summary. Use `AskUserQuestion`:
+**You MUST output the full contents of `docs/build/{slug}/requirements.md` to the conversation** so the user can read every requirement before approving. Do NOT just summarise or reference the file — display every REQ item in full.
+
+Then use `AskUserQuestion`:
 - header: "Build — Requirements"
 - question: "Are these requirements complete and accurate?"
 - options:
@@ -388,13 +397,21 @@ For each task, create a Linear issue with:
 
 ### 4.4 — HUMAN GATE: Task Breakdown Approval
 
-Use `AskUserQuestion`:
+**You MUST output a summary table of all tasks** before asking for approval. Display:
+
+| Task | Wave | Title | Complexity | Dependencies |
+|------|------|-------|------------|--------------|
+| T001 | 0    | ...   | M          | —            |
+
+Then use `AskUserQuestion`:
 - header: "Build — Task Breakdown"
-- question: "Generated {N} task mini-plans across {W} waves. Ready to begin execution?"
+- question: "Generated {N} task mini-plans across {W} waves. Review the tasks above. Ready to begin execution?"
 - options:
   - `{label: "Begin execution (Recommended)", description: "Start Wave 0 immediately."}`
-  - `{label: "Review task plans first", description: "I want to review the mini-plans before execution."}`
+  - `{label: "Review task plans first", description: "I want to review individual mini-plans before execution."}`
   - `{label: "Adjust task breakdown", description: "Some tasks need modification."}`
+
+**IMPORTANT:** This gate approves the task breakdown only. After the user approves, proceed to Phase 4.5 (Scaffold) if applicable, then Phase 5 (Execution). Do NOT skip any phases.
 
 > **Persuasion layer (if build_persuasion=true):** "Each task is scoped to under 200 lines of change with a clear done condition. The standard approach is to approve the breakdown now — adjusting mid-execution costs 3x more than adjusting the plan."
 
@@ -521,6 +538,14 @@ After each task, use `AskUserQuestion`:
   - `{label: "Review changes", description: "Show me git diff before continuing"}`
   - `{label: "Modify plan", description: "Adjust remaining tasks"}`
   - `{label: "Pause build", description: "Save state and stop for now"}`
+
+### 5.8 — Execution complete
+
+When all waves have finished:
+1. Update state: add `EXECUTION` to `phase_completed`, set `phase` to `REVIEW`.
+2. Check off `Phase 5: EXECUTION` in `tasks/todo.md`.
+3. Check off all satisfied requirements in `docs/build/{slug}/requirements.md`.
+4. **Proceed immediately to Phase 6 (Review).** Do NOT skip to Phase 7 or Phase 8.
 
 ---
 
