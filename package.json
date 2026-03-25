@@ -1,6 +1,6 @@
 {
   "name": "@garethdaine/agentops",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Enterprise guardrails, delivery lifecycle, and self-evolution for Claude Code CLI",
   "author": {
     "name": "Gareth Daine",
@@ -27,6 +27,10 @@
     "compliance",
     "audit"
   ],
+  "scripts": {
+    "test": "bats tests/",
+    "lint": "shellcheck hooks/*.sh"
+  },
   "files": [
     ".claude-plugin/",
     "agents/",

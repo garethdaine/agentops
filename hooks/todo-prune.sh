@@ -19,7 +19,8 @@ TODO="${CWD}/tasks/todo.md"
 
 # Build a pruned version: keep unchecked items and their nearest heading
 # Remove checked items (- [x]) and blank lines that result from removal
-TEMP=$(mktemp)
+# Create temp file in same directory as target for atomic mv (same filesystem)
+TEMP=$(mktemp "${TODO}.XXXXXX")
 trap 'rm -f "$TEMP"' EXIT
 
 HAS_UNCHECKED=false
@@ -67,9 +68,9 @@ if [ "$SECTION_HAS_UNCHECKED" = true ] && [ -n "$SECTION_BUFFER" ]; then
 fi
 
 if [ "$HAS_UNCHECKED" = true ]; then
-  # Replace with pruned version containing only incomplete items
-  mv "$TEMP" "$TODO"
+  # Replace with pruned version containing only incomplete items (atomic rename)
   trap - EXIT
+  mv "$TEMP" "$TODO"
   REMAINING=$(grep -cE '^\s*- \[ \]' "$TODO" 2>/dev/null || echo 0)
   jq -nc --arg remaining "$REMAINING" \
     '{systemMessage: ("AgentOps: Pruned completed todos from previous session. " + $remaining + " incomplete item(s) remain in tasks/todo.md — review them before planning new work.")}'

@@ -3,7 +3,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/feature-flags.sh"
 
-[ "$(agentops_flag 'auto_evolve_enabled')" != "true" ] && exit 0
+agentops_automation_enabled 'auto_evolve_enabled' || exit 0
 
 INPUT=$(cat) || exit 0
 CWD=$(echo "$INPUT" | jq -r '.cwd // "."' 2>/dev/null) || CWD="."

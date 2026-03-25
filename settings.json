@@ -1,6 +1,17 @@
 {
   "permissions": {
     "allow": [],
-    "deny": []
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(curl*|*bash)",
+      "Bash(curl*|*sh)",
+      "Bash(wget*|*bash)",
+      "Bash(wget*|*sh)",
+      "Write(/etc/*)",
+      "Write(/sys/*)",
+      "Write(/proc/*)",
+      "Write(/dev/*)",
+      "Write(/boot/*)"
+    ]
   }
 }

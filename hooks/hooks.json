@@ -48,6 +48,12 @@
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/injection-scan.sh", "timeout": 5 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/runtime-mode.sh", "timeout": 5 }
         ]
+      },
+      {
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/unicode-firewall.sh", "timeout": 5 }
+        ]
       }
     ],
     "PostToolUse": [
@@ -76,9 +82,14 @@
         ]
       },
       {
+        "matcher": "Bash|Read",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/credential-redact.sh", "timeout": 5 }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/credential-redact.sh", "timeout": 5 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/detect-test-run.sh", "timeout": 5 }
         ]
       },
