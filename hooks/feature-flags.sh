@@ -21,6 +21,8 @@ source "${_AGENTOPS_LIB_DIR}/redact-lib.sh"
 source "${_AGENTOPS_LIB_DIR}/evolve-lib.sh"
 
 # ── Supply-Chain Defense Flags ───────────────────────────────────────────────
+# code_field_rules_enabled        Code Field methodology — session-start injection
+#                                 (confidence scoring, verify, Answer/Confidence/Caveats).
 # unicode_firewall_enabled        Glassworm/Trojan Source defense — auto-strips
 #                                 invisible Unicode on writes, warns on reads,
 #                                 scans project at session start.

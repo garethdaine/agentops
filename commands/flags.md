@@ -17,6 +17,7 @@ Available flags:
 - `verification_gate_enabled` (bool) — Require all items checked before stop
 - `test_gate_enabled` (bool) — Require tests to be run
 - `star_preamble_enabled` (bool) — Inject STAR framework at session start
+- `code_field_rules_enabled` (bool) — Inject Code Field methodology (confidence, verify, answer format) at session start
 - `lessons_enabled` (bool) — Load and enforce lessons from tasks/lessons.md
 - `llm_content_firewall_enabled` (bool) — LLM-based content injection detection
 - `auto_plan_enabled` (bool) — Auto-generate STAR plan after 3+ file modifications

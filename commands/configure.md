@@ -40,6 +40,7 @@ If no arguments provided, read `.agentops/flags.json` and `.agentops/budget.json
 | Flag | Status |
 |------|--------|
 | star_preamble_enabled | on/off |
+| code_field_rules_enabled | on/off |
 | plan_gate_enabled | on/off |
 | verification_gate_enabled | on/off |
 | test_gate_enabled | on/off |
@@ -109,7 +110,8 @@ Parse the arguments as `<setting> <value>` and update accordingly.
   "auto_lesson_enabled": false, "auto_verify_enabled": false,
   "auto_evolve_enabled": false, "auto_delegate_enabled": false,
   "plan_gate_enabled": false, "verification_gate_enabled": false,
-  "test_gate_enabled": false, "star_preamble_enabled": false
+  "test_gate_enabled": false, "star_preamble_enabled": false,
+  "code_field_rules_enabled": false
 }
 ```
 
@@ -148,6 +150,7 @@ All flags `true`, `enforcement_mode: "advisory"`, `autonomy_level: "autonomous"`
   "verification_gate_enabled": true,
   "test_gate_enabled": true,
   "star_preamble_enabled": true,
+  "code_field_rules_enabled": true,
   "lessons_enabled": true,
   "auto_plan_enabled": true,
   "auto_test_enabled": true,

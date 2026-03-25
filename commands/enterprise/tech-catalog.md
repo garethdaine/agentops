@@ -38,6 +38,7 @@ Commands:
 - `/agentops:tech-catalog add <category> <name>` — add a new technology
 - `/agentops:tech-catalog remove <category> <name>` — remove a technology
 - `/agentops:tech-catalog update` — interactive update session
+- `/agentops:tech-catalog auto-update` — AI-driven catalog refresh (researches and proposes changes automatically)
 - `/agentops:tech-catalog search <query>` — search across all categories
 ```
 
@@ -75,6 +76,47 @@ Walk through the catalog category by category. For each, use `AskUserQuestion`:
 - options: "Looks good — skip", "Add a technology", "Remove a technology", "Update an entry"
 
 After all categories, update the `_meta.lastUpdated` field and save.
+
+### `auto-update` — AI-driven catalog refresh
+
+Automatically research and update the entire catalog without manual intervention. This is the hands-off alternative to `update`.
+
+**Process:**
+
+1. Read the current catalog from `templates/tech-catalog.json`.
+2. Use `WebSearch` to research each category for:
+   - **New entrants:** Technologies that have gained significant adoption since the catalog was last updated (check `_meta.lastUpdated`). Look for new frameworks, tools, or services that have reached production-readiness and meaningful community adoption.
+   - **Deprecated/dead:** Technologies that have been deprecated, abandoned, or superseded. Look for official deprecation notices, archived repositories, or successor announcements.
+   - **Description drift:** Existing entries whose descriptions are now inaccurate (e.g. a tool that has expanded scope, changed ownership, or shifted focus).
+   - **Broken docs links:** Verify that documentation URLs still resolve. If a docs site has moved, update the URL.
+   - **Missing categories:** Consider whether any new category of tooling has emerged that warrants its own section (e.g. AI/LLM frameworks, edge runtimes, observability).
+3. For each category, launch parallel `Agent` searches where possible to speed up research.
+4. Compile all proposed changes into a summary table:
+
+```markdown
+## Auto-Update Proposals
+
+| Action | Category | Technology | Reason |
+|--------|----------|-----------|--------|
+| ADD | [category] | [name] | [why — adoption signal, release date] |
+| REMOVE | [category] | [name] | [why — deprecated, archived, superseded by X] |
+| UPDATE | [category] | [name] | [what changed — description, docs URL] |
+| NEW CAT | [key] | — | [why this category is needed] |
+```
+
+5. Present the summary to the user and use `AskUserQuestion`:
+   - question: "Apply these catalog updates?"
+   - options: "Apply all", "Let me review individually", "Cancel"
+6. If "Let me review individually": walk through each proposed change with `AskUserQuestion` asking "Apply this change?" with options "Yes", "No", "Edit before applying".
+7. Apply approved changes to the catalog JSON, update `_meta.lastUpdated`, bump `_meta.version` patch number, and save.
+8. Present a final diff summary of what was changed.
+
+**Research guidelines:**
+- Prefer technologies with 1,000+ GitHub stars or equivalent adoption signal.
+- Don't add niche or experimental tools — the catalog should reflect production-ready, broadly applicable options.
+- Keep each category to a reasonable size (8–18 options). If a category is getting too large, consider whether some entries should be removed or a subcategory created.
+- When in doubt about whether to add something, err on the side of not adding — the user can always add manually.
+- Search queries should target "[category] framework/tool 2025 2026" to find recent entrants.
 
 ### `search <query>` — Search catalog
 

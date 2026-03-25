@@ -157,6 +157,14 @@ The `star-preamble.sh` hook injects this requirement at every session start. Use
 
 ---
 
+## Code Field Methodology
+
+Before writing or materially changing code, agents follow **DECOMPOSE → SOLVE (with 0.0–1.0 confidence per sub-problem) → VERIFY → SYNTHESIZE → REFLECT**. Complex solutions must end with explicit **Answer**, **Confidence**, and **Caveats** lines so limitations are visible, not hidden.
+
+The `code-field-preamble.sh` hook injects this at every session start (toggle with `code_field_rules_enabled`). Use `/agentops:code-field` for a focused reminder or to apply the checklist to the current task.
+
+---
+
 ## Commands
 
 All commands are invoked with the `/agentops:` prefix.
@@ -168,6 +176,10 @@ Generates a STAR-based implementation plan with checkable task items. Writes out
 ### `/agentops:star`
 
 Quick STAR analysis generation. Lighter than `/agentops:plan` - produces the STAR header without full task breakdown.
+
+### `/agentops:code-field`
+
+Applies the Code Field methodology (decompose, confidence-scored solve, verify, synthesize, reflect) and the required Answer / Confidence / Caveats output format for complex technical responses.
 
 ### `/agentops:workflow`
 
@@ -453,6 +465,7 @@ All flags are stored in `.agentops/flags.json` and default to `true`. Toggle the
 | Flag | Default | Controls |
 |------|---------|----------|
 | `star_preamble_enabled` | `true` | STAR methodology injection at session start |
+| `code_field_rules_enabled` | `true` | Code Field methodology injection at session start |
 | `plan_gate_enabled` | `true` | Require plan for multi-file changes |
 | `verification_gate_enabled` | `true` | Require all items checked before stop |
 | `test_gate_enabled` | `true` | Require tests for multi-file changes |
@@ -622,6 +635,7 @@ agentops-plugin/
 │   ├── feature-flags.sh            # Shared flag system library
 │   ├── session-cleanup.sh          # Reset stale session state
 │   ├── star-preamble.sh            # STAR protocol injection
+│   ├── code-field-preamble.sh      # Code Field methodology injection
 │   ├── validate-command.sh         # Bash command validation
 │   ├── validate-path.sh            # Path traversal protection
 │   ├── validate-env.sh             # Env var protection
@@ -650,6 +664,7 @@ agentops-plugin/
 ├── commands/
 │   ├── plan.md                     # /agentops:plan
 │   ├── star.md                     # /agentops:star
+│   ├── code-field.md               # /agentops:code-field
 │   ├── workflow.md                 # /agentops:workflow
 │   ├── interrogate.md              # /agentops:interrogate
 │   ├── verify.md                   # /agentops:verify
