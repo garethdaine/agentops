@@ -164,26 +164,28 @@ If `build_parallel_research=false`, run sequentially.
 
 ### 2.2 — Run interrogator
 
-Invoke the interrogation process from `commands/interrogate.md` with research context injected:
-- Pass the brief AND the 4 research files as context
-- Store interrogation artifacts in `docs/build/{slug}/interrogation.md`
+Run the interrogation process inline (do NOT invoke `commands/interrogate.md` as a separate command — its default storage paths differ). Instead, conduct the interrogation directly within this build context using the same methodology:
 
-The interrogation must cover at minimum:
-- Tech stack decisions (informed by stack research)
-- Architecture approach (informed by architecture research)
-- Feature scope — MVP vs v2 (informed by feature research)
-- Known pitfalls to avoid (informed by pitfalls research)
-- Non-functional requirements (performance, security, scale)
-- Auth and data model decisions
-- Integration points
-- Deployment and ops constraints
-- Success criteria and acceptance tests
+1. Present the brief AND all 4 research reports to the user as context.
+2. Conduct exhaustive interrogation rounds using `AskUserQuestion`, covering at minimum:
+   - Tech stack decisions (informed by stack research)
+   - Architecture approach (informed by architecture research)
+   - Feature scope — MVP vs v2 (informed by feature research)
+   - Known pitfalls to avoid (informed by pitfalls research)
+   - Non-functional requirements (performance, security, scale)
+   - Auth and data model decisions
+   - Integration points
+   - Deployment and ops constraints
+   - Success criteria and acceptance tests
+3. Push back on vague answers. "Something modern" is not a tech stack. "Users can log in" is not an auth model.
+4. Run at least 2-3 rounds. After each round, ask: "What might I have missed?"
+5. When complete, produce the summary and ask the user to confirm nothing is missing.
 
 ### 2.3 — Write outputs
 
-Write two files:
-1. `docs/build/{slug}/interrogation.md` — full Q&A log
-2. `docs/build/{slug}/requirements.md` — structured requirements derived from interrogation
+Write two files (both under the build artifact root, NOT under `docs/interrogation/`):
+1. `docs/build/{slug}/interrogation.md` — full Q&A log organised by domain/concern area and round number
+2. `docs/build/{slug}/requirements.md` — structured requirements derived from interrogation, with each requirement as a discrete checkable item (REQ-001, REQ-002, etc.)
 
 ### 2.4 — HUMAN GATE: Requirements Approval
 
@@ -331,6 +333,8 @@ Use `AskUserQuestion`:
   - `{label: "Review task plans first", description: "I want to review the mini-plans before execution."}`
   - `{label: "Adjust task breakdown", description: "Some tasks need modification."}`
 
+> **Persuasion layer (if build_persuasion=true):** "Each task is scoped to under 200 lines of change with a clear done condition. The standard approach is to approve the breakdown now — adjusting mid-execution costs 3x more than adjusting the plan."
+
 ---
 
 ## Phase 4.5: SCAFFOLD (conditional — new projects only)
@@ -368,9 +372,42 @@ Execute tasks wave by wave. Within a wave, tasks run in parallel if `build_wave_
    - The mini-plan from `docs/build/{slug}/tasks/{task-id}.md`
    - The requirements from `docs/build/{slug}/requirements.md`
    - The engineering standards from `templates/standards/engineering-standards.md` (if `build_standards_inject=true`)
-   - Instruction: "Implement this task following the TDD spec exactly. Write the failing test first (RED), then the implementation (GREEN), then refactor. Commit atomically."
+   - The standards checklist from `templates/standards/standards-checklist.md` (if `build_standards_inject=true`)
 
-3. If `build_fresh_context=false`: implement directly in the current context using the mini-plan.
+   **Subagent prompt (include verbatim):**
+
+   > You are an execution agent implementing a single task from a build plan.
+   >
+   > **Your inputs:**
+   > - `docs/build/{slug}/tasks/{task-id}.md` — your task mini-plan. This is your primary instruction. Follow it exactly.
+   > - `docs/build/{slug}/requirements.md` — the approved requirements. Your task must satisfy the requirements it maps to.
+   > - `templates/standards/engineering-standards.md` — mandatory coding standards. All code you produce must comply.
+   > - `templates/standards/standards-checklist.md` — quick-reference checklist. Verify your code against this before committing.
+   >
+   > **Process — follow this order strictly:**
+   >
+   > 1. **Read all inputs.** Read the mini-plan first, then requirements, then standards. Understand the task fully before writing any code.
+   > 2. **Read existing code.** The mini-plan lists files to read under "Context → Files to read first." Read all of them. Understand the patterns, naming conventions, and project structure before writing anything.
+   > 3. **RED — Write the failing test.** Follow the mini-plan's "TDD Specification → RED Phase" exactly. Write the test file. Run it. It MUST fail. If it passes without implementation, the test is wrong — fix the test, do not proceed.
+   > 4. **GREEN — Minimal implementation.** Write the minimum code to make the test pass. Follow the mini-plan's "GREEN Phase." Run the test. It MUST pass.
+   > 5. **REFACTOR — Improve without changing behaviour.** Apply the improvements listed in the mini-plan's "REFACTOR Phase." Run tests after each change. They must stay green. Verify against the standards checklist.
+   > 6. **Verify.** Run the verification command from the mini-plan's "Verification" section. Confirm expected output matches.
+   > 7. **Commit.** Stage ONLY the files listed in the mini-plan's "Commit" section. Use the exact commit message specified. Do NOT use `git add -A`.
+   >
+   > **Rules:**
+   > - Do NOT modify files outside the scope of this task unless a dependency requires it.
+   > - Do NOT skip the RED phase. Code without a failing test first violates TDD and will be caught in review.
+   > - Do NOT add features, abstractions, or "improvements" beyond what the mini-plan specifies. Implement exactly what is asked.
+   > - If the test framework or dependencies are missing, install them as part of the task and include them in the commit.
+   > - If you encounter a blocking issue (missing dependency from a prior wave, ambiguous requirement, broken existing code), STOP and return a failure report with: task ID, what blocked you, what you tried, and what the orchestrator needs to resolve.
+   >
+   > **Reporting — return this when done:**
+   > ```json
+   > {"task_id": "{task-id}", "status": "completed|failed|blocked", "tdd_phases_completed": ["RED","GREEN","REFACTOR"], "test_count": N, "tests_passing": N, "commit_sha": "abc1234", "files_changed": ["path/to/file"], "notes": "any issues or deviations"}
+   > ```
+   > If `status` is `failed` or `blocked`, include `"error"` and `"attempted"` fields describing what went wrong and what you tried.
+
+3. If `build_fresh_context=false`: implement directly in the current context using the mini-plan. Follow the same process as above (steps 1-7) without spawning a subagent.
 
 ### 5.2 — TDD enforcement (if build_tdd_enforced=true)
 
@@ -468,6 +505,8 @@ Present the consolidated review report. Use `AskUserQuestion`:
 
 If CRITICAL findings remain unaddressed: do NOT allow progression. Re-present the option to fix.
 
+> **Persuasion layer (if build_persuasion=true):** "Fixing findings now takes minutes. Fixing them after merge takes hours — and the review team will flag the same issues. Senior engineers address all critical and high findings before proceeding."
+
 ---
 
 ## Phase 7: VERIFICATION
@@ -503,6 +542,8 @@ Use `AskUserQuestion`:
   - `{label: "Proceed to approval (Recommended)", description: "Move to final summary and PR."}`
   - `{label: "Run additional checks", description: "I want to run more tests before approving."}`
 
+> **Persuasion layer (if build_persuasion=true):** "Every task's verify command has passed and the full test suite is green. Delaying approval now doesn't reduce risk — it increases context rot. The window for a clean merge is now."
+
 ---
 
 ## Phase 8: APPROVAL
@@ -531,6 +572,8 @@ Present the full summary. Use `AskUserQuestion`:
   - `{label: "Approve without PR", description: "Mark complete but skip PR creation."}`
 
 If `autonomy_level=autonomous`: skip this gate.
+
+> **Persuasion layer (if build_persuasion=true):** "This build has passed planning validation, TDD enforcement, two-stage review, and full verification. Every task has a commit and every commit has a test. Approving now captures the momentum — teams that delay approval after passing verification lose an average of 2 hours to context switching."
 
 ### 8.3 — PR creation
 
@@ -576,3 +619,52 @@ Runs a condensed lifecycle:
 4. VERIFICATION (Nyquist audit + test suite only)
 
 No PR creation. No Linear sync. Suitable for solo exploration builds.
+
+---
+
+## Hook Interaction During Builds
+
+The AgentOps hook system runs during builds. This is by design — builds benefit from the same guardrails as normal sessions. Key interactions:
+
+| Hook | Phase | Behaviour |
+|------|-------|-----------|
+| `auto-test.sh` | 5 (Execution) | Will nudge for tests after 3 writes — redundant when `build_tdd_enforced=true` since TDD is already mandatory. Harmless. |
+| `auto-plan.sh` | 5 (Execution) | Detects Write/Edit without a plan. During builds a plan always exists in `tasks/todo.md`. Harmless. |
+| `standards-enforce.sh` | 5 (Execution) | Enforces coding standards on writes. Complements the build's own standards injection. Desired behaviour. |
+| `auto-verify.sh` | Stop | Checks `tasks/todo.md` completion. During a multi-phase build, this fires if the user stops mid-build. It will report unchecked items — this is correct, since the build is incomplete. |
+| `compliance-gate.sh` | Stop | Runs compliance checks. Safe during builds. Fires on pause/stop. |
+| `auto-evolve.sh` | Stop | Checks for unprocessed failures. Works correctly with build failure tracking. |
+| `unicode-firewall.sh` | 5 (Execution) | Scans writes for invisible Unicode. Desired behaviour — protects build output. |
+| `injection-scan.sh` | 5 (Execution) | Scans for prompt injection. Desired behaviour — protects subagent inputs. |
+
+**No hooks need to be disabled during builds.** The hook system and build system are complementary. If a hook blocks a legitimate build operation, the issue is in the hook, not the build.
+
+---
+
+## Linear Integration (build_linear_sync=true)
+
+**Default: disabled.** Enable via `/agentops:flags` or `.agentops/flags.json`.
+
+**Prerequisites:**
+- The `linear` CLI must be installed and authenticated (`linear auth`)
+- Alternatively, set `LINEAR_API_KEY` in your environment for API-based access
+
+**How it works:**
+
+Phase 4 (Task Breakdown):
+```bash
+# Create issues via CLI
+linear issue create --title "{task title}" --description "{mini-plan content}" \
+  --estimate {1|2|3} --label "build/{slug}" --status "Todo"
+```
+
+Phase 5 (Execution):
+- On task start: update Linear status to "In Progress"
+- On task complete: update Linear status to "Done"
+- On task failure: update Linear status to "Blocked" with failure reason in a comment
+
+Phase 8 (Approval):
+- Move all `build/{slug}` issues to "Done"
+- Add PR URL as a comment on each issue
+
+If `linear` CLI is not available or authentication fails, log a warning and continue without sync. Linear sync is advisory — it must never block the build.

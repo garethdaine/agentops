@@ -114,3 +114,4 @@ The following features are commonly underestimated:
 - Do NOT inflate scope. Default to the smallest MVP that proves the core value proposition.
 - Flag features that sound simple but carry hidden complexity (e.g., "real-time" = websockets/polling, "search" = indexing strategy, "notifications" = delivery guarantees).
 - If the brief already has clear MVP scope, validate and refine it rather than replacing it.
+- **If the brief is too vague to classify features** (no clear problem statement, no target user, no domain), say so explicitly. Write a "Gaps" section listing what information is missing. Do not guess at features for a product you don't understand — flag it for interrogation.

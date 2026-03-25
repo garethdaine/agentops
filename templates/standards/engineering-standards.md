@@ -352,3 +352,62 @@ Controller (HTTP/GraphQL/CLI)
 - **No magic numbers in assertions.** Use named constants or setup variables.
 - **Test the contract, not the internals.** Do not test private methods directly.
 - **Red first.** In TDD, the test MUST fail before implementation. A test that passes without implementation is a broken test.
+
+---
+
+## Security Standards
+
+Any violation of these rules is a **CRITICAL** finding in code review. No exceptions.
+
+### Injection Prevention
+
+- **No raw SQL string concatenation.** Always use parameterised queries or the ORM's query builder. Never interpolate user input into SQL strings.
+- **No raw HTML rendering of user input.** All user-controlled values rendered in HTML must be sanitised or escaped. Use the framework's built-in escaping (e.g., React's JSX auto-escaping, Django's template auto-escaping).
+- **No `eval()`, `Function()`, or equivalent dynamic code execution** with user-controlled input.
+
+```typescript
+// BAD: SQL injection via string interpolation
+const users = await db.query(`SELECT * FROM users WHERE name = '${name}'`);
+
+// GOOD: Parameterised query
+const users = await db.query('SELECT * FROM users WHERE name = $1', [name]);
+```
+
+### Secrets and Credentials
+
+- **No hardcoded secrets.** API keys, passwords, tokens, and connection strings must come from environment variables or a secrets manager. Never commit them to source code.
+- **No secrets in URL query parameters.** Tokens and keys go in headers (`Authorization`, `X-API-Key`), never in URLs (they appear in logs, browser history, and referrer headers).
+- **No secrets in client-side code.** Frontend bundles are public. Server-side secrets must stay server-side.
+
+### Authentication and Authorisation
+
+- **Auth middleware on every route handling user data.** No route that reads or writes user-specific data should be accessible without authentication.
+- **Authorisation checks at the resource level.** Verifying that a user is logged in is not enough — verify they have access to the specific resource they're requesting (prevents IDOR vulnerabilities).
+- **Session tokens must be httpOnly, secure, sameSite.** Never store session tokens in localStorage (XSS-accessible). Use httpOnly cookies.
+
+### Input Validation
+
+- **Validate all external input at system boundaries.** Every API endpoint that accepts POST/PUT/PATCH must have an input validation schema (zod, joi, yup, pydantic, or equivalent).
+- **Fail closed.** If validation fails, reject the request. Never proceed with partially-valid data.
+- **Validate types, ranges, and formats.** Not just presence — check that email fields contain emails, IDs are valid formats, numbers are within expected ranges.
+
+```typescript
+// GOOD: Schema validation at the boundary
+const CreateUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).max(200),
+  role: z.enum(['user', 'admin']),
+});
+
+app.post('/users', async (req, res) => {
+  const input = CreateUserSchema.parse(req.body); // Throws on invalid input
+  const user = await createUserAction.execute(input);
+  res.json(user);
+});
+```
+
+### Data Protection
+
+- **Never log sensitive data.** Passwords, tokens, credit card numbers, and PII must be redacted from log output.
+- **Encrypt sensitive data at rest** when regulatory requirements demand it (GDPR, HIPAA, PCI-DSS).
+- **Use constant-time comparison for secrets.** When comparing tokens, hashes, or API keys, use `crypto.timingSafeEqual` or equivalent to prevent timing attacks.

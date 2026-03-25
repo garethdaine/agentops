@@ -86,3 +86,4 @@ Write your findings to `docs/build/{slug}/research/stack.md`:
 - If the brief already specifies technology, validate the choice rather than replacing it.
 - Base recommendations on the brief's stated scale, team size, and delivery timeline.
 - Search the web for current best practices if the technology landscape has shifted recently.
+- **If you cannot produce a confident recommendation** (brief is too vague, project type is unfamiliar, web search returns nothing useful), say so explicitly. Write a "Gaps" section at the end listing what information is missing and what questions need answering before a stack can be recommended. Do not fabricate confidence — a flagged gap is more valuable than a bad recommendation.

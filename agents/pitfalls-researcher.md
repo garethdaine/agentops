@@ -109,3 +109,4 @@ The implementation plan MUST NOT:
 - Be specific. "Security vulnerabilities are common" is not useful. "SQL injection via ORM raw query escape in Prisma is common when developers mix `prisma.$queryRaw` with string interpolation" is useful.
 - Rank pitfalls by severity — CRITICAL pitfalls (data loss, security breach, production outage) get the most detail.
 - Connect pitfalls to the planning phase: the Planning Recommendations section must give concrete, actionable additions to the build plan.
+- **If the project type is unfamiliar or the brief is too vague** to identify specific pitfalls, say so explicitly. Write a "Gaps" section listing what information is missing. Generic warnings like "security vulnerabilities are common" are not useful — either be specific or flag that you need more context.

@@ -36,28 +36,26 @@ This task connects to:
 
 ### RED Phase — Write the failing test first
 
-**Test file:** `{path/to/feature.test.ts}`
+**Test file:** `{path/to/test-file}` *(use the project's test file naming convention — e.g., `.test.ts`, `_test.go`, `test_*.py`, `*_spec.rb`)*
 
 **Test to write:**
 
-```typescript
-describe('{component/function name}', () => {
-  it('should {expected behaviour} when {condition}', async () => {
-    // Arrange
-    {setup code}
+```
+{Write the test using the project's testing framework and language.
+ Follow Arrange-Act-Assert structure.
+ Test description format: "should {expected behaviour} when {condition}".
+ Example patterns by language:
 
-    // Act
-    {call the thing being tested}
-
-    // Assert
-    expect({actual}).{matcher}({expected});
-  });
-});
+ TypeScript/Jest:  describe('...', () => { it('should ...', () => { expect(...).toBe(...); }); });
+ Python/pytest:    def test_should_do_x_when_y(): ... assert result == expected
+ Go:              func TestShouldDoXWhenY(t *testing.T) { ... if got != want { t.Errorf(...) } }
+ Rust:            #[test] fn should_do_x_when_y() { assert_eq!(...); }
+}
 ```
 
-**Expected failure message:** `{The exact error you expect to see when running this test before implementation — e.g., "Cannot find module '../users.service'"}`
+**Expected failure message:** `{The exact error you expect to see when running this test before implementation — e.g., "ModuleNotFoundError", "undefined: FunctionName", "cannot find module"}`
 
-**Run command:** `{test runner command} -- --grep "{test description}"`
+**Run command:** `{project's test runner — e.g., npm test, pytest, go test, cargo test} {with filter for this specific test}`
 
 **Confirm RED:** The test must fail with the expected error before any implementation begins. If it passes, the test is wrong.
 
@@ -89,13 +87,13 @@ After the test is green, apply these improvements. Re-run tests after each chang
 
 | Refactor | Rationale |
 |----------|-----------|
-| {e.g. Extract the validation logic into a private method} | {SRP — keeps the main method at one abstraction level} |
-| {e.g. Add JSDoc to the public method} | {Aids future contributors} |
+| {e.g. Extract the validation logic into a private/internal function} | {SRP — keeps the main function at one abstraction level} |
+| {e.g. Add doc comment to the public function} | {Aids future contributors} |
 | {e.g. Replace magic number 3 with named constant MAX_RETRY_ATTEMPTS} | {Avoid magic numbers} |
 
 **Standards to verify during refactor (from standards-checklist.md):**
 - [ ] Function is ≤30 lines
-- [ ] No `new ConcreteClass()` in business logic
+- [ ] No concrete dependency instantiation in business logic
 - [ ] Function is named as a verb phrase
 - [ ] Boolean parameters removed (if any crept in)
 - [ ] Command-query separation respected

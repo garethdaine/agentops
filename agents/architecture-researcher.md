@@ -112,3 +112,4 @@ src/
 - Reference the templates in `templates/architecture/` — do not duplicate their content, link to relevant patterns.
 - If the project is straightforward CRUD with low domain complexity, say so explicitly. Do not recommend DDD or microservices for simple projects.
 - Match architectural ambition to stated team size and delivery constraints.
+- **If you cannot produce a confident recommendation** (brief is too vague, project type is novel, no clear architectural precedent), say so explicitly. Write a "Gaps" section listing what information is missing and what questions need answering. Do not invent an architecture for a problem you don't understand — flag it for the interrogation phase.
