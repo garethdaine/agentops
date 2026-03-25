@@ -1,9 +1,22 @@
+# OS
 .DS_Store
 **/.DS_Store
+
+# Claude Code runtime (user-specific)
 .claude/
 .agentops/
+.mcp.json
+
+# Runtime state (session-specific, not versioned)
 tasks/
 skills/
 docs/interrogation/
 docs/adr/
+docs/build/
 docs/dry-run-results.md
+docs/plans/
+docs/demo-script.md
+
+# Build artifacts
+node_modules/
+*.log
