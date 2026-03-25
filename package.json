@@ -1,6 +1,6 @@
 {
   "name": "@garethdaine/agentops",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Enterprise guardrails, delivery lifecycle, and self-evolution for Claude Code CLI",
   "author": {
     "name": "Gareth Daine",
