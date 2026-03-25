@@ -10,7 +10,7 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Unicode scan (Trojan Source defense)
         run: |
@@ -45,4 +45,12 @@ jobs:
           fi
 
       - name: npm audit
-        run: npm audit --audit-level=high || true
+        run: |
+          if [ -f package-lock.json ]; then
+            npm audit --audit-level=high || true
+          else
+            echo "No lockfile found — generating for audit"
+            npm i --package-lock-only --ignore-scripts
+            npm audit --audit-level=high || true
+            rm -f package-lock.json
+          fi
