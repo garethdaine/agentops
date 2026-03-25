@@ -3,7 +3,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/feature-flags.sh"
 
-[ "$(agentops_flag 'auto_delegate_enabled')" != "true" ] && exit 0
+agentops_automation_enabled 'auto_delegate_enabled' || exit 0
 
 INPUT=$(cat) || exit 0
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || exit 0
@@ -33,8 +33,8 @@ CODE_TRACKER="${STATE_DIR}/modified-files.txt"
 # Count source code files only
 CODE_COUNT=$(sort -u "$CODE_TRACKER" 2>/dev/null | grep -cE "$SOURCE_CODE_EXTENSIONS" || echo 0)
 
-# After 5+ source code files modified, trigger delegation
-if [ "$CODE_COUNT" -ge 5 ]; then
+# After threshold source code files modified, trigger delegation
+if [ "$CODE_COUNT" -ge "$AGENTOPS_DELEGATE_THRESHOLD" ]; then
   date -u +%FT%TZ > "$DELEGATE_SENT" 2>/dev/null
 
   # Collect the modified source files for review context

@@ -13,6 +13,7 @@ TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || exit 0
 TRUST="contextual"
 case "$TOOL" in
   WebFetch|WebSearch) TRUST="untrusted" ;;
+  Agent) TRUST="untrusted" ;;
   mcp__*) TRUST="untrusted" ;;
 esac
 

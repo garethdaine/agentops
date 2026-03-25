@@ -19,4 +19,7 @@ AGENTOPS_PROTECTED_PATHS='(\.agentops/|tasks/lessons\.md$)'
 
 # Writable state files — whitelisted from protected path enforcement
 # so that plugin commands (e.g. /agentops:flags) can manage them via Write/Edit.
-AGENTOPS_WRITABLE_STATE='(\.agentops/flags\.json$|\.agentops/integrity\.jsonl$|\.agentops/build-state\.json$|\.agentops/build-execution\.jsonl$|tasks/lessons\.md$)'
+AGENTOPS_WRITABLE_STATE='(\.agentops/flags\.json$|\.agentops/build-state\.json$|\.agentops/build-execution\.jsonl$|tasks/lessons\.md$)'
+
+# Delegation threshold — number of modified source files before auto-delegate triggers
+AGENTOPS_DELEGATE_THRESHOLD=5

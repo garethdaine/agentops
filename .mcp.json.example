@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "slack-bridge": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/slack-bridge/index.js"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_SIGNING_SECRET": "${SLACK_SIGNING_SECRET}"
+      }
+    }
+  }
+}

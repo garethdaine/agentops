@@ -22,7 +22,8 @@ for VAR in $VARS; do
   VAR_UPPER=$(echo "$VAR" | tr '[:lower:]' '[:upper:]')
 
   # Forbidden keys — LD_PRELOAD, PATH, HOME etc. are always dangerous
-  if echo "$VAR_UPPER" | grep -qE "^(PATH|HOME|SHELL|USER|LD_PRELOAD|LD_LIBRARY_PATH|DYLD_)"; then
+  if echo "$VAR_UPPER" | grep -qE "^(PATH|HOME|SHELL|USER|LD_PRELOAD|LD_LIBRARY_PATH|NODE_OPTIONS|NODE_PATH|PYTHONPATH|PYTHONSTARTUP|RUBYOPT|PERL5OPT|CLASSPATH)$" || \
+     echo "$VAR_UPPER" | grep -qE "^DYLD_"; then
     jq -nc --arg var "$VAR" --arg action "$HARD_DENY" \
       '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:("EnvPolicy: forbidden env var " + $var + " (hard deny)")}}'
     exit 0

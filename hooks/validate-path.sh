@@ -38,14 +38,12 @@ if [ ${#FILE_PATH} -gt 1024 ]; then
   exit 0
 fi
 
-# Canonicalize for symlink resolution (for Write/Edit, resolve existing paths)
+# Canonicalize for symlink resolution (resolve existing paths for all tools)
 CANONICAL="$FILE_PATH"
-if [ "$TOOL" = "Write" ] || [ "$TOOL" = "Edit" ]; then
-  PARENT_DIR=$(dirname "$FILE_PATH")
-  if [ -d "$PARENT_DIR" ]; then
-    RESOLVED=$(realpath -m "$FILE_PATH" 2>/dev/null) || RESOLVED="$FILE_PATH"
-    CANONICAL="$RESOLVED"
-  fi
+PARENT_DIR=$(dirname "$FILE_PATH")
+if [ -d "$PARENT_DIR" ]; then
+  RESOLVED=$(realpath -m "$FILE_PATH" 2>/dev/null) || RESOLVED="$FILE_PATH"
+  CANONICAL="$RESOLVED"
 fi
 
 # 4. Protect plugin state files from agent writes (hard deny)

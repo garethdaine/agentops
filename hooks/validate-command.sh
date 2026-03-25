@@ -13,7 +13,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) || a
 HARD_DENY=$(agentops_hard_deny)
 
 # 1. Destructive system commands (always deny, even in bypass/unrestricted)
-if echo "$COMMAND" | grep -qE "(rm\s+-rf\s+/[^t]|mkfs\s|dd\s+if=|shutdown|reboot|init\s+[06])"; then
+if echo "$COMMAND" | grep -qE "(rm\s+-rf\s+/([^t]|t[^m]|tm[^p]|tmp[^/])|mkfs\s|dd\s+if=|shutdown|reboot|init\s+[06])"; then
   jq -nc --arg action "$HARD_DENY" \
     '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:"Destructive system command blocked by AgentOps CommandPolicy (hard deny)"}}'
   exit 0
@@ -51,7 +51,7 @@ if echo "$COMMAND" | grep -qE '>\s*[^ ]*\.agentops/' \
   fi
 fi
 
-# 4b. Tampering with hooks/ directory via Bash (always deny — prevent hook tampering)
+# 4b. Tampering with hooks/ directory via Bash write operations (always deny — prevent hook tampering)
 if echo "$COMMAND" | grep -qE '>\s*[^ ]*hooks/' \
    || echo "$COMMAND" | grep -qE '(tee|cp|mv|install)\s+[^ ]*\s+[^ ]*hooks/' \
    || echo "$COMMAND" | grep -qE 'sed\s+-i[^ ]*\s+[^ ]*hooks/' \
@@ -60,6 +60,14 @@ if echo "$COMMAND" | grep -qE '>\s*[^ ]*hooks/' \
    || echo "$COMMAND" | grep -qE '(ln)\s+[^ ]*\s+[^ ]*hooks/'; then
   jq -nc --arg action "$HARD_DENY" \
     '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:"Tampering with hooks/ directory via Bash is blocked by AgentOps CommandPolicy (hard deny)"}}'
+  exit 0
+fi
+
+# 4c. Scripting language file I/O to protected paths (always deny — prevent bypass via python/ruby/node)
+if echo "$COMMAND" | grep -qE "(python3?|ruby|node|perl)\s+(-c|(-e\s))" && \
+   echo "$COMMAND" | grep -qE '(\.agentops/|hooks/)'; then
+  jq -nc --arg action "$HARD_DENY" \
+    '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:$action,permissionDecisionReason:"Scripting language referencing protected paths blocked by AgentOps CommandPolicy (hard deny)"}}'
   exit 0
 fi
 

@@ -21,6 +21,26 @@ audit() {
     '{ts:$ts, event:$ev} + $ARGS.named' >> "$LOG_DIR/audit.jsonl" 2>/dev/null
 }
 
+# ── PreToolUse: Scan inputs for dangerous Unicode before execution ────────
+if [ "$EVENT" = "PreToolUse" ]; then
+  CONTENT=""
+  case "$TOOL" in
+    Bash)   CONTENT=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) ;;
+    Write)  CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // empty' 2>/dev/null) ;;
+    Edit)   CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string // empty' 2>/dev/null) ;;
+  esac
+
+  if [ -n "$CONTENT" ] && echo "$CONTENT" | unicode_detect; then
+    CATEGORIES=$(echo "$CONTENT" | unicode_classify)
+    audit "UNICODE_PRETOOL_WARNING" --arg tool "$TOOL" --arg cats "$CATEGORIES"
+
+    jq -nc --arg cats "$CATEGORIES" --arg tool "$TOOL" \
+      '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"ask",permissionDecisionReason:("UNICODE FIREWALL: " + $tool + " input contains dangerous invisible Unicode (" + $cats + "). This may be a Trojan Source attack. Review the content carefully before allowing.")}}'
+    exit 0
+  fi
+  exit 0
+fi
+
 # ── PostToolUse: Auto-strip on Write/Edit ───────────────────────────────────
 # Instead of blocking the write, we let it through and immediately sanitise
 # the file, emitting a warning so the agent knows what happened.
