@@ -40,7 +40,7 @@ On first session, the plugin auto-initializes `.agentops/` with default flags an
 | **Parallel execution** | Wave-based with dependency graphs + 4 parallel researchers | Wave-based parallel execution | N/A |
 | **Persuasion psychology** | 5 Cialdini techniques embedded in human gates | None | 5 Cialdini techniques |
 | **Plan format** | STAR markdown + XML with Nyquist compliance (<test>/<verify>/<done>) | XML executable plans | Markdown plans |
-| **Git workflow** | Atomic commits per task, conventional commit format | Atomic commits, worktrees | Worktrees, atomic commits |
+| **Git workflow** | Configurable strategy (worktree / feature-branch / trunk-based); atomic commits per task, conventional commit format | Atomic commits, worktrees | Worktrees, atomic commits |
 | **Review** | Two-stage: spec compliance (requirements mapping) + code quality (11 dimensions) | N/A | Two-stage review |
 | **Feature flags** | 32+ independently toggleable with presets | Minimal settings | None |
 | **Enterprise templates** | 49 templates (discovery → delivery → handover) | None | None |

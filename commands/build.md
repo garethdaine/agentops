@@ -30,6 +30,7 @@ You MUST use the `AskUserQuestion` tool for EVERY human interaction in this comm
 - `build_scaffold_auto` (default: true) — auto-run scaffold on new projects
 - `build_standards_inject` (default: true) — inject engineering-standards into execution agents
 - `standards_enforcement_mode` (default: advisory) — advisory|blocking
+- `build_git_workflow` (default: worktree) — git branching strategy: `worktree`, `feature-branch`, or `trunk`
 
 **State file:** `.agentops/build-state.json`
 **Artifact root:** `docs/build/{project-slug}/`
@@ -78,8 +79,70 @@ After each phase completes (including human gates), write to `.agentops/build-st
   "started_at": "ISO timestamp",
   "updated_at": "ISO timestamp",
   "artifact_root": "docs/build/project-slug/",
+  "git_workflow": "worktree",
+  "git_branch": "build/project-slug",
+  "git_worktree_path": ".claude/worktrees/build-project-slug",
   "flags": { "autonomy_level": "guided", "build_tdd_enforced": true }
 }
+```
+
+---
+
+## Git Workflow
+
+Read `build_git_workflow` from flags (default: `worktree`). The chosen strategy governs how the build isolates its work and merges it back.
+
+### Strategy: `worktree` (default)
+
+1. **Setup (before Phase 5):** Create an isolated git worktree for the build:
+   ```
+   git worktree add .claude/worktrees/build-{slug} -b build/{slug}
+   ```
+2. **Execution:** All Phase 5 subagents operate inside the worktree directory. Commits go to the `build/{slug}` branch.
+3. **Merge (Phase 8, after approval):** From main:
+   ```
+   git merge --no-ff build/{slug} -m "feat({slug}): merge build"
+   git worktree remove .claude/worktrees/build-{slug}
+   git branch -d build/{slug}
+   ```
+4. **Abort / failure:** `git worktree remove --force` and delete the branch. No commits touch main.
+
+**Advantages:** Complete isolation — main stays clean throughout the build. Parallel builds possible.
+
+### Strategy: `feature-branch`
+
+1. **Setup:** Create a feature branch from the current HEAD:
+   ```
+   git checkout -b build/{slug}
+   ```
+2. **Execution:** All commits land on `build/{slug}` in the working directory.
+3. **Merge (Phase 8):** Create PR via `gh pr create` (as per Phase 8.3). Do NOT auto-merge — the PR is the deliverable.
+4. **Abort / failure:** `git checkout main && git branch -D build/{slug}`.
+
+**Advantages:** Familiar GitHub Flow. PR review before merge. Works with CI/CD gates.
+
+### Strategy: `trunk`
+
+1. **Setup:** No branch or worktree creation. Work directly on the current branch.
+2. **Execution:** All commits land on the current branch immediately.
+3. **Merge (Phase 8):** No merge step needed — code is already on trunk. Phase 8.3 PR creation is skipped.
+4. **Abort / failure:** Provide a list of commit SHAs from the build execution log so the user can revert if needed.
+
+**Advantages:** Simplest workflow. Good for solo developers or when CI validates on push.
+
+### Workflow integration points
+
+| Phase | Worktree | Feature-branch | Trunk |
+|-------|----------|----------------|-------|
+| Phase 4.5 (Scaffold) | Scaffold inside worktree | Scaffold on feature branch | Scaffold on current branch |
+| Phase 5 (Execution) | Subagents get worktree path as cwd | Subagents work on feature branch | Subagents work on current branch |
+| Phase 5.3 (Commit) | Commit to worktree branch | Commit to feature branch | Commit to current branch |
+| Phase 8.3 (PR) | Merge worktree branch, then PR if remote | PR from feature branch | Skip PR |
+| Phase 8.6 (Archive) | Remove worktree, delete branch | Delete branch after merge | No cleanup |
+
+Record the active workflow in `build-state.json`:
+```json
+{ "git_workflow": "worktree", "branch": "build/{slug}", "worktree_path": ".claude/worktrees/build-{slug}" }
 ```
 
 ---
@@ -426,6 +489,8 @@ Every task MUST follow this cycle. Do NOT skip the RED phase.
 After each task: `git add` relevant files and commit using the message from the mini-plan.
 Follow conventional commit format: `type(scope): description`
 
+Commits target the branch/worktree determined by the active `build_git_workflow` strategy (see Git Workflow section above).
+
 ### 5.4 — Execution log
 
 After each task, append to `.agentops/build-execution.jsonl`:
@@ -577,7 +642,13 @@ If `autonomy_level=autonomous`: skip this gate.
 
 ### 8.3 — PR creation
 
-Create a pull request using `gh pr create`:
+**Behaviour depends on `build_git_workflow`:**
+
+- **worktree:** Merge the worktree branch into main (`git merge --no-ff build/{slug}`), then create PR if a remote is configured. Clean up worktree and branch.
+- **feature-branch:** Create PR from `build/{slug}` → main using `gh pr create`. Do not auto-merge.
+- **trunk:** Skip this step — code is already on trunk.
+
+PR details (when created):
 - Title: `feat({slug}): {project name}`
 - Body: contents of `docs/build/{slug}/summary.md` (truncated to 4000 chars if needed)
 - Label: `build`, `agentops`

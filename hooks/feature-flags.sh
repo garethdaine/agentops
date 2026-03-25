@@ -64,3 +64,4 @@ source "${_AGENTOPS_LIB_DIR}/evolve-lib.sh"
 # build_scaffold_auto            true     Auto-run scaffold on new projects (Phase 4.5)
 # build_standards_inject         true     Inject engineering-standards.md into execution agents
 # standards_enforcement_mode     advisory Advisory or blocking mode for standards violations
+# build_git_workflow             worktree Git branching strategy: worktree, feature-branch, or trunk
