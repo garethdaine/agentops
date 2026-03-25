@@ -10,15 +10,21 @@ A plugin for [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) t
 
 ## Quick Start
 
+### Install via npm
+
 ```bash
-# Clone the plugin
-git clone https://github.com/garethdaine/agentops.git agentops-plugin
+npm install -g @garethdaine/agentops
 
 # Run Claude Code with the plugin loaded
-claude --plugin-dir ./agentops-plugin
+claude --plugin-dir $(npm root -g)/@garethdaine/agentops
+```
 
-# Or with permissions auto-approved
-claude --plugin-dir ./agentops-plugin --dangerously-skip-permissions
+### Or clone from GitHub
+
+```bash
+git clone https://github.com/garethdaine/agentops.git agentops-plugin
+
+claude --plugin-dir ./agentops-plugin
 ```
 
 On first session, the plugin auto-initializes `.agentops/` with default flags and budget.

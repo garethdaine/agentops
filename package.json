@@ -1,0 +1,40 @@
+{
+  "name": "@garethdaine/agentops",
+  "version": "0.9.0",
+  "description": "Enterprise guardrails, delivery lifecycle, and self-evolution for Claude Code CLI",
+  "author": {
+    "name": "Gareth Daine",
+    "email": "1745959+garethdaine@users.noreply.github.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/garethdaine/agentops.git"
+  },
+  "homepage": "https://github.com/garethdaine/agentops",
+  "bugs": {
+    "url": "https://github.com/garethdaine/agentops/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "guardrails",
+    "security",
+    "tdd",
+    "delivery",
+    "enterprise",
+    "ai-agent",
+    "compliance",
+    "audit"
+  ],
+  "files": [
+    ".claude-plugin/",
+    "agents/",
+    "commands/",
+    "hooks/",
+    "templates/",
+    "settings.json",
+    "LICENSE",
+    "README.md"
+  ]
+}
