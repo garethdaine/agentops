@@ -32,6 +32,10 @@ source "${_AGENTOPS_LIB_DIR}/evolve-lib.sh"
 #                                 Unicode anomalies, suspicious registries, and
 #                                 malformed integrity hashes.
 
+# ── Dashboard Flags ────────────────────────────────────────────────────────
+# dashboard_enabled             Controls auto-launch of Agent Office Dashboard
+#                               on session start.  Default: true.
+
 # ── Enterprise Extension Flags ──────────────────────────────────────────────
 # These flags gate the enterprise delivery framework capabilities.
 # All default to "true" via agentops_flag's default mechanism.

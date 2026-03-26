@@ -45,3 +45,9 @@ agentops_enterprise_enabled() {
   local FLAG="$1"
   [ "$(agentops_flag "$FLAG" "true")" = "true" ]
 }
+
+# Dashboard flag — controls auto-launch of Agent Office Dashboard.
+# Usage: agentops_dashboard_enabled && launch_dashboard
+agentops_dashboard_enabled() {
+  [ "$(agentops_flag "dashboard_enabled" "true")" = "true" ]
+}
