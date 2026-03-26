@@ -102,22 +102,25 @@ seed_tracker() {
 
 @test "exits silently when auto_plan_enabled is false" {
   set_flag "auto_plan_enabled" "false"
+  # Seed tracker so the hook would normally emit a decision
+  seed_tracker 3
   result=$(write_input "/src/app.ts" | bash "$HOOKS_DIR/auto-plan.sh")
   [ -z "$result" ]
 }
 
 @test "runs when auto_plan_enabled is true" {
   set_flag "auto_plan_enabled" "true"
-  # With a plan, should exit silently (no blocking)
-  create_plan
+  # With tracker seeded and no plan, auto-plan should emit a decision
+  seed_tracker 3
   result=$(write_input "/src/app.ts" | bash "$HOOKS_DIR/auto-plan.sh")
-  [ -z "$result" ]
+  [ -n "$result" ]
 }
 
 @test "runs when auto_plan_enabled is not set (defaults to true)" {
-  create_plan
+  # Default behavior should match auto_plan_enabled=true
+  seed_tracker 3
   result=$(write_input "/src/app.ts" | bash "$HOOKS_DIR/auto-plan.sh")
-  [ -z "$result" ]
+  [ -n "$result" ]
 }
 
 # ── Bypass permission mode ───────────────────────────────────────────────────
@@ -206,9 +209,12 @@ seed_tracker() {
 }
 
 @test "treats plan as current when todo.md is newer than session-start" {
-  create_session_marker
-  sleep 1
-  create_plan  # Created after session marker
+  # Use explicit timestamps for determinism instead of sleep
+  mkdir -p "$TEST_PROJECT_DIR/.agentops"
+  touch -t 202601010000 "$TEST_PROJECT_DIR/.agentops/session-start"
+  mkdir -p "$TEST_PROJECT_DIR/tasks"
+  echo "- [ ] Step 1: do something" > "$TEST_PROJECT_DIR/tasks/todo.md"
+  touch -t 202601020000 "$TEST_PROJECT_DIR/tasks/todo.md"
   result=$(write_input "/src/app.ts" | bash "$HOOKS_DIR/auto-plan.sh")
   [ -z "$result" ]
 }
