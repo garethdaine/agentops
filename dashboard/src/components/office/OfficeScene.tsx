@@ -3,11 +3,9 @@
 import { useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
-import OfficeFloor from './OfficeFloor';
-import OfficeWalls from './OfficeWalls';
-import OfficeLighting from './OfficeLighting';
-import Workstation from './Workstation';
-import AgentAvatar from './AgentAvatar';
+import { OfficeFloor, OfficeWalls, OfficeLighting } from '@/slices/scene';
+import { Workstation } from '@/slices/zones';
+import { AgentAvatar } from '@/slices/agents';
 import { WORKSTATION_SLOTS } from '@/lib/floorplan';
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
