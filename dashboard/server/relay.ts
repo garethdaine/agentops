@@ -1,5 +1,8 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer, Server, IncomingMessage } from 'http';
+import * as path from 'path';
+import * as os from 'os';
+import { IdleDetector, cleanupPidFile } from './lifecycle';
 
 const DEFAULT_PORT = 3099;
 
@@ -133,12 +136,28 @@ const isEntryPoint =
   (process.argv[1].endsWith('/relay.ts') || process.argv[1].endsWith('/relay.js'));
 
 if (isEntryPoint) {
+  const pidFilePath = path.join(os.homedir(), '.agentops', 'dashboard.pid');
+  const registryPath = path.join(os.homedir(), '.agentops', 'active-sessions.jsonl');
+
   startRelay().then((relay) => {
-    const shutdown = () => {
+    const shutdown = async () => {
       log('info', 'Shutting down relay...');
-      relay.close().then(() => process.exit(0));
+      idleDetector.stop();
+      await cleanupPidFile(pidFilePath);
+      await relay.close();
+      process.exit(0);
     };
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
+
+    // Signal handlers for graceful shutdown (REQ-023)
+    process.on('SIGINT', () => void shutdown());
+    process.on('SIGTERM', () => void shutdown());
+
+    // Idle auto-shutdown (REQ-022)
+    const idleDetector = new IdleDetector({ registryPath });
+    idleDetector.onShutdown(() => {
+      log('info', 'Idle timeout reached — initiating auto-shutdown');
+      void shutdown();
+    });
+    idleDetector.start();
   });
 }
