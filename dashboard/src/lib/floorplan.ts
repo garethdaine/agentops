@@ -80,12 +80,10 @@ export interface WallPartition {
 }
 
 export const WALL_PARTITIONS: WallPartition[] = [
-  // Left divider between workstations and server room
-  { position: [-5, 0.6, -4.5], size: [0.1, 1.2, 5], rotation: 0 },
-  // Right side divider
-  { position: [7, 0.6, -1], size: [0.1, 1.2, 6], rotation: 0 },
-  // Back partition behind workstations
-  { position: [0, 0.6, -5], size: [12, 1.2, 0.1], rotation: 0 },
-  // Conference room partition
-  { position: [3, 0.6, 3.5], size: [0.1, 1.2, 4], rotation: 0 },
+  // Low back partition behind workstations (waist-height divider)
+  { position: [0, 0.35, -4.5], size: [10, 0.7, 0.08], rotation: 0 },
+  // Small side partition between workstation rows
+  { position: [-6, 0.35, -1], size: [0.08, 0.7, 3], rotation: 0 },
+  // Conference area low divider
+  { position: [3, 0.35, 3], size: [0.08, 0.7, 2.5], rotation: 0 },
 ];
