@@ -31,7 +31,7 @@ CODE_TRACKER="${STATE_DIR}/modified-files.txt"
 [ ! -f "$CODE_TRACKER" ] && exit 0
 
 # Count source code files only
-CODE_COUNT=$(sort -u "$CODE_TRACKER" 2>/dev/null | grep -cE "$SOURCE_CODE_EXTENSIONS" || echo 0)
+CODE_COUNT=$(sort -u "$CODE_TRACKER" 2>/dev/null | grep -cE "$SOURCE_CODE_EXTENSIONS") || CODE_COUNT=0
 
 # After threshold source code files modified, trigger delegation
 if [ "$CODE_COUNT" -ge "$AGENTOPS_DELEGATE_THRESHOLD" ]; then
