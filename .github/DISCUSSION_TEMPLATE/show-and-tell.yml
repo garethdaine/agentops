@@ -1,0 +1,36 @@
+title: "[Show & Tell] "
+labels: ["show-and-tell"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Show & Tell
+
+        Share your AgentOps setup, custom configurations, workflow screenshots, audit reports, or anything you've built with the plugin. We'd love to see how you're using it.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What are you sharing?
+      description: Describe your setup, what problem it solves, and any lessons learned.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: What type of setup is this?
+      options:
+        - Solo developer workflow
+        - Team / enterprise configuration
+        - CI/CD integration
+        - Custom hooks or agents
+        - Security hardening
+        - Other
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration details (optional)
+      description: Share relevant flag settings, environment config, or snippets.
+      render: json

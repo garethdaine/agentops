@@ -1,0 +1,54 @@
+title: "[Security] "
+labels: ["security", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Security Configuration Discussion
+
+        Use this category to discuss hook tuning, security rule customisation, production vs advisory mode setups, and general security architecture questions.
+
+        > **Note:** If you've found an actual vulnerability, please use our [security policy](https://github.com/garethdaine/agentops/security/policy) instead.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What are you trying to achieve?
+      description: Describe your security configuration goal or question.
+      placeholder: "e.g. I want to allow curl to specific internal APIs while keeping exfiltration detection active..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: security-layer
+    attributes:
+      label: Which security layer(s) does this relate to?
+      multiple: true
+      options:
+        - Command validation
+        - Path validation
+        - Environment protection
+        - Injection detection
+        - Exfiltration prevention
+        - Credential redaction
+        - Content trust
+        - Unicode/Glassworm firewall
+        - Integrity verification
+        - Supply chain
+        - General / Multiple layers
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Which runtime mode are you using?
+      options:
+        - safe
+        - standard (default)
+        - full
+        - unrestricted
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Flag configurations, environment details, or anything else relevant.
