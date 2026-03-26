@@ -48,17 +48,31 @@ if dashboard_running; then
 fi
 
 # Launch relay + Next.js in background
-nohup npx --prefix "$PLUGIN_ROOT/dashboard" tsx "$PLUGIN_ROOT/dashboard/server/relay.ts" > /dev/null 2>&1 &
+# Use the dashboard's local node_modules binaries directly for reliability
+DASHBOARD_BIN="$PLUGIN_ROOT/dashboard/node_modules/.bin"
+LOG_DIR="$STATE_DIR"
+
+DASHBOARD_DIR="$PLUGIN_ROOT/dashboard"
+
+nohup "$DASHBOARD_BIN/tsx" "$DASHBOARD_DIR/server/relay.ts" > "$LOG_DIR/relay.log" 2>&1 &
 RELAY_PID=$!
-nohup npx --prefix "$PLUGIN_ROOT/dashboard" next dev --port 3100 > /dev/null 2>&1 &
+(cd "$DASHBOARD_DIR" && nohup "$DASHBOARD_BIN/next" dev --port 3100 > "$LOG_DIR/next.log" 2>&1) &
 NEXT_PID=$!
 echo "$RELAY_PID $NEXT_PID" > "$PID_FILE"
 
-# Open browser (cross-platform)
-if command -v open >/dev/null 2>&1; then
-  open http://localhost:3100
-elif command -v xdg-open >/dev/null 2>&1; then
-  xdg-open http://localhost:3100
-fi
+# Wait for the server to be ready (up to 15 seconds), then open browser
+(
+  for i in $(seq 1 30); do
+    if curl -s -o /dev/null http://localhost:3100 2>/dev/null; then
+      if command -v open >/dev/null 2>&1; then
+        open http://localhost:3100
+      elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open http://localhost:3100
+      fi
+      exit 0
+    fi
+    sleep 0.5
+  done
+) &
 
 exit 0
