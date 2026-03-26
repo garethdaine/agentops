@@ -1,4 +1,8 @@
-import { createStore } from 'zustand/vanilla';
+/**
+ * UI store shim — delegates to the panels slice of the unified office store.
+ * Preserves the original API for backward compatibility with existing consumers.
+ */
+import { useOfficeStore } from './office-store';
 
 export interface UIStoreState {
   selectedAgent: string | null;
@@ -9,19 +13,7 @@ export interface UIStoreState {
   togglePanel: () => void;
 }
 
-export const useUIStore = createStore<UIStoreState>((set) => ({
-  selectedAgent: null,
-  panelVisible: false,
-
-  setSelectedAgent: (id: string) => {
-    set({ selectedAgent: id });
-  },
-
-  clearSelection: () => {
-    set({ selectedAgent: null });
-  },
-
-  togglePanel: () => {
-    set((state) => ({ panelVisible: !state.panelVisible }));
-  },
-}));
+export const useUIStore = useOfficeStore as unknown as typeof useOfficeStore & {
+  getState: () => UIStoreState;
+  setState: (partial: Partial<UIStoreState> | ((state: UIStoreState) => Partial<UIStoreState>)) => void;
+};
