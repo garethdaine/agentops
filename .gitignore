@@ -11,6 +11,7 @@
 tasks/
 skills/
 meta/
+.worktrees/
 docs/interrogation/
 docs/adr/
 docs/build/
