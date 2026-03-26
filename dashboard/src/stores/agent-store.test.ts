@@ -144,7 +144,7 @@ describe('AgentStore', () => {
       expect(events[999].tool).toBe('Tool-1049');
     });
 
-    it('should not add event for unregistered session', () => {
+    it('should auto-initialize events for unregistered session', () => {
       useAgentStore.getState().addEvent('nonexistent', {
         ts: '2026-03-26T00:00:01Z',
         event: 'PostToolUse',
@@ -153,7 +153,9 @@ describe('AgentStore', () => {
         cwd: '/project',
       });
 
-      expect(useAgentStore.getState().recentEvents.has('nonexistent')).toBe(false);
+      const events = useAgentStore.getState().recentEvents.get('nonexistent');
+      expect(events).toHaveLength(1);
+      expect(events![0].tool).toBe('Read');
     });
   });
 
@@ -377,6 +379,37 @@ describe('useWebSocket', () => {
     const events = useAgentStore.getState().recentEvents.get('sess-1');
     expect(events).toHaveLength(1);
     expect(events![0]).toEqual(event);
+
+    disconnectWebSocket();
+  });
+
+  it('should auto-register session on first telemetry event', async () => {
+    const { connectWebSocket, disconnectWebSocket } = await import('../hooks/useWebSocket');
+
+    connectWebSocket();
+    mockWebSocket.onopen?.(new Event('open'));
+
+    // Send an event for a session that was never registered
+    const event: TelemetryEvent = {
+      ts: '2026-03-26T00:00:01Z',
+      event: 'PostToolUse',
+      session: 'auto-sess',
+      tool: 'Bash',
+      cwd: '/my-project',
+    };
+
+    mockWebSocket.onmessage?.(new MessageEvent('message', {
+      data: JSON.stringify(event),
+    }));
+
+    const state = useAgentStore.getState();
+    // Session should have been auto-registered
+    expect(state.sessions.has('auto-sess')).toBe(true);
+    expect(state.sessions.get('auto-sess')!.project_dir).toBe('/my-project');
+    // Event should have been added
+    const events = state.recentEvents.get('auto-sess');
+    expect(events).toHaveLength(1);
+    expect(events![0].tool).toBe('Bash');
 
     disconnectWebSocket();
   });

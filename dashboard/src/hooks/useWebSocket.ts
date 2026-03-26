@@ -25,6 +25,15 @@ function handleMessage(event: MessageEvent): void {
         lastEventAt: data.ts || new Date().toISOString(),
       });
     } else if (data.session) {
+      // Auto-register session on first sighting so addEvent doesn't drop it
+      if (!store.sessions.has(data.session)) {
+        store.registerSession({
+          session_id: data.session,
+          project_dir: data.cwd || '',
+          started_at: data.ts || new Date().toISOString(),
+          pid: 0,
+        });
+      }
       store.addEvent(data.session, data as TelemetryEvent);
     }
   } catch (err) {

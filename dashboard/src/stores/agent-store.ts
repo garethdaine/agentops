@@ -44,8 +44,8 @@ export const useAgentStore = createStore<AgentStoreState>((set, get) => ({
 
   addEvent: (sessionId: string, event: TelemetryEvent) => {
     const { recentEvents } = get();
-    const sessionEvents = recentEvents.get(sessionId);
-    if (sessionEvents === undefined) return;
+    // Auto-initialize events array for unknown sessions instead of dropping
+    const sessionEvents = recentEvents.get(sessionId) ?? [];
 
     const updated = [...sessionEvents, event];
     const trimmed = updated.length > MAX_EVENTS_PER_SESSION
