@@ -86,16 +86,25 @@ fi
     fi
   fi
 
+  # Ensure both ports are free before launching (handles TIME_WAIT / slow teardown)
+  for port in $RELAY_PORT $NEXT_PORT; do
+    attempts=0
+    while lsof -ti :"$port" >/dev/null 2>&1 && [ $attempts -lt 10 ]; do
+      sleep 0.5
+      attempts=$((attempts + 1))
+    done
+  done
+
   # Launch relay + Next.js in background
   DASHBOARD_BIN="$PLUGIN_ROOT/dashboard/node_modules/.bin"
   LOG_DIR="$STATE_DIR"
   DASHBOARD_DIR="$PLUGIN_ROOT/dashboard"
 
-  # Relay — launch from plugin root so relay.ts resolves paths correctly
-  nohup "$DASHBOARD_BIN/tsx" "$DASHBOARD_DIR/server/relay.ts" > "$LOG_DIR/relay.log" 2>&1 &
+  # Relay — must cd to CWD so relay.ts process.cwd() resolves .agentops/ correctly
+  nohup bash -c "cd '$CWD' && exec '$DASHBOARD_BIN/tsx' '$DASHBOARD_DIR/server/relay.ts'" > "$LOG_DIR/relay.log" 2>&1 &
   RELAY_PID=$!
 
-  # Next.js — must run from dashboard dir; use exec to avoid subshell nohup issues with Turbopack
+  # Next.js — must run from dashboard dir for Turbopack to find src/app/
   nohup bash -c "cd '$DASHBOARD_DIR' && exec '$DASHBOARD_BIN/next' dev --port $NEXT_PORT" > "$LOG_DIR/next.log" 2>&1 &
   NEXT_PID=$!
 
