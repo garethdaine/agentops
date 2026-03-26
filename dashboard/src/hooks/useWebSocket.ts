@@ -81,6 +81,11 @@ function connect(): void {
 export function connectWebSocket(): void {
   intentionalClose = false;
   backoffMs = INITIAL_BACKOFF_MS;
+  // Clear any pending reconnect timer to prevent duplicate connections on remount/hot-reload
+  if (reconnectTimer !== null) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
   connect();
 }
 

@@ -129,8 +129,15 @@ CURLEOF
   chmod +x "$MOCK_BIN/curl"
 
   bash -c 'echo "{\"session_id\":\"s4\",\"hook_event_name\":\"SessionStart\",\"cwd\":\"$TEST_PROJECT_DIR\"}" | bash hooks/dashboard-launch.sh'
-  # Give the background wait loop a moment to execute
-  sleep 1
+  # Poll for open-calls.log with bounded timeout instead of fixed sleep
+  local attempts=0
+  while [ $attempts -lt 20 ]; do
+    if [ -f "$HOME/.agentops/open-calls.log" ]; then
+      break
+    fi
+    sleep 0.1
+    attempts=$((attempts + 1))
+  done
   [ -f "$HOME/.agentops/open-calls.log" ]
   grep -q "http://localhost:3100" "$HOME/.agentops/open-calls.log"
 }

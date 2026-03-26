@@ -53,14 +53,14 @@ if [ -n "${OTLP_ENDPOINT:-}" ]; then
 
   PAYLOAD=$(tail -1 "$LOG_FILE" 2>/dev/null) || true
   if [ -n "$PAYLOAD" ]; then
-    AUTH_HEADER=""
+    CURL_ARGS=(
+      -sf --max-time 10 --connect-timeout 5 --no-location
+      -X POST "$OTLP_ENDPOINT/v1/logs"
+      -H "Content-Type: application/json"
+    )
     if [ -n "${OTLP_AUTH_TOKEN:-}" ]; then
-      AUTH_HEADER="-H \"Authorization: Bearer ${OTLP_AUTH_TOKEN}\""
+      CURL_ARGS+=(-H "Authorization: Bearer ${OTLP_AUTH_TOKEN}")
     fi
-    eval curl -sf --max-time 10 --connect-timeout 5 --no-location \
-      -X POST "$OTLP_ENDPOINT/v1/logs" \
-      -H "Content-Type: application/json" \
-      $AUTH_HEADER \
-      -d "'$PAYLOAD'" '&>/dev/null &'
+    printf '%s' "$PAYLOAD" | curl "${CURL_ARGS[@]}" --data-binary @- &>/dev/null &
   fi
 fi

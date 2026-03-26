@@ -17,6 +17,10 @@ agentops_dashboard_enabled || exit 0
 
 # ── Session Registry ─────────────────────────────────────────────────────────
 SAFE_HOME="${HOME:-$(cd ~ 2>/dev/null && pwd)}"
+if [ -z "$SAFE_HOME" ]; then
+  # Cannot determine home directory — skip global registry writes
+  exit 0
+fi
 REGISTRY_DIR="${SAFE_HOME}/.agentops"
 REGISTRY_FILE="$REGISTRY_DIR/active-sessions.jsonl"
 mkdir -p "$REGISTRY_DIR" 2>/dev/null
@@ -66,7 +70,7 @@ echo "$RELAY_PID $NEXT_PID" > "$PID_FILE"
 
 # Wait for the server to be ready, then open browser (fully detached)
 {
-  for i in $(seq 1 30); do
+  for _i in $(seq 1 30); do
     if curl -s -o /dev/null http://localhost:3100 2>/dev/null; then
       if command -v open >/dev/null 2>&1; then
         open http://localhost:3100

@@ -13,14 +13,21 @@ mkdir -p "$STATE_DIR" 2>/dev/null
 SAFE_HOME="${HOME:-$(cd ~ 2>/dev/null && pwd)}"
 REGISTRY_FILE="${SAFE_HOME}/.agentops/active-sessions.jsonl"
 if [ -n "$SESSION_ID" ] && [ -f "$REGISTRY_FILE" ]; then
+  LOCK_FILE="${REGISTRY_FILE}.lock"
   TMP_REG=$(mktemp)
-  trap 'rm -f "$TMP_REG"' EXIT
-  # Use jq for exact field matching (not regex) to avoid injection via session_id
-  while IFS= read -r line; do
-    sid=$(echo "$line" | jq -r '.session_id // ""' 2>/dev/null) || sid=""
-    [ "$sid" != "$SESSION_ID" ] && echo "$line"
-  done < "$REGISTRY_FILE" > "$TMP_REG" 2>/dev/null || true
-  mv "$TMP_REG" "$REGISTRY_FILE" 2>/dev/null || true
+  trap 'rm -f "$TMP_REG" "$LOCK_FILE"' EXIT
+  # Advisory lock to prevent concurrent read-modify-write races
+  (
+    if command -v flock >/dev/null 2>&1; then
+      flock -w 5 200
+    fi
+    # Use jq for exact field matching (not regex) to avoid injection via session_id
+    while IFS= read -r line; do
+      sid=$(echo "$line" | jq -r '.session_id // ""' 2>/dev/null) || sid=""
+      [ "$sid" != "$SESSION_ID" ] && echo "$line"
+    done < "$REGISTRY_FILE" > "$TMP_REG" 2>/dev/null || true
+    mv "$TMP_REG" "$REGISTRY_FILE" 2>/dev/null || true
+  ) 200>"$LOCK_FILE"
 fi
 
 # Mark session start time for staleness checks
