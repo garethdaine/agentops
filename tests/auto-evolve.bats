@@ -209,10 +209,9 @@ mark_evolve_ran() {
   [ -z "$result" ]
 }
 
-@test "handles missing .agentops directory" {
+@test "exits silently when .agentops has flags but no data files" {
   set_flag "auto_evolve_enabled" "true"
   rm -rf "$TEST_PROJECT_DIR/.agentops"
-  # Re-create just flags.json so flag check passes
   mkdir -p "$TEST_PROJECT_DIR/.agentops"
   echo '{"auto_evolve_enabled":"true"}' > "$TEST_PROJECT_DIR/.agentops/flags.json"
   result=$(run_hook "$(stop_event)")
