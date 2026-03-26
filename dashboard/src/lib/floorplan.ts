@@ -79,11 +79,26 @@ export interface WallPartition {
   rotation: number;
 }
 
+const WALL_HEIGHT = 2.5;
+const WALL_THICKNESS = 0.12;
+const HALF_W = FLOOR_WIDTH / 2;
+const HALF_D = FLOOR_DEPTH / 2;
+const WALL_Y = WALL_HEIGHT / 2;
+
 export const WALL_PARTITIONS: WallPartition[] = [
-  // Low back partition behind workstations (waist-height divider)
-  { position: [0, 0.35, -4.5], size: [10, 0.7, 0.08], rotation: 0 },
-  // Small side partition between workstation rows
-  { position: [-6, 0.35, -1], size: [0.08, 0.7, 3], rotation: 0 },
-  // Conference area low divider
-  { position: [3, 0.35, 3], size: [0.08, 0.7, 2.5], rotation: 0 },
+  // ── Outer walls (perimeter) ──
+  // Back wall (full width)
+  { position: [0, WALL_Y, -HALF_D], size: [FLOOR_WIDTH, WALL_HEIGHT, WALL_THICKNESS], rotation: 0 },
+  // Front wall left section (with door gap in center)
+  { position: [-5.5, WALL_Y, HALF_D], size: [9, WALL_HEIGHT, WALL_THICKNESS], rotation: 0 },
+  // Front wall right section
+  { position: [5.5, WALL_Y, HALF_D], size: [9, WALL_HEIGHT, WALL_THICKNESS], rotation: 0 },
+  // Left wall
+  { position: [-HALF_W, WALL_Y, 0], size: [WALL_THICKNESS, WALL_HEIGHT, FLOOR_DEPTH], rotation: 0 },
+  // Right wall
+  { position: [HALF_W, WALL_Y, 0], size: [WALL_THICKNESS, WALL_HEIGHT, FLOOR_DEPTH], rotation: 0 },
+
+  // ── Interior partitions (low, waist-height) ──
+  // Divider between workstation area and back zones
+  { position: [0, 0.5, 3.5], size: [8, 1.0, 0.08], rotation: 0 },
 ];

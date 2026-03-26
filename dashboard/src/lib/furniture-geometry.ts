@@ -68,8 +68,8 @@ export const STATUS_COLORS: Record<string, string> = {
 
 /** Wall partition dimensions. */
 export const PARTITION = {
-  color: '#5a7d9a',
-  opacity: 0.85,
+  color: '#c8d0d8',
+  opacity: 1.0,
 } as const;
 
 /** Code color palettes for monitor animation, keyed by activity. */

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import OfficeFloor from './OfficeFloor';
 import OfficeWalls from './OfficeWalls';
 import OfficeLighting from './OfficeLighting';
@@ -11,20 +11,13 @@ import AgentAvatar from './AgentAvatar';
 import { WORKSTATION_SLOTS } from '@/lib/floorplan';
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
-import { getAgentColor, AGENT_COLORS } from '@/lib/avatar-animations';
+import { useUIStore } from '@/stores/ui-store';
+import { getAgentColor } from '@/lib/avatar-animations';
 import { mapToolToActivity } from '@/lib/event-mapper';
 import type { AgentState as StoreAgentState } from '@/stores/agent-store';
 import type { AgentActivity } from '@/types/agent';
 
 const INACTIVITY_TIMEOUT_MS = 60_000;
-
-/** Demo agents shown when no real agents are connected (development aid). */
-const DEMO_AGENTS: Array<{ name: string; type: string; activity: AgentActivity; tool: string }> = [
-  { name: 'Claude (main)', type: 'main', activity: 'typing', tool: 'Edit' },
-  { name: 'Code Critic', type: 'code-critic', activity: 'reading', tool: 'Read' },
-  { name: 'Security Reviewer', type: 'security-reviewer', activity: 'reading', tool: 'Grep' },
-  { name: 'Plan Validator', type: 'plan-validator', activity: 'idle', tool: '' },
-];
 
 function deriveActivity(agent: StoreAgentState): AgentActivity {
   if (agent.currentTool) {
@@ -33,9 +26,38 @@ function deriveActivity(agent: StoreAgentState): AgentActivity {
   return 'idle';
 }
 
+function SelectedAgentPanel({ agent }: { agent: StoreAgentState }) {
+  const clearSelection = useStore(useUIStore, (s) => s.clearSelection);
+  return (
+    <Html position={[0, 3, 0]} center distanceFactor={10} style={{ pointerEvents: 'auto' }}>
+      <div
+        style={{
+          background: 'rgba(0,0,0,0.85)',
+          color: 'white',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          fontSize: '13px',
+          lineHeight: '1.5',
+          minWidth: '180px',
+          border: '1px solid rgba(255,255,255,0.15)',
+        }}
+        onClick={(e) => { e.stopPropagation(); clearSelection(); }}
+      >
+        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{agent.name || agent.session_id}</div>
+        <div>Type: {agent.type}</div>
+        <div>Status: {agent.status}</div>
+        <div>Tool: {agent.currentTool || 'none'}</div>
+        <div>Activity: {deriveActivity(agent)}</div>
+        <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>Click to dismiss</div>
+      </div>
+    </Html>
+  );
+}
+
 export default function OfficeScene() {
   const activeAgents = useStore(useAgentStore, (s) => s.activeAgents);
-  const showDemo = activeAgents.length === 0;
+  const selectedAgent = useStore(useUIStore, (s) => s.selectedAgent);
+  const setSelectedAgent = useStore(useUIStore, (s) => s.setSelectedAgent);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -50,25 +72,14 @@ export default function OfficeScene() {
     return () => clearInterval(interval);
   }, []);
 
-  const agentsToRender = useMemo(() => {
-    if (!showDemo) return activeAgents.map((agent, i) => ({
-      key: agent.session_id,
-      name: agent.name || `Agent ${i + 1}`,
-      color: getAgentColor(agent.type),
-      activity: deriveActivity(agent),
-      status: 'active' as const,
-      tool: agent.currentTool || '',
-    }));
-
-    return DEMO_AGENTS.map((demo, i) => ({
-      key: `demo-${i}`,
-      name: demo.name,
-      color: getAgentColor(demo.type),
-      activity: demo.activity,
-      status: 'active' as const,
-      tool: demo.tool,
-    }));
-  }, [activeAgents, showDemo]);
+  const clearSelection = useStore(useUIStore, (s) => s.clearSelection);
+  const handleAvatarClick = useCallback((sessionId: string) => {
+    if (sessionId === selectedAgent) {
+      clearSelection();
+    } else {
+      setSelectedAgent(sessionId);
+    }
+  }, [selectedAgent, setSelectedAgent, clearSelection]);
 
   return (
     <Canvas
@@ -85,30 +96,42 @@ export default function OfficeScene() {
       <OfficeWalls />
 
       {WORKSTATION_SLOTS.map((slot, i) => {
-        const agent = agentsToRender[i];
+        const agent = activeAgents[i];
         return (
           <Workstation
             key={i}
             position={slot.position}
             rotation={slot.rotation}
-            status={agent ? agent.status : 'idle'}
-            activity={agent ? agent.activity : 'idle'}
+            status={agent ? 'active' : 'idle'}
+            activity={agent ? deriveActivity(agent) : 'idle'}
           />
         );
       })}
 
-      {agentsToRender.map((agent, i) => {
+      {activeAgents.map((agent, i) => {
         if (i >= WORKSTATION_SLOTS.length) return null;
         const slot = WORKSTATION_SLOTS[i];
         const avatarZ = slot.rotation === Math.PI ? slot.position[2] - 1 : slot.position[2] + 1;
+        const isSelected = selectedAgent === agent.session_id;
         return (
-          <AgentAvatar
-            key={agent.key}
-            name={agent.name}
-            color={agent.color}
-            position={[slot.position[0], slot.position[1], avatarZ]}
-            activity={agent.activity}
-          />
+          <group
+            key={agent.session_id}
+            onClick={(e) => { e.stopPropagation(); handleAvatarClick(agent.session_id); }}
+            onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
+            onPointerOut={() => { document.body.style.cursor = 'default'; }}
+          >
+            <AgentAvatar
+              name={agent.name || `Agent ${i + 1}`}
+              color={getAgentColor(agent.type)}
+              position={[slot.position[0], slot.position[1], avatarZ]}
+              activity={deriveActivity(agent)}
+            />
+            {isSelected && (
+              <group position={[slot.position[0], slot.position[1], avatarZ]}>
+                <SelectedAgentPanel agent={agent} />
+              </group>
+            )}
+          </group>
         );
       })}
 
