@@ -139,10 +139,15 @@ if (isEntryPoint) {
   const pidFilePath = path.join(os.homedir(), '.agentops', 'dashboard.pid');
   const registryPath = path.join(os.homedir(), '.agentops', 'active-sessions.jsonl');
 
+  // Dynamic imports for entry point only (not loaded during tests)
+  import('./file-watcher').then(({ FileWatcher }) =>
+  import('./session-registry').then(({ readSessionRegistry }) => {
+
   startRelay().then((relay) => {
     const shutdown = async () => {
       log('info', 'Shutting down relay...');
       idleDetector.stop();
+      fileWatcher.stop();
       await cleanupPidFile(pidFilePath);
       await relay.close();
       process.exit(0);
@@ -159,5 +164,36 @@ if (isEntryPoint) {
       void shutdown();
     });
     idleDetector.start();
+
+    // Wire FileWatcher to relay broadcast (SPEC-001 fix)
+    // Discover session directories from registry, watch each .agentops/ dir
+    const watchDirs: string[] = [];
+    readSessionRegistry(registryPath).then((sessions) => {
+      for (const session of sessions) {
+        const agentopsDir = path.join(session.project_dir, '.agentops');
+        if (!watchDirs.includes(agentopsDir)) {
+          watchDirs.push(agentopsDir);
+          const fw = new FileWatcher(agentopsDir);
+          fw.onEvent((event) => {
+            relay.broadcast(JSON.stringify(event));
+          });
+          fw.start().then(() => {
+            log('info', `Watching ${agentopsDir}`);
+          });
+        }
+      }
+    });
+
+    // Also watch the cwd .agentops/ as a fallback
+    const cwdAgentops = path.join(process.cwd(), '.agentops');
+    const fileWatcher = new FileWatcher(cwdAgentops);
+    fileWatcher.onEvent((event) => {
+      relay.broadcast(JSON.stringify(event));
+    });
+    fileWatcher.start().then(() => {
+      log('info', `Watching ${cwdAgentops}`);
+    });
   });
+
+  }));
 }

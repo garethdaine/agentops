@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import OfficeFloor from './OfficeFloor';
@@ -14,6 +15,8 @@ import { getAgentColor } from '@/lib/avatar-animations';
 import { mapToolToActivity } from '@/lib/event-mapper';
 import type { AgentState as StoreAgentState } from '@/stores/agent-store';
 import type { AgentActivity } from '@/types/agent';
+
+const INACTIVITY_TIMEOUT_MS = 60_000; // 60 seconds (REQ-040)
 
 /**
  * Derive avatar activity from the store agent state.
@@ -35,6 +38,20 @@ function deriveActivity(agent: StoreAgentState): AgentActivity {
  */
 export default function OfficeScene() {
   const activeAgents = useStore(useAgentStore, (s) => s.activeAgents);
+
+  // REQ-040: Remove inactive agents after 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const store = useAgentStore.getState();
+      for (const agent of store.activeAgents) {
+        if (agent.lastEventAt && now - new Date(agent.lastEventAt).getTime() > INACTIVITY_TIMEOUT_MS) {
+          store.removeSession(agent.session_id);
+        }
+      }
+    }, 10_000); // Check every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Canvas

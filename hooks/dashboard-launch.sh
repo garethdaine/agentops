@@ -48,13 +48,17 @@ if dashboard_running; then
 fi
 
 # Launch relay + Next.js in background
-nohup node "$PLUGIN_ROOT/dashboard/server/relay.ts" > /dev/null 2>&1 &
+nohup npx --prefix "$PLUGIN_ROOT/dashboard" tsx "$PLUGIN_ROOT/dashboard/server/relay.ts" > /dev/null 2>&1 &
 RELAY_PID=$!
 nohup npx --prefix "$PLUGIN_ROOT/dashboard" next dev --port 3100 > /dev/null 2>&1 &
 NEXT_PID=$!
 echo "$RELAY_PID $NEXT_PID" > "$PID_FILE"
 
-# Open browser
-open http://localhost:3100
+# Open browser (cross-platform)
+if command -v open >/dev/null 2>&1; then
+  open http://localhost:3100
+elif command -v xdg-open >/dev/null 2>&1; then
+  xdg-open http://localhost:3100
+fi
 
 exit 0
