@@ -224,8 +224,10 @@ EOF
 @test "empty input does not crash the hook" {
   set_flag "auto_verify_enabled" "true"
   create_todo 1 1
-  result=$(echo '{}' | bash "$HOOKS_DIR/auto-verify.sh")
-  # With empty cwd, hook uses "." — no todo.md there in test context, so silent exit
-  # Just verify it doesn't crash
-  true
+  mkdir -p "$TEST_PROJECT_DIR/empty"
+  cd "$TEST_PROJECT_DIR/empty"
+  run bash "$HOOKS_DIR/auto-verify.sh" <<< '{}'
+  # With empty cwd, hook uses "." — no todo.md here, so it should exit successfully and silently
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
