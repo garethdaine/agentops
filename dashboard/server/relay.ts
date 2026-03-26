@@ -137,7 +137,8 @@ const isEntryPoint =
   (process.argv[1].endsWith('/relay.ts') || process.argv[1].endsWith('/relay.js'));
 
 if (isEntryPoint) {
-  const pidFilePath = path.join(os.homedir(), '.agentops', 'dashboard.pid');
+  // PID file lives under the project's .agentops/ (same as dashboard-launch.sh)
+  const pidFilePath = path.join(process.cwd(), '.agentops', 'dashboard.pid');
   const registryPath = path.join(os.homedir(), '.agentops', 'active-sessions.jsonl');
 
   // Dynamic imports for entry point only (not loaded during tests)
@@ -148,11 +149,25 @@ if (isEntryPoint) {
     // Declare mutable references before shutdown to avoid TDZ
     let idleDetector: IdleDetector | null = null;
     let fileWatcher: FileWatcherType | null = null;
+    const sessionWatchers: FileWatcherType[] = [];
+
+    /**
+     * Broadcast individual TelemetryEvents from a WatcherEvent envelope.
+     * The client expects flat TelemetryEvent objects, not WatcherEvent wrappers.
+     */
+    const broadcastEvents = (event: import('./file-watcher').WatcherEvent) => {
+      if (event.type === 'data') {
+        for (const telemetryEvent of event.events) {
+          relay.broadcast(JSON.stringify(telemetryEvent));
+        }
+      }
+    };
 
     const shutdown = async () => {
       log('info', 'Shutting down relay...');
       idleDetector?.stop();
       await fileWatcher?.stop();
+      await Promise.all(sessionWatchers.map(w => w.stop()));
       await cleanupPidFile(pidFilePath);
       await relay.close();
       process.exit(0);
@@ -176,9 +191,8 @@ if (isEntryPoint) {
       for (const session of sessions) {
         const agentopsDir = path.join(session.project_dir, '.agentops');
         const fw = new FileWatcher(agentopsDir);
-        fw.onEvent((event) => {
-          relay.broadcast(JSON.stringify(event));
-        });
+        sessionWatchers.push(fw);
+        fw.onEvent(broadcastEvents);
         fw.start().then(() => {
           log('info', `Watching ${agentopsDir}`);
         });
@@ -188,9 +202,7 @@ if (isEntryPoint) {
     // Also watch the cwd .agentops/ as a fallback
     const cwdAgentops = path.join(process.cwd(), '.agentops');
     fileWatcher = new FileWatcher(cwdAgentops);
-    fileWatcher.onEvent((event) => {
-      relay.broadcast(JSON.stringify(event));
-    });
+    fileWatcher.onEvent(broadcastEvents);
     fileWatcher.start().then(() => {
       log('info', `Watching ${cwdAgentops}`);
     });

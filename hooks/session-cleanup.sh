@@ -14,6 +14,7 @@ SAFE_HOME="${HOME:-$(cd ~ 2>/dev/null && pwd)}"
 REGISTRY_FILE="${SAFE_HOME}/.agentops/active-sessions.jsonl"
 if [ -n "$SESSION_ID" ] && [ -f "$REGISTRY_FILE" ]; then
   TMP_REG=$(mktemp)
+  trap 'rm -f "$TMP_REG"' EXIT
   # Use jq for exact field matching (not regex) to avoid injection via session_id
   while IFS= read -r line; do
     sid=$(echo "$line" | jq -r '.session_id // ""' 2>/dev/null) || sid=""
