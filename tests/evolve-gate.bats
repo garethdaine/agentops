@@ -166,7 +166,7 @@ set_nudge_counter() {
   [ -z "$output" ]
 }
 
-@test "does not re-nudge when counter exceeds threshold" {
+@test "does not re-nudge when counter matches threshold" {
   set_flag "auto_evolve_enabled" "true"
   seed_failures 7
   set_nudge_counter 5
@@ -258,13 +258,15 @@ set_nudge_counter() {
     tool_input: { command: "false" },
     permission_mode: "default"
   }')
+  pushd "$TEST_PROJECT_DIR" >/dev/null
   run run_hook "$INPUT"
+  popd >/dev/null
   [ "$status" -eq 0 ]
 }
 
 @test "handles empty input gracefully" {
   set_flag "auto_evolve_enabled" "true"
-  run bash -c 'echo "" | bash "'"$HOOKS_DIR"'/evolve-gate.sh"'
+  run bash -c 'cd "'"$TEST_PROJECT_DIR"'" && printf "" | bash "'"$HOOKS_DIR"'/evolve-gate.sh"'
   [ "$status" -eq 0 ]
 }
 
