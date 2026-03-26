@@ -16,43 +16,22 @@ teardown() {
 }
 
 # ── Helper: build Write/Edit JSON input ─────────────────────────────────────
+# Reuse file_tool_input from test-helpers.bash for consistency.
 
 write_input() {
-  local FILE_PATH="$1"
-  jq -nc --arg fp "$FILE_PATH" --arg cwd "$TEST_PROJECT_DIR" '{
-    hook_event: "PreToolUse",
-    tool_name: "Write",
-    tool_input: { file_path: $fp },
-    cwd: $cwd,
-    permission_mode: "default"
-  }'
+  file_tool_input "Write" "$1"
 }
 
 edit_input() {
-  local FILE_PATH="$1"
-  jq -nc --arg fp "$FILE_PATH" --arg cwd "$TEST_PROJECT_DIR" '{
-    hook_event: "PreToolUse",
-    tool_name: "Edit",
-    tool_input: { file_path: $fp },
-    cwd: $cwd,
-    permission_mode: "default"
-  }'
+  file_tool_input "Edit" "$1"
 }
 
 other_tool_input() {
-  local TOOL="$1"
-  local FILE_PATH="$2"
-  jq -nc --arg tool "$TOOL" --arg fp "$FILE_PATH" --arg cwd "$TEST_PROJECT_DIR" '{
-    hook_event: "PreToolUse",
-    tool_name: $tool,
-    tool_input: { file_path: $fp },
-    cwd: $cwd,
-    permission_mode: "default"
-  }'
+  file_tool_input "$1" "$2"
 }
 
 run_hook() {
-  echo "$1" | bash "$HOOKS_DIR/standards-enforce.sh"
+  printf '%s' "$1" | bash "$HOOKS_DIR/standards-enforce.sh"
 }
 
 # ── Feature flag gating ─────────────────────────────────────────────────────
@@ -215,10 +194,11 @@ run_hook() {
   echo "$output" | jq -r '.additionalContext' | grep -q "kebab-case"
 }
 
-@test "suggests kebab-case conversion" {
+@test "emits kebab-case guidance for camelCase ts file" {
   run run_hook "$(edit_input "/src/myHelper.ts")"
   [ "$status" -eq 0 ]
-  # The hook suggests a kebab-case alternative (exact output depends on platform sed)
+  # The hook suggests a kebab-case alternative (exact output depends on platform sed),
+  # so this test only verifies that kebab-case guidance is present.
   echo "$output" | jq -r '.additionalContext' | grep -q "kebab-case"
 }
 
