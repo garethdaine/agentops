@@ -123,6 +123,15 @@ EOF
 @test "writes PID file on launch" {
   run bash -c 'echo "{\"session_id\":\"s3\",\"hook_event_name\":\"SessionStart\",\"cwd\":\"$TEST_PROJECT_DIR\"}" | bash hooks/dashboard-launch.sh'
   [ "$status" -eq 0 ]
+  # PID file is written by background process — poll for it
+  local attempts=0
+  while [ $attempts -lt 30 ]; do
+    if [ -f "$TEST_PROJECT_DIR/.agentops/dashboard.pid" ]; then
+      break
+    fi
+    sleep 0.1
+    attempts=$((attempts + 1))
+  done
   [ -f "$TEST_PROJECT_DIR/.agentops/dashboard.pid" ]
 }
 

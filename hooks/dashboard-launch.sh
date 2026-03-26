@@ -18,7 +18,6 @@ agentops_dashboard_enabled || exit 0
 # ── Session Registry ─────────────────────────────────────────────────────────
 SAFE_HOME="${HOME:-$(cd ~ 2>/dev/null && pwd)}"
 if [ -z "$SAFE_HOME" ]; then
-  # Cannot determine home directory — skip global registry writes
   exit 0
 fi
 REGISTRY_DIR="${SAFE_HOME}/.agentops"
@@ -48,65 +47,74 @@ mkdir -p "$STATE_DIR" 2>/dev/null
 RELAY_PORT=3099
 NEXT_PORT=3100
 
-# Check if dashboard is already running — verify both ports
-dashboard_running() {
-  [ -f "$PID_FILE" ] && lsof -i :"$NEXT_PORT" >/dev/null 2>&1 && lsof -i :"$RELAY_PORT" >/dev/null 2>&1
-}
+# Quick check: if dashboard is already running with valid PID file and both ports, exit
+if [ -f "$PID_FILE" ] && lsof -i :"$NEXT_PORT" >/dev/null 2>&1 && lsof -i :"$RELAY_PORT" >/dev/null 2>&1; then
+  exit 0
+fi
 
-# Kill stale processes on dashboard ports and clean up PID file
-cleanup_stale() {
-  local stale=false
+# Detach the full cleanup + launch sequence so the hook returns immediately.
+# This avoids the hook timeout (5s) killing the launch mid-flight.
+(
+  # Kill stale processes on dashboard ports
+  stale=false
   for port in $RELAY_PORT $NEXT_PORT; do
-    local pids
     pids=$(lsof -ti :"$port" 2>/dev/null) || true
     if [ -n "$pids" ]; then
       stale=true
       echo "$pids" | xargs kill 2>/dev/null || true
     fi
   done
+
   if [ "$stale" = true ]; then
     rm -f "$PID_FILE"
-    sleep 1
+    # Wait for ports to actually be released (up to 5 seconds)
+    attempts=0
+    while [ $attempts -lt 10 ]; do
+      if ! lsof -ti :"$RELAY_PORT" >/dev/null 2>&1 && ! lsof -ti :"$NEXT_PORT" >/dev/null 2>&1; then
+        break
+      fi
+      sleep 0.5
+      attempts=$((attempts + 1))
+    done
+    # Force-kill if still hanging after graceful attempt
+    if [ $attempts -ge 10 ]; then
+      for port in $RELAY_PORT $NEXT_PORT; do
+        pids=$(lsof -ti :"$port" 2>/dev/null) || true
+        [ -n "$pids" ] && echo "$pids" | xargs kill -9 2>/dev/null || true
+      done
+      sleep 1
+    fi
   fi
-}
 
-if dashboard_running; then
-  exit 0
-fi
+  # Launch relay + Next.js in background
+  DASHBOARD_BIN="$PLUGIN_ROOT/dashboard/node_modules/.bin"
+  LOG_DIR="$STATE_DIR"
+  DASHBOARD_DIR="$PLUGIN_ROOT/dashboard"
 
-# Clean up any stale processes from previous sessions
-cleanup_stale
+  # Relay — launch from plugin root so relay.ts resolves paths correctly
+  nohup "$DASHBOARD_BIN/tsx" "$DASHBOARD_DIR/server/relay.ts" > "$LOG_DIR/relay.log" 2>&1 &
+  RELAY_PID=$!
 
-# Launch relay + Next.js in background
-DASHBOARD_BIN="$PLUGIN_ROOT/dashboard/node_modules/.bin"
-LOG_DIR="$STATE_DIR"
-DASHBOARD_DIR="$PLUGIN_ROOT/dashboard"
+  # Next.js — must run from dashboard dir; use exec to avoid subshell nohup issues with Turbopack
+  nohup bash -c "cd '$DASHBOARD_DIR' && exec '$DASHBOARD_BIN/next' dev --port $NEXT_PORT" > "$LOG_DIR/next.log" 2>&1 &
+  NEXT_PID=$!
 
-# Relay — launch from plugin root so relay.ts resolves paths correctly
-nohup "$DASHBOARD_BIN/tsx" "$DASHBOARD_DIR/server/relay.ts" > "$LOG_DIR/relay.log" 2>&1 &
-RELAY_PID=$!
+  echo "$RELAY_PID $NEXT_PID" > "$PID_FILE"
 
-# Next.js — must run from dashboard dir; use exec to avoid subshell nohup issues with Turbopack
-nohup bash -c "cd '$DASHBOARD_DIR' && exec '$DASHBOARD_BIN/next' dev --port $NEXT_PORT" > "$LOG_DIR/next.log" 2>&1 &
-NEXT_PID=$!
+  # Verify processes started — clean up if either died immediately
+  sleep 1
+  if ! kill -0 "$RELAY_PID" 2>/dev/null; then
+    kill "$NEXT_PID" 2>/dev/null || true
+    rm -f "$PID_FILE"
+    exit 0
+  fi
+  if ! kill -0 "$NEXT_PID" 2>/dev/null; then
+    kill "$RELAY_PID" 2>/dev/null || true
+    rm -f "$PID_FILE"
+    exit 0
+  fi
 
-echo "$RELAY_PID $NEXT_PID" > "$PID_FILE"
-
-# Verify processes started — clean up if either died immediately
-sleep 1
-if ! kill -0 "$RELAY_PID" 2>/dev/null; then
-  kill "$NEXT_PID" 2>/dev/null || true
-  rm -f "$PID_FILE"
-  exit 0
-fi
-if ! kill -0 "$NEXT_PID" 2>/dev/null; then
-  kill "$RELAY_PID" 2>/dev/null || true
-  rm -f "$PID_FILE"
-  exit 0
-fi
-
-# Wait for the server to be ready, then open browser (fully detached)
-{
+  # Wait for the server to be ready, then open browser
   for _i in $(seq 1 30); do
     if curl -s -o /dev/null "http://localhost:$NEXT_PORT" 2>/dev/null; then
       if command -v open >/dev/null 2>&1; then
@@ -118,7 +126,7 @@ fi
     fi
     sleep 0.5
   done
-} </dev/null >/dev/null 2>&1 &
+) </dev/null >/dev/null 2>&1 &
 disown 2>/dev/null || true
 
 exit 0
