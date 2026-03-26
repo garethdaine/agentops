@@ -10,6 +10,7 @@
 # Runtime state (session-specific, not versioned)
 tasks/
 skills/
+meta/
 docs/interrogation/
 docs/adr/
 docs/build/

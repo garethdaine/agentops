@@ -1,0 +1,310 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 320" width="960" height="320">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
+      text { font-family: 'Press Start 2P', 'Courier New', monospace; }
+    </style>
+    <!-- Scanline pattern -->
+    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="rgba(0,0,0,0.08)"/>
+    </pattern>
+    <!-- Grid pattern -->
+    <pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse">
+      <rect width="16" height="16" fill="none" stroke="rgba(0,255,136,0.04)" stroke-width="0.5"/>
+    </pattern>
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-strong">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- CRT curvature -->
+    <filter id="crt">
+      <feGaussianBlur stdDeviation="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Background: dark terminal -->
+  <rect width="960" height="320" fill="#0a0e17" rx="12"/>
+
+  <!-- Subtle vignette -->
+  <rect width="960" height="320" rx="12" fill="url(#grid)"/>
+
+  <!-- Top border glow line -->
+  <rect x="0" y="0" width="960" height="2" fill="#00ff88" opacity="0.6" rx="1"/>
+  <rect x="0" y="318" width="960" height="2" fill="#00ff88" opacity="0.3" rx="1"/>
+
+  <!-- === LEFT SECTION: Pixel Shield Agent === -->
+
+  <!-- Shield body (pixel art) -->
+  <!-- Row 1 -->
+  <rect x="60" y="60" width="8" height="8" fill="#00ff88" opacity="0.9"/>
+  <rect x="68" y="60" width="8" height="8" fill="#00ff88" opacity="0.9"/>
+  <rect x="76" y="60" width="8" height="8" fill="#00ff88" opacity="0.9"/>
+  <rect x="84" y="60" width="8" height="8" fill="#00ff88" opacity="0.9"/>
+  <rect x="92" y="60" width="8" height="8" fill="#00ff88" opacity="0.9"/>
+  <rect x="100" y="60" width="8" height="8" fill="#00ff88" opacity="0.9"/>
+  <rect x="108" y="60" width="8" height="8" fill="#00ff88" opacity="0.9"/>
+  <!-- Row 2 -->
+  <rect x="52" y="68" width="8" height="8" fill="#00ff88"/>
+  <rect x="60" y="68" width="8" height="8" fill="#00cc6a"/>
+  <rect x="68" y="68" width="8" height="8" fill="#00cc6a"/>
+  <rect x="76" y="68" width="8" height="8" fill="#00ff88"/>
+  <rect x="84" y="68" width="8" height="8" fill="#00cc6a"/>
+  <rect x="92" y="68" width="8" height="8" fill="#00cc6a"/>
+  <rect x="100" y="68" width="8" height="8" fill="#00cc6a"/>
+  <rect x="108" y="68" width="8" height="8" fill="#00cc6a"/>
+  <rect x="116" y="68" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 3 -->
+  <rect x="52" y="76" width="8" height="8" fill="#00ff88"/>
+  <rect x="60" y="76" width="8" height="8" fill="#00cc6a"/>
+  <rect x="68" y="76" width="8" height="8" fill="#00994f"/>
+  <rect x="76" y="76" width="8" height="8" fill="#00994f"/>
+  <rect x="84" y="76" width="8" height="8" fill="#00ff88"/>
+  <rect x="92" y="76" width="8" height="8" fill="#00994f"/>
+  <rect x="100" y="76" width="8" height="8" fill="#00994f"/>
+  <rect x="108" y="76" width="8" height="8" fill="#00cc6a"/>
+  <rect x="116" y="76" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 4 - Lock icon row -->
+  <rect x="52" y="84" width="8" height="8" fill="#00ff88"/>
+  <rect x="60" y="84" width="8" height="8" fill="#00cc6a"/>
+  <rect x="68" y="84" width="8" height="8" fill="#00994f"/>
+  <rect x="76" y="84" width="8" height="8" fill="#ffaa00"/>
+  <rect x="84" y="84" width="8" height="8" fill="#ffcc33"/>
+  <rect x="92" y="84" width="8" height="8" fill="#ffaa00"/>
+  <rect x="100" y="84" width="8" height="8" fill="#00994f"/>
+  <rect x="108" y="84" width="8" height="8" fill="#00cc6a"/>
+  <rect x="116" y="84" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 5 -->
+  <rect x="52" y="92" width="8" height="8" fill="#00ff88"/>
+  <rect x="60" y="92" width="8" height="8" fill="#00cc6a"/>
+  <rect x="68" y="92" width="8" height="8" fill="#ffaa00"/>
+  <rect x="76" y="92" width="8" height="8" fill="#ffcc33"/>
+  <rect x="84" y="92" width="8" height="8" fill="#ffffff"/>
+  <rect x="92" y="92" width="8" height="8" fill="#ffcc33"/>
+  <rect x="100" y="92" width="8" height="8" fill="#ffaa00"/>
+  <rect x="108" y="92" width="8" height="8" fill="#00cc6a"/>
+  <rect x="116" y="92" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 6 -->
+  <rect x="52" y="100" width="8" height="8" fill="#00ff88"/>
+  <rect x="60" y="100" width="8" height="8" fill="#00cc6a"/>
+  <rect x="68" y="100" width="8" height="8" fill="#ffaa00"/>
+  <rect x="76" y="100" width="8" height="8" fill="#ffcc33"/>
+  <rect x="84" y="100" width="8" height="8" fill="#ffcc33"/>
+  <rect x="92" y="100" width="8" height="8" fill="#ffcc33"/>
+  <rect x="100" y="100" width="8" height="8" fill="#ffaa00"/>
+  <rect x="108" y="100" width="8" height="8" fill="#00cc6a"/>
+  <rect x="116" y="100" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 7 -->
+  <rect x="56" y="108" width="8" height="8" fill="#00ff88"/>
+  <rect x="64" y="108" width="8" height="8" fill="#00cc6a"/>
+  <rect x="72" y="108" width="8" height="8" fill="#00994f"/>
+  <rect x="80" y="108" width="8" height="8" fill="#00994f"/>
+  <rect x="88" y="108" width="8" height="8" fill="#00994f"/>
+  <rect x="96" y="108" width="8" height="8" fill="#00994f"/>
+  <rect x="104" y="108" width="8" height="8" fill="#00cc6a"/>
+  <rect x="112" y="108" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 8 -->
+  <rect x="60" y="116" width="8" height="8" fill="#00ff88"/>
+  <rect x="68" y="116" width="8" height="8" fill="#00cc6a"/>
+  <rect x="76" y="116" width="8" height="8" fill="#00994f"/>
+  <rect x="84" y="116" width="8" height="8" fill="#00994f"/>
+  <rect x="92" y="116" width="8" height="8" fill="#00994f"/>
+  <rect x="100" y="116" width="8" height="8" fill="#00cc6a"/>
+  <rect x="108" y="116" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 9 -->
+  <rect x="64" y="124" width="8" height="8" fill="#00ff88"/>
+  <rect x="72" y="124" width="8" height="8" fill="#00cc6a"/>
+  <rect x="80" y="124" width="8" height="8" fill="#00cc6a"/>
+  <rect x="88" y="124" width="8" height="8" fill="#00cc6a"/>
+  <rect x="96" y="124" width="8" height="8" fill="#00cc6a"/>
+  <rect x="104" y="124" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 10 (tip) -->
+  <rect x="72" y="132" width="8" height="8" fill="#00ff88"/>
+  <rect x="80" y="132" width="8" height="8" fill="#00ff88"/>
+  <rect x="88" y="132" width="8" height="8" fill="#00ff88"/>
+  <rect x="96" y="132" width="8" height="8" fill="#00ff88"/>
+  <!-- Row 11 (tip end) -->
+  <rect x="80" y="140" width="8" height="8" fill="#00ff88"/>
+  <rect x="88" y="140" width="8" height="8" fill="#00ff88"/>
+
+  <!-- Shield glow -->
+  <rect x="50" y="58" width="80" height="96" fill="none" stroke="#00ff88" stroke-width="0" opacity="0" filter="url(#glow-strong)"/>
+
+  <!-- === PIXEL ROBOT AGENTS (bottom left) === -->
+
+  <!-- Agent 1: small pixel bot -->
+  <g transform="translate(40, 170)">
+    <!-- Head -->
+    <rect x="8" y="0" width="8" height="8" fill="#4af"/>
+    <rect x="16" y="0" width="8" height="8" fill="#4af"/>
+    <rect x="0" y="8" width="8" height="8" fill="#4af"/>
+    <rect x="8" y="8" width="8" height="8" fill="#0a0e17"/>
+    <rect x="16" y="8" width="8" height="8" fill="#0a0e17"/>
+    <rect x="24" y="8" width="8" height="8" fill="#4af"/>
+    <rect x="0" y="16" width="8" height="8" fill="#4af"/>
+    <rect x="8" y="16" width="8" height="8" fill="#fff"/>
+    <rect x="16" y="16" width="8" height="8" fill="#fff"/>
+    <rect x="24" y="16" width="8" height="8" fill="#4af"/>
+    <!-- Body -->
+    <rect x="4" y="24" width="24" height="8" fill="#3388ff"/>
+    <rect x="8" y="32" width="16" height="8" fill="#3388ff"/>
+    <!-- Antenna -->
+    <rect x="14" y="-8" width="4" height="8" fill="#ffaa00"/>
+    <rect x="12" y="-12" width="8" height="4" fill="#ffcc33"/>
+  </g>
+
+  <!-- Agent 2 -->
+  <g transform="translate(90, 175)">
+    <rect x="8" y="0" width="8" height="8" fill="#ff6b9d"/>
+    <rect x="16" y="0" width="8" height="8" fill="#ff6b9d"/>
+    <rect x="0" y="8" width="8" height="8" fill="#ff6b9d"/>
+    <rect x="8" y="8" width="8" height="8" fill="#fff"/>
+    <rect x="16" y="8" width="8" height="8" fill="#fff"/>
+    <rect x="24" y="8" width="8" height="8" fill="#ff6b9d"/>
+    <rect x="4" y="16" width="24" height="8" fill="#cc4477"/>
+    <rect x="8" y="24" width="16" height="8" fill="#cc4477"/>
+    <rect x="14" y="-8" width="4" height="8" fill="#ffaa00"/>
+    <rect x="12" y="-12" width="8" height="4" fill="#ffcc33"/>
+  </g>
+
+  <!-- Agent 3 -->
+  <g transform="translate(140, 172)">
+    <rect x="8" y="0" width="8" height="8" fill="#a78bfa"/>
+    <rect x="16" y="0" width="8" height="8" fill="#a78bfa"/>
+    <rect x="0" y="8" width="8" height="8" fill="#a78bfa"/>
+    <rect x="8" y="8" width="8" height="8" fill="#fff"/>
+    <rect x="16" y="8" width="8" height="8" fill="#fff"/>
+    <rect x="24" y="8" width="8" height="8" fill="#a78bfa"/>
+    <rect x="4" y="16" width="24" height="8" fill="#7c5cbf"/>
+    <rect x="8" y="24" width="16" height="8" fill="#7c5cbf"/>
+    <rect x="14" y="-8" width="4" height="8" fill="#ffaa00"/>
+    <rect x="12" y="-12" width="8" height="4" fill="#ffcc33"/>
+  </g>
+
+  <!-- "x12" agent count -->
+  <text x="62" y="230" fill="#00ff88" font-size="10" opacity="0.7" font-family="'Press Start 2P', monospace">x12 AGENTS</text>
+
+  <!-- === CENTER: Main Title === -->
+
+  <!-- Terminal window frame -->
+  <rect x="210" y="40" width="530" height="240" rx="8" fill="#0d1220" stroke="#1a2744" stroke-width="2"/>
+  <!-- Title bar -->
+  <rect x="210" y="40" width="530" height="28" rx="8" fill="#1a2744"/>
+  <rect x="210" y="56" width="530" height="12" fill="#1a2744"/>
+  <!-- Traffic lights -->
+  <circle cx="230" cy="54" r="5" fill="#ff5f57"/>
+  <circle cx="248" cy="54" r="5" fill="#febc2e"/>
+  <circle cx="266" cy="54" r="5" fill="#28c840"/>
+  <!-- Terminal title -->
+  <text x="475" y="58" fill="#5a7a9a" font-size="9" text-anchor="middle" font-family="'Press Start 2P', monospace">agentops — claude</text>
+
+  <!-- Main title text with glow -->
+  <text x="475" y="115" fill="#00ff88" font-size="28" text-anchor="middle" font-family="'Press Start 2P', monospace" filter="url(#glow)">AGENTOPS</text>
+
+  <!-- Subtitle -->
+  <text x="475" y="148" fill="#4af" font-size="10" text-anchor="middle" font-family="'Press Start 2P', monospace">ENTERPRISE GUARDRAILS FOR</text>
+  <text x="475" y="166" fill="#4af" font-size="10" text-anchor="middle" font-family="'Press Start 2P', monospace">CLAUDE CODE</text>
+
+  <!-- Blinking cursor -->
+  <rect x="548" y="156" width="8" height="12" fill="#00ff88" opacity="0.9">
+    <animate attributeName="opacity" values="0.9;0;0.9" dur="1.2s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Divider line -->
+  <line x1="240" y1="182" x2="710" y2="182" stroke="#1a2744" stroke-width="1"/>
+
+  <!-- Stats bar -->
+  <text x="260" y="205" fill="#ffaa00" font-size="7" font-family="'Press Start 2P', monospace">37 CMDS</text>
+  <rect x="350" y="197" width="2" height="12" fill="#1a2744"/>
+  <text x="370" y="205" fill="#ff6b9d" font-size="7" font-family="'Press Start 2P', monospace">44 HOOKS</text>
+  <rect x="460" y="197" width="2" height="12" fill="#1a2744"/>
+  <text x="480" y="205" fill="#a78bfa" font-size="7" font-family="'Press Start 2P', monospace">12 AGENTS</text>
+  <rect x="580" y="197" width="2" height="12" fill="#1a2744"/>
+  <text x="600" y="205" fill="#4af" font-size="7" font-family="'Press Start 2P', monospace">7 LAYERS</text>
+
+  <!-- Terminal prompt line -->
+  <text x="240" y="235" fill="#00ff88" font-size="8" font-family="'Press Start 2P', monospace" opacity="0.6">$</text>
+  <text x="260" y="235" fill="#5a7a9a" font-size="8" font-family="'Press Start 2P', monospace" opacity="0.5">claude --plugin agentops</text>
+
+  <!-- Second prompt with typing animation -->
+  <text x="240" y="255" fill="#00ff88" font-size="8" font-family="'Press Start 2P', monospace">$</text>
+  <text x="260" y="255" fill="#fff" font-size="8" font-family="'Press Start 2P', monospace" opacity="0.8">/build my-project</text>
+  <rect x="410" y="245" width="8" height="12" fill="#00ff88">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- === RIGHT SECTION: Security layers visualization === -->
+
+  <!-- Pixel lock icon -->
+  <g transform="translate(780, 55)">
+    <!-- Lock top arc -->
+    <rect x="16" y="0" width="8" height="8" fill="#ffaa00"/>
+    <rect x="24" y="0" width="8" height="8" fill="#ffaa00"/>
+    <rect x="32" y="0" width="8" height="8" fill="#ffaa00"/>
+    <rect x="8" y="8" width="8" height="8" fill="#ffaa00"/>
+    <rect x="40" y="8" width="8" height="8" fill="#ffaa00"/>
+    <rect x="8" y="16" width="8" height="8" fill="#ffaa00"/>
+    <rect x="40" y="16" width="8" height="8" fill="#ffaa00"/>
+    <!-- Lock body -->
+    <rect x="0" y="24" width="56" height="40" fill="#ffaa00" rx="2"/>
+    <rect x="4" y="28" width="48" height="32" fill="#cc8800" rx="1"/>
+    <!-- Keyhole -->
+    <rect x="22" y="36" width="12" height="12" fill="#ffcc33" rx="6"/>
+    <rect x="26" y="46" width="4" height="10" fill="#ffcc33"/>
+  </g>
+
+  <!-- Security layer labels (stacked, descending) -->
+  <g font-family="'Press Start 2P', monospace" font-size="6">
+    <rect x="770" y="115" width="150" height="14" rx="2" fill="#ff5f57" opacity="0.15"/>
+    <text x="780" y="125" fill="#ff5f57">INJECTION</text>
+
+    <rect x="775" y="133" width="145" height="14" rx="2" fill="#ff8c42" opacity="0.15"/>
+    <text x="785" y="143" fill="#ff8c42">EXFILTRATION</text>
+
+    <rect x="780" y="151" width="140" height="14" rx="2" fill="#febc2e" opacity="0.15"/>
+    <text x="790" y="161" fill="#febc2e">SUPPLY CHAIN</text>
+
+    <rect x="785" y="169" width="135" height="14" rx="2" fill="#28c840" opacity="0.15"/>
+    <text x="795" y="179" fill="#28c840">CREDENTIAL</text>
+
+    <rect x="790" y="187" width="130" height="14" rx="2" fill="#4af" opacity="0.15"/>
+    <text x="800" y="197" fill="#4af">PATH GUARD</text>
+
+    <rect x="795" y="205" width="125" height="14" rx="2" fill="#a78bfa" opacity="0.15"/>
+    <text x="805" y="215" fill="#a78bfa">ENV SHIELD</text>
+
+    <rect x="800" y="223" width="120" height="14" rx="2" fill="#ff6b9d" opacity="0.15"/>
+    <text x="810" y="233" fill="#ff6b9d">UNICODE</text>
+  </g>
+
+  <!-- Floating pixel particles -->
+  <rect x="200" y="290" width="4" height="4" fill="#00ff88" opacity="0.3">
+    <animate attributeName="y" values="290;280;290" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="400" y="295" width="4" height="4" fill="#4af" opacity="0.3">
+    <animate attributeName="y" values="295;282;295" dur="2.5s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="600" y="288" width="4" height="4" fill="#ffaa00" opacity="0.3">
+    <animate attributeName="y" values="288;275;288" dur="3.5s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="750" y="292" width="4" height="4" fill="#a78bfa" opacity="0.3">
+    <animate attributeName="y" values="292;278;292" dur="2.8s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="300" y="30" width="3" height="3" fill="#00ff88" opacity="0.2">
+    <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="650" y="25" width="3" height="3" fill="#4af" opacity="0.2">
+    <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2.5s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Bottom bar -->
+  <rect x="20" y="300" width="920" height="2" fill="#1a2744"/>
+  <text x="480" y="315" fill="#2a3a5a" font-size="6" text-anchor="middle" font-family="'Press Start 2P', monospace">MIT LICENSE  |  v0.9.0  |  github.com/garethdaine/agentops</text>
+
+  <!-- Scanline overlay -->
+  <rect width="960" height="320" fill="url(#scanlines)" rx="12" opacity="0.4"/>
+</svg>
