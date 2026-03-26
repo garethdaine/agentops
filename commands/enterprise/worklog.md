@@ -44,7 +44,7 @@ Check if `.agentops/journal-config.json` exists.
 
 Run integration detection ONCE per conventions.md protocol:
 1. If config has `integrations.cortex.enabled: true`: attempt `mcp__cortex__cortex_status`. Set CORTEX_AVAILABLE accordingly.
-2. If config has `integrations.notion.enabled: true`: check if `mcp__notion__notion-search` is available. Set NOTION_AVAILABLE accordingly.
+2. If config has `integrations.notion.enabled: true`: check if `mcp__notion__notion_search` is available. Set NOTION_AVAILABLE accordingly.
 3. If any Linear MCP tools are available: set LINEAR_AVAILABLE accordingly.
 4. Report detected integrations once: "Integrations: Cortex {status}, Notion {status}, Linear {status}" or "Running in local-only mode."
 5. Skip silently for any unavailable integration. Never fail due to missing integration.
@@ -81,7 +81,10 @@ When the user provides arguments, create an entry with ZERO prompts.
 5. **Update index:** Update `.agentops/journal/worklog/index.json` using atomic write protocol from conventions.md (write to .tmp, verify, mv)
 6. **Cortex sync:** If CORTEX_AVAILABLE and enabled, write episodic memory with tags ["worklog", "general", "medium"]. On failure: log warning, continue.
 7. **Notion sync:** If NOTION_AVAILABLE and enabled, push entry to worklog database. On failure: log warning, continue.
-8. **Auto-commit:** If `preferences.auto_commit` is true in config, run `git add .agentops/journal/ && git commit -m "docs(worklog): add entry — YYYY-MM-DD"`
+8. **Auto-commit:** If `preferences.auto_commit` is true in config:
+   - First, check whether `.agentops/journal/` is tracked by git (i.e., not excluded by `.gitignore`).
+   - If it is tracked, run: `git add .agentops/journal/ && git commit -m "docs(worklog): add entry — YYYY-MM-DD"`.
+   - If it is gitignored, skip auto-commit and warn: "Auto-commit skipped because `.agentops/journal/` is gitignored. To enable, unignore this path in `.gitignore`."
 9. **Confirm:** "Entry logged at HH:MM. {integration status if any synced}"
 
 ---
@@ -119,7 +122,7 @@ Use `AskUserQuestion` for each field:
 
 ### Step 2: Create Entry
 
-1. Determine today's date (YYYY-MM-DD) and current time (HH:MM)
+1. Determine today's date and current time in UTC (YYYY-MM-DD, HH:MM)
 2. Auto-detect git context: branch and recent commits
 3. Auto-tag from description content per conventions.md
 4. Create/append to `.agentops/journal/worklog/YYYY/MM/YYYY-MM-DD.md` using the entry section format from conventions.md:

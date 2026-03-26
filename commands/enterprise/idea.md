@@ -37,13 +37,13 @@ Use `AskUserQuestion` for each of these in sequence:
    - "Light (15 min) — Analysis with alternatives, trade-offs, and risks"
    - "Full (30+ min) — Research-backed proposal with implementation plan and metrics"
 
-Generate a kebab-case slug from the idea title. Create the directory: `.agentops/journal/ideas/{slug}/` using `mkdir -p`. Create `scratchpad.md` for working notes.
+Generate a kebab-case slug from the idea title. Create the directory: `.agentops/journal/ideas/{slug}/` using `mkdir -p`. Create `.agentops/journal/ideas/{slug}/scratchpad.md` for working notes.
 
 ---
 
 ## Quick Capture (5 min)
 
-Generate a one-page proposal document at `ideas/{slug}/proposal.md` using the Idea Proposal frontmatter and document structure from conventions.md. Include these sections:
+Generate a one-page proposal document at `.agentops/journal/ideas/{slug}/proposal.md` using the Idea Proposal frontmatter and document structure from conventions.md. Include these sections:
 
 - **Problem Statement** — What problem does this solve?
 - **Proposed Solution** — What is being proposed?
@@ -72,7 +72,7 @@ Update the proposal document with all expanded sections. Proceed to **Post-Captu
 
 Complete everything in Light Development, then deepen with research:
 
-1. **Web research:** Search the web for prior art, industry practices, benchmarks, and supporting data relevant to this idea. Save all research notes to `ideas/{slug}/research.md` with source URLs and key findings.
+1. **Web research:** Search the web for prior art, industry practices, benchmarks, and supporting data relevant to this idea. Save all research notes to `.agentops/journal/ideas/{slug}/research.md` with source URLs and key findings.
 2. **Detailed implementation plan:** Add phased implementation approach with effort estimates, dependencies, and milestones to the Implementation Sketch section.
 3. **Cost-benefit analysis:** Fill in the Cost-Benefit Assessment section with time/effort investment vs expected return, including quantitative estimates where possible.
 4. **Success metrics:** Define measurable success criteria in the Success Metrics section.
@@ -86,10 +86,10 @@ Update the proposal document with all sections complete. Proceed to **Post-Captu
 ### Storage Confirmation
 
 Confirm files written:
-- `ideas/{slug}/proposal.md` — the proposal document
-- `ideas/{slug}/scratchpad.md` — working notes
-- `ideas/{slug}/research.md` — research notes (Full development only)
-- `ideas/{slug}/exports/` — directory created for future exports
+- `.agentops/journal/ideas/{slug}/proposal.md` — the proposal document
+- `.agentops/journal/ideas/{slug}/scratchpad.md` — working notes
+- `.agentops/journal/ideas/{slug}/research.md` — research notes (Full development only)
+- `.agentops/journal/ideas/{slug}/exports/` — directory created for future exports
 
 ### Index Management
 
@@ -109,7 +109,7 @@ If not skipped, follow the export approach from conventions.md:
 2. **Playwright (fallback):** Render as styled HTML, then PDF
 3. **HTML (last resort):** Generate styled HTML with print instructions
 
-Save exports to `ideas/{slug}/exports/`.
+Save exports to `.agentops/journal/ideas/{slug}/exports/`.
 
 ### Share Guidance
 
@@ -121,7 +121,7 @@ Never send anything automatically. This is guidance only. If no contacts match o
 
 ### Cortex Sync
 
-If Cortex is available and enabled in config: write the idea as a semantic memory via `cortex_write` with tags `["idea", "{category_snake_case}", "draft"]`. Store the returned ID as `cortex_id` in the index entry. On failure: log warning, continue.
+If Cortex is available and enabled in config: write the idea as a semantic memory via `mcp__cortex__cortex_write` with tags `["idea", "{category_snake_case}", "draft"]`. Store the returned ID as `cortex_id` in the index entry. On failure: log warning, continue.
 
 ### Notion Sync
 
@@ -132,11 +132,16 @@ If Notion is available and enabled in config:
 
 ### Auto-Commit
 
-If `preferences.auto_commit` is `true` in journal-config.json, run:
-```
-git add .agentops/journal/ideas/{slug}/
-git commit -m "docs(idea): capture — {slug}"
-```
+If `preferences.auto_commit` is `true` in journal-config.json:
+
+1. Check whether `.agentops/journal/` is tracked by git (i.e., not excluded by `.gitignore`).
+2. If it is tracked, run:
+   ```
+   git add .agentops/journal/ideas/{slug}/
+   git commit -m "docs(idea): capture — {slug}"
+   ```
+3. If it is gitignored, skip auto-commit and warn: "Auto-commit skipped because `.agentops/journal/` is gitignored. To enable, unignore this path in `.gitignore`."
+
 If auto_commit is false (default), skip.
 
 ---
@@ -145,7 +150,7 @@ If auto_commit is false (default), skip.
 
 When revisiting an existing idea (slug provided or selected):
 
-1. Read the existing proposal from `ideas/{slug}/proposal.md`
+1. Read the existing proposal from `.agentops/journal/ideas/{slug}/proposal.md`
 2. Display current status and summary
 3. Use `AskUserQuestion`: "What would you like to do with this idea?" — options:
    - "Update status"
@@ -166,7 +171,7 @@ Record who updated the status (from `identity.name` in config) and when (UTC tim
 | {date} | {new_status} | {identity.name} |
 ```
 
-Update `ideas/index.json` with new status (atomic write). If Cortex available, update the memory tags. If Notion available, update the database entry. If auto_commit enabled:
+Update `.agentops/journal/ideas/index.json` with new status (atomic write). If Cortex available, update the memory tags. If Notion available, update the database entry. If auto_commit enabled:
 ```
 git commit -am "docs(idea): update status — {slug} → {status}"
 ```

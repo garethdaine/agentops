@@ -74,6 +74,8 @@ The contacts array is extensible — users add as many as they need. The `share_
 
 All journal data is stored under `.agentops/journal/` within the project directory. This path is private by default (inside `.agentops/` which should be gitignored).
 
+> **Hook whitelist note:** The repo's PathPolicy currently protects `.agentops/` with a small whitelist of writable state files. To allow journal writes, add `.agentops/journal/` and `.agentops/journal-config.json` to `AGENTOPS_WRITABLE_STATE` in `hooks/patterns-lib.sh`, or move journal storage to an unprotected path.
+
 ```
 .agentops/journal/
   worklog/
@@ -182,12 +184,19 @@ If loading an index file fails (malformed JSON, empty file, missing file):
 
 1. Log a warning: "Index file corrupted or missing. Rebuilding from source files."
 2. Scan the relevant directory for markdown files
-3. Read frontmatter from each markdown file
-4. Reconstruct the index entries from frontmatter data
+3. For each markdown file:
+   - Read frontmatter for file-level metadata (e.g., `date`, `entry_count`)
+   - Parse the markdown body to identify individual entry sections and their fields
+     (e.g., headings, IDs, titles, tags, timestamps, categories, impact levels)
+4. Reconstruct the index entries from the combination of frontmatter and parsed
+   entry metadata
 5. Write the rebuilt index using the atomic write protocol
 6. Continue with the rebuilt index — do NOT fail the operation
 
-The markdown files are the source of truth. The index is a derived cache.
+The markdown files are the source of truth. The index is a derived cache. When
+rebuilding, do not rely solely on frontmatter fields like `date` and
+`entry_count`; always parse the entry sections in the markdown body so the index
+can be accurately reconstructed.
 
 ---
 
@@ -208,7 +217,7 @@ Run integration detection ONCE at command startup. Cache the results for the ses
    - Skip silently if unavailable
 
    NOTION:
-   - Check if mcp__notion__notion-search tool is available
+   - Check if mcp__notion__notion_search tool is available
    - If available: NOTION_AVAILABLE = true
    - If unavailable: NOTION_AVAILABLE = false
    - Skip silently if unavailable
@@ -405,9 +414,9 @@ All work journal commands check the `work_journal` flag from `.agentops/flags.js
 Run: source hooks/feature-flags.sh && agentops_enterprise_enabled "work_journal"
 ```
 
-If the flag is disabled or missing, inform the user: "Work journal commands are disabled. Enable with: /agentops:flags work_journal true" and stop.
+If the flag is disabled, inform the user: "Work journal commands are disabled. Enable with: /agentops:flags work_journal true" and stop.
 
-Default: `true` (enabled by default as these commands are additive and non-destructive).
+Default: `true` (commands are enabled by default as they are additive and non-destructive; missing flag entries are treated as enabled-by-default by `agentops_enterprise_enabled`).
 
 ---
 

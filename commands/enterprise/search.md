@@ -20,7 +20,7 @@ You MUST use the `AskUserQuestion` tool for EVERY question in this command. DO N
 2. **Load config:** Read `.agentops/journal-config.json`. If missing, run the first-run setup defined in conventions.md.
 3. **Detect integrations** per the conventions Integration Detection protocol:
    - Check Cortex: call `mcp__cortex__cortex_status`. Set CORTEX_AVAILABLE = true/false.
-   - Check Notion: check if `mcp__notion__notion-search` tool is available. Set NOTION_AVAILABLE = true/false.
+   - Check Notion: check if `mcp__notion__notion_search` tool is available. Set NOTION_AVAILABLE = true/false.
    - Check Linear: check if any Linear MCP tools are available. Set LINEAR_AVAILABLE = true/false.
    - Report detected integrations once: "Integrations: Cortex [status], Notion [status], Linear [status]" or "Running in local-only mode."
 4. **Parse arguments:** The user's input is: $ARGUMENTS
@@ -94,9 +94,9 @@ Search the selected sources. Where possible, run local and external searches in 
 - Limit to 20 results
 
 **(c) Git History:**
-- Run: `git log --all --oneline --grep="{query}" --max-count=20`
+- Run: `git log --all --grep="{query}" --max-count=20 --date=short --pretty=format:"%h %ad %s"`
 - If date-range specified, add `--since="{since}"` and `--until="{until}"`
-- Parse commit hash, message, and date from output
+- Parse commit hash, date, and message from output
 
 **(d) Architecture Decision Records:**
 - Check if `docs/adr/` directory exists
@@ -122,7 +122,7 @@ Search the selected sources. Where possible, run local and external searches in 
 - Limit to 20 results
 
 **(h) Notion Pages (if NOTION_AVAILABLE and scope includes Notion):**
-- Call `mcp__notion__notion-search` with the query
+- Call `mcp__notion__notion_search` with the query
 - Include page title, last edited date, and URL
 - Limit to 20 results
 
