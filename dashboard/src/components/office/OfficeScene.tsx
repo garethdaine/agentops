@@ -7,6 +7,7 @@ import { OfficeFloor, OfficeWalls, OfficeLighting } from '@/slices/scene';
 import { Workstation } from '@/slices/zones';
 import { AgentAvatar } from '@/slices/agents';
 import { WORKSTATION_SLOTS } from '@/lib/floorplan';
+import { FOG_CONFIG } from '@/lib/lighting-config';
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
 import { useUIStore } from '@/stores/ui-store';
@@ -87,7 +88,7 @@ export default function OfficeScene() {
       style={{ background: '#1a1a2e' }}
     >
       <color attach="background" args={['#1a1a2e']} />
-      <fog attach="fog" args={['#1a1a2e', 40, 65]} />
+      <fog attach="fog" args={['#1a1a2e', FOG_CONFIG.near, FOG_CONFIG.far]} />
 
       <OfficeLighting />
       <OfficeFloor />
