@@ -1,6 +1,7 @@
 #!/bin/bash
 # Shared patterns, thresholds, and protected path constants.
 # Sourced by: feature-flags.sh (facade)
+# shellcheck disable=SC2034  # All variables are used by scripts that source this file
 
 # ── Shared thresholds ────────────────────────────────────────────────────────
 # Number of modified files before plan/test/compliance gates trigger.

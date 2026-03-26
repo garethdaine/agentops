@@ -46,7 +46,7 @@ done
 
 # ── Check 1: Unicode anomalies in lockfiles ─────────────────────────────────
 for LF in "${LOCKFILES[@]}"; do
-  REL="${LF#$PROJECT_DIR/}"
+  REL="${LF#"$PROJECT_DIR"/}"
 
   # Invisible Unicode check
   if unicode_detect_file "$LF"; then

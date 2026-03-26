@@ -29,7 +29,8 @@ agentops_enforcement_action() {
     echo "allow"
     return
   fi
-  local MODE=$(agentops_mode)
+  local MODE
+  MODE=$(agentops_mode)
   if [ "$MODE" = "blocking" ]; then
     echo "deny"
   else
@@ -51,7 +52,8 @@ agentops_fail_closed() {
 
 # Returns "block" in blocking mode, "approve" in advisory mode (for Stop hooks).
 agentops_stop_action() {
-  local MODE=$(agentops_mode)
+  local MODE
+  MODE=$(agentops_mode)
   if [ "$MODE" = "blocking" ]; then
     echo "block"
   else
