@@ -67,9 +67,6 @@ ZWS=$'\xe2\x80\x8b'
 # A right-to-left override character (U+202E) for bidi test
 BIDI=$'\xe2\x80\xae'
 
-run_hook() {
-  echo "$1" | bash "$HOOKS_DIR/unicode-firewall.sh"
-}
 
 # ── Flag gating ──────────────────────────────────────────────────────────────
 
@@ -288,9 +285,9 @@ run_hook() {
 
 @test "PreToolUse output is valid JSON with correct structure" {
   result=$(pre_tool_input "Bash" "command" "rm ${ZWS}file" | bash "$HOOKS_DIR/unicode-firewall.sh")
-  echo "$result" | jq -e '.hookSpecificOutput.hookEventName == "PreToolUse"'
-  echo "$result" | jq -e '.hookSpecificOutput.permissionDecision == "ask"'
-  echo "$result" | jq -e '.hookSpecificOutput.permissionDecisionReason | test("UNICODE FIREWALL")'
+  echo "$result" | jq -e '.hookSpecificOutput.hookEventName == "PreToolUse"' > /dev/null
+  echo "$result" | jq -e '.hookSpecificOutput.permissionDecision == "ask"' > /dev/null
+  echo "$result" | jq -e '.hookSpecificOutput.permissionDecisionReason | test("UNICODE FIREWALL")' > /dev/null
 }
 
 @test "PostToolUse sanitise output is valid JSON with correct structure" {
@@ -298,8 +295,8 @@ run_hook() {
   printf "x${ZWS}y\n" > "$TESTFILE"
 
   result=$(post_file_tool "Write" "$TESTFILE" | bash "$HOOKS_DIR/unicode-firewall.sh")
-  echo "$result" | jq -e '.hookSpecificOutput.hookEventName == "PostToolUse"'
-  echo "$result" | jq -e '.hookSpecificOutput.additionalContext | test("AUTO-SANITISED")'
+  echo "$result" | jq -e '.hookSpecificOutput.hookEventName == "PostToolUse"' > /dev/null
+  echo "$result" | jq -e '.hookSpecificOutput.additionalContext | test("AUTO-SANITISED")' > /dev/null
 }
 
 @test "PostToolUse Read warning output is valid JSON" {
@@ -307,5 +304,5 @@ run_hook() {
   printf "text${ZWS}here\n" > "$TESTFILE"
 
   result=$(post_read_tool "$TESTFILE" | bash "$HOOKS_DIR/unicode-firewall.sh")
-  echo "$result" | jq -e '.hookSpecificOutput.additionalContext | test("UNICODE FIREWALL WARNING")'
+  echo "$result" | jq -e '.hookSpecificOutput.additionalContext | test("UNICODE FIREWALL WARNING")' > /dev/null
 }
