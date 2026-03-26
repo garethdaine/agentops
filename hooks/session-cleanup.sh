@@ -10,10 +10,15 @@ mkdir -p "$STATE_DIR" 2>/dev/null
 
 # ── Session Registry Cleanup ─────────────────────────────────────────────────
 # Remove previous session entry from the global active-sessions registry.
-REGISTRY_FILE="$HOME/.agentops/active-sessions.jsonl"
+SAFE_HOME="${HOME:-$(cd ~ 2>/dev/null && pwd)}"
+REGISTRY_FILE="${SAFE_HOME}/.agentops/active-sessions.jsonl"
 if [ -n "$SESSION_ID" ] && [ -f "$REGISTRY_FILE" ]; then
   TMP_REG=$(mktemp)
-  grep -v "\"session_id\":\"${SESSION_ID}\"" "$REGISTRY_FILE" > "$TMP_REG" 2>/dev/null || true
+  # Use jq for exact field matching (not regex) to avoid injection via session_id
+  while IFS= read -r line; do
+    sid=$(echo "$line" | jq -r '.session_id // ""' 2>/dev/null) || sid=""
+    [ "$sid" != "$SESSION_ID" ] && echo "$line"
+  done < "$REGISTRY_FILE" > "$TMP_REG" 2>/dev/null || true
   mv "$TMP_REG" "$REGISTRY_FILE" 2>/dev/null || true
 fi
 

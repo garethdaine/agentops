@@ -16,9 +16,13 @@ export CLAUDE_PROJECT_DIR="$CWD"
 agentops_dashboard_enabled || exit 0
 
 # ── Session Registry ─────────────────────────────────────────────────────────
-REGISTRY_DIR="$HOME/.agentops"
+SAFE_HOME="${HOME:-$(cd ~ 2>/dev/null && pwd)}"
+REGISTRY_DIR="${SAFE_HOME}/.agentops"
 REGISTRY_FILE="$REGISTRY_DIR/active-sessions.jsonl"
 mkdir -p "$REGISTRY_DIR" 2>/dev/null
+
+# Skip registry write if session_id is empty
+[ -z "$SESSION_ID" ] && exit 0
 
 # Append session metadata
 jq -nc \

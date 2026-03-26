@@ -1,15 +1,9 @@
 import { createStore } from 'zustand/vanilla';
+import type { TelemetryEvent } from '@/types/events';
+
+export type { TelemetryEvent };
 
 const MAX_EVENTS_PER_SESSION = 1000;
-
-export interface TelemetryEvent {
-  ts: string;
-  event: string;
-  session: string;
-  tool: string;
-  cwd: string;
-  [key: string]: unknown;
-}
 
 export interface SessionState {
   session_id: string;

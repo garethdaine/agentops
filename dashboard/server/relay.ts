@@ -3,6 +3,7 @@ import { createServer, Server, IncomingMessage } from 'http';
 import * as path from 'path';
 import * as os from 'os';
 import { IdleDetector, cleanupPidFile } from './lifecycle';
+import type { FileWatcher as FileWatcherType } from './file-watcher';
 
 const DEFAULT_PORT = 3099;
 
@@ -144,10 +145,14 @@ if (isEntryPoint) {
   import('./session-registry').then(({ readSessionRegistry }) => {
 
   startRelay().then((relay) => {
+    // Declare mutable references before shutdown to avoid TDZ
+    let idleDetector: IdleDetector | null = null;
+    let fileWatcher: FileWatcherType | null = null;
+
     const shutdown = async () => {
       log('info', 'Shutting down relay...');
-      idleDetector.stop();
-      fileWatcher.stop();
+      idleDetector?.stop();
+      await fileWatcher?.stop();
       await cleanupPidFile(pidFilePath);
       await relay.close();
       process.exit(0);
@@ -158,7 +163,7 @@ if (isEntryPoint) {
     process.on('SIGTERM', () => void shutdown());
 
     // Idle auto-shutdown (REQ-022)
-    const idleDetector = new IdleDetector({ registryPath });
+    idleDetector = new IdleDetector({ registryPath });
     idleDetector.onShutdown(() => {
       log('info', 'Idle timeout reached — initiating auto-shutdown');
       void shutdown();
@@ -167,26 +172,22 @@ if (isEntryPoint) {
 
     // Wire FileWatcher to relay broadcast (SPEC-001 fix)
     // Discover session directories from registry, watch each .agentops/ dir
-    const watchDirs: string[] = [];
     readSessionRegistry(registryPath).then((sessions) => {
       for (const session of sessions) {
         const agentopsDir = path.join(session.project_dir, '.agentops');
-        if (!watchDirs.includes(agentopsDir)) {
-          watchDirs.push(agentopsDir);
-          const fw = new FileWatcher(agentopsDir);
-          fw.onEvent((event) => {
-            relay.broadcast(JSON.stringify(event));
-          });
-          fw.start().then(() => {
-            log('info', `Watching ${agentopsDir}`);
-          });
-        }
+        const fw = new FileWatcher(agentopsDir);
+        fw.onEvent((event) => {
+          relay.broadcast(JSON.stringify(event));
+        });
+        fw.start().then(() => {
+          log('info', `Watching ${agentopsDir}`);
+        });
       }
     });
 
     // Also watch the cwd .agentops/ as a fallback
     const cwdAgentops = path.join(process.cwd(), '.agentops');
-    const fileWatcher = new FileWatcher(cwdAgentops);
+    fileWatcher = new FileWatcher(cwdAgentops);
     fileWatcher.onEvent((event) => {
       relay.broadcast(JSON.stringify(event));
     });

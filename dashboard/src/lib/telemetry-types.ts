@@ -7,11 +7,5 @@ export interface MonitorStyle {
   contentType: 'terminal' | 'file' | 'diff' | 'search' | 'chat' | 'idle';
 }
 
-/** Raw telemetry event shape from .agentops/telemetry.jsonl */
-export interface TelemetryEvent {
-  ts: string;
-  event: 'PostToolUse' | 'PostToolUseFailure' | 'PreToolUse' | 'SessionEnd';
-  session: string;
-  tool: string;
-  cwd: string;
-}
+// Re-export canonical TelemetryEvent from types/events
+export type { TelemetryEvent } from '@/types/events';
