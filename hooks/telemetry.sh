@@ -10,11 +10,12 @@ TS=$(date -u +%FT%TZ)
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // "unknown"' 2>/dev/null) || EVENT="unknown"
 SESSION=$(echo "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null) || SESSION="unknown"
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL=""
+CWD=$(echo "$INPUT" | jq -r '.cwd // ""' 2>/dev/null) || CWD=""
 
 jq -nc \
   --arg ts "$TS" --arg event "$EVENT" --arg session "$SESSION" \
-  --arg tool "$TOOL" \
-  '{ts:$ts, event:$event, session:$session, tool:$tool}' >> "$LOG_FILE" 2>/dev/null || true
+  --arg tool "$TOOL" --arg cwd "$CWD" \
+  '{ts:$ts, event:$event, session:$session, tool:$tool, cwd:$cwd}' >> "$LOG_FILE" 2>/dev/null || true
 
 # Forward to OTLP if configured — validate endpoint with hostname allowlist
 if [ -n "${OTLP_ENDPOINT:-}" ]; then
