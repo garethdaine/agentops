@@ -1,0 +1,144 @@
+import { WebSocketServer, WebSocket } from 'ws';
+import { createServer, Server, IncomingMessage } from 'http';
+
+const DEFAULT_PORT = 3099;
+
+export interface RelayOptions {
+  port?: number;
+}
+
+export interface RelayHandle {
+  wss: WebSocketServer;
+  httpServer: Server;
+  broadcast: (data: string) => void;
+  close: () => Promise<void>;
+}
+
+/**
+ * Validate that an origin header represents a localhost connection.
+ * Accepts localhost, 127.0.0.1, and [::1] with any port.
+ */
+export function isLocalhostOrigin(origin: string | undefined): boolean {
+  if (!origin) return false;
+
+  try {
+    const url = new URL(origin);
+    const hostname = url.hostname;
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '[::1]'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function log(level: 'info' | 'warn' | 'error', message: string): void {
+  const ts = new Date().toISOString();
+  const prefix = `[relay ${ts}]`;
+  if (level === 'error') {
+    console.error(`${prefix} ERROR: ${message}`);
+  } else if (level === 'warn') {
+    console.warn(`${prefix} WARN: ${message}`);
+  } else {
+    console.log(`${prefix} ${message}`);
+  }
+}
+
+/**
+ * Start the WebSocket relay server.
+ * Returns a handle with broadcast() and close() methods.
+ */
+export function startRelay(options: RelayOptions = {}): Promise<RelayHandle> {
+  const port = options.port ?? DEFAULT_PORT;
+  const clients = new Set<WebSocket>();
+
+  return new Promise((resolve, reject) => {
+    const httpServer = createServer((_req, res) => {
+      res.writeHead(426, { 'Content-Type': 'text/plain' });
+      res.end('WebSocket relay — upgrade required');
+    });
+
+    const wss = new WebSocketServer({
+      server: httpServer,
+      verifyClient: (
+        info: { origin: string; req: IncomingMessage },
+        callback: (result: boolean, code?: number, message?: string) => void,
+      ) => {
+        if (!isLocalhostOrigin(info.origin)) {
+          log('warn', `Rejected connection from origin: ${info.origin}`);
+          callback(false, 403, 'Forbidden: non-localhost origin');
+          return;
+        }
+        callback(true);
+      },
+    });
+
+    wss.on('connection', (ws, req) => {
+      const origin = req.headers.origin ?? 'unknown';
+      clients.add(ws);
+      log('info', `Client connected (origin: ${origin}, total: ${clients.size})`);
+
+      ws.on('close', () => {
+        clients.delete(ws);
+        log('info', `Client disconnected (total: ${clients.size})`);
+      });
+
+      ws.on('error', (err) => {
+        log('error', `Client error: ${err.message}`);
+        clients.delete(ws);
+      });
+    });
+
+    function broadcast(data: string): void {
+      for (const client of clients) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(data);
+        }
+      }
+    }
+
+    function close(): Promise<void> {
+      return new Promise((res, rej) => {
+        for (const client of clients) {
+          client.close();
+        }
+        clients.clear();
+        wss.close(() => {
+          httpServer.close((err) => {
+            if (err) rej(err);
+            else res();
+          });
+        });
+      });
+    }
+
+    httpServer.on('error', (err) => {
+      reject(err);
+    });
+
+    httpServer.listen(port, () => {
+      log('info', `WebSocket relay listening on port ${port}`);
+      resolve({ wss, httpServer, broadcast, close });
+    });
+  });
+}
+
+// Entry point: run directly with node/tsx
+const isEntryPoint =
+  typeof process !== 'undefined' &&
+  process.argv[1] &&
+  (process.argv[1].endsWith('/relay.ts') || process.argv[1].endsWith('/relay.js'));
+
+if (isEntryPoint) {
+  startRelay().then((relay) => {
+    const shutdown = () => {
+      log('info', 'Shutting down relay...');
+      relay.close().then(() => process.exit(0));
+    };
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+  });
+}
