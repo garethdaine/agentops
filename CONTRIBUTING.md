@@ -2,6 +2,15 @@
 
 Thanks for your interest in contributing! This guide covers how to report issues, suggest features, and submit pull requests.
 
+## Discussions
+
+Before opening an issue, consider starting a [Discussion](https://github.com/garethdaine/agentops/discussions):
+
+- **Questions** → [Q&A](https://github.com/garethdaine/agentops/discussions/categories/q-a)
+- **Ideas** → [Feature Ideas](https://github.com/garethdaine/agentops/discussions/categories/feature-ideas)
+- **Security config help** → [Security Configurations](https://github.com/garethdaine/agentops/discussions/categories/security-configurations)
+- **Show your setup** → [Show & Tell](https://github.com/garethdaine/agentops/discussions/categories/show-and-tell)
+
 ## Reporting Bugs
 
 1. Search [existing issues](https://github.com/garethdaine/agentops/issues) first to avoid duplicates.
