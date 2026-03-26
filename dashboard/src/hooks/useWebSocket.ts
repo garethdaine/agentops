@@ -1,4 +1,5 @@
 import { useAgentStore, type TelemetryEvent } from '@/stores/agent-store';
+import { createEventBatcher, THROTTLE_MS, type EventBatcher } from '@/lib/event-batcher';
 
 const WS_URL = 'ws://localhost:3099';
 const INITIAL_BACKOFF_MS = 1000;
@@ -8,6 +9,28 @@ let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let backoffMs = INITIAL_BACKOFF_MS;
 let intentionalClose = false;
+let eventBatcher: EventBatcher<TelemetryEvent> | null = null;
+
+function flushEvents(events: TelemetryEvent[]): void {
+  const store = useAgentStore.getState();
+  for (const event of events) {
+    store.addEvent(event.session, event);
+  }
+}
+
+function ensureBatcher(): EventBatcher<TelemetryEvent> {
+  if (!eventBatcher) {
+    eventBatcher = createEventBatcher(flushEvents, { throttleMs: THROTTLE_MS });
+  }
+  return eventBatcher;
+}
+
+function destroyBatcher(): void {
+  if (eventBatcher) {
+    eventBatcher.destroy();
+    eventBatcher = null;
+  }
+}
 
 function handleMessage(event: MessageEvent): void {
   try {
@@ -34,7 +57,7 @@ function handleMessage(event: MessageEvent): void {
           pid: 0,
         });
       }
-      store.addEvent(data.session, data as TelemetryEvent);
+      ensureBatcher().push(data as TelemetryEvent);
     }
   } catch (err) {
     console.debug('[ws] Skipping malformed message:', err);
@@ -91,6 +114,7 @@ export function connectWebSocket(): void {
 
 export function disconnectWebSocket(): void {
   intentionalClose = true;
+  destroyBatcher();
   if (reconnectTimer !== null) {
     clearTimeout(reconnectTimer);
     reconnectTimer = null;
