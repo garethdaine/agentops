@@ -1,7 +1,7 @@
 'use client';
 
 import MonitorScreen from './MonitorScreen';
-import { DESK, MONITOR, LAMP, STATUS_COLORS } from '@/lib/furniture-geometry';
+import { DESK, MONITOR, LAMP, CHAIR, STATUS_COLORS } from '@/lib/furniture-geometry';
 import type { AgentStatus } from '@/types/agent';
 import type { AgentActivity } from '@/types/agent';
 
@@ -12,9 +12,64 @@ interface WorkstationProps {
   activity?: AgentActivity;
 }
 
+/** Chair mesh group positioned behind the desk. */
+function Chair() {
+  const seatY = CHAIR.seatHeight;
+  const backY = seatY + CHAIR.seatThickness / 2 + CHAIR.backHeight / 2;
+  const armY = seatY + CHAIR.armHeight / 2;
+  const armX = CHAIR.seatWidth / 2 - CHAIR.armWidth / 2;
+
+  return (
+    <group position={[0, 0, CHAIR.offsetZ]}>
+      {/* Pneumatic cylinder */}
+      <mesh position={[0, CHAIR.cylinderHeight / 2, 0]}>
+        <cylinderGeometry args={[CHAIR.cylinderRadius, CHAIR.cylinderRadius, CHAIR.cylinderHeight, 8]} />
+        <meshStandardMaterial color={CHAIR.baseColor} metalness={0.7} />
+      </mesh>
+
+      {/* 5-star base spokes */}
+      {[0, 1, 2, 3, 4].map((i) => {
+        const angle = (i * Math.PI * 2) / 5;
+        const cx = Math.sin(angle) * CHAIR.baseRadius * 0.5;
+        const cz = Math.cos(angle) * CHAIR.baseRadius * 0.5;
+        return (
+          <mesh key={`spoke-${i}`} position={[cx, 0.02, cz]} rotation={[0, -angle, Math.PI / 2]}>
+            <cylinderGeometry args={[0.015, 0.015, CHAIR.baseRadius, 6]} />
+            <meshStandardMaterial color={CHAIR.baseColor} metalness={0.6} />
+          </mesh>
+        );
+      })}
+
+      {/* Seat */}
+      <mesh position={[0, seatY, 0]} castShadow>
+        <boxGeometry args={[CHAIR.seatWidth, CHAIR.seatThickness, CHAIR.seatDepth]} />
+        <meshStandardMaterial color={CHAIR.seatColor} />
+      </mesh>
+
+      {/* Back */}
+      <mesh position={[0, backY, -CHAIR.seatDepth / 2 + CHAIR.backThickness / 2]} castShadow>
+        <boxGeometry args={[CHAIR.seatWidth, CHAIR.backHeight, CHAIR.backThickness]} />
+        <meshStandardMaterial color={CHAIR.seatColor} />
+      </mesh>
+
+      {/* Left armrest */}
+      <mesh position={[-armX, armY, 0]}>
+        <boxGeometry args={[CHAIR.armWidth, CHAIR.armThickness, CHAIR.armDepth]} />
+        <meshStandardMaterial color={CHAIR.armColor} />
+      </mesh>
+
+      {/* Right armrest */}
+      <mesh position={[armX, armY, 0]}>
+        <boxGeometry args={[CHAIR.armWidth, CHAIR.armThickness, CHAIR.armDepth]} />
+        <meshStandardMaterial color={CHAIR.armColor} />
+      </mesh>
+    </group>
+  );
+}
+
 /**
- * Desk + monitor + lamp group.
- * REQ-029, REQ-030, REQ-031
+ * Desk + monitor + lamp + chair group.
+ * REQ-022, REQ-029, REQ-030, REQ-031
  */
 export default function Workstation({
   position,
@@ -114,6 +169,9 @@ export default function Workstation({
           emissiveIntensity={lampIntensity}
         />
       </mesh>
+
+      {/* Office chair */}
+      <Chair />
     </group>
   );
 }
