@@ -13,6 +13,7 @@ A plugin for [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) t
 [![Security](https://github.com/garethdaine/agentops/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/garethdaine/agentops/actions/workflows/security.yml)
 [![npm version](https://img.shields.io/npm/v/@garethdaine/agentops)](https://www.npmjs.com/package/@garethdaine/agentops)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Discussions](https://img.shields.io/github/discussions/garethdaine/agentops)](https://github.com/garethdaine/agentops/discussions)
 
 ---
 
