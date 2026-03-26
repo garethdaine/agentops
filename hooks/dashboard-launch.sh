@@ -60,8 +60,8 @@ RELAY_PID=$!
 NEXT_PID=$!
 echo "$RELAY_PID $NEXT_PID" > "$PID_FILE"
 
-# Wait for the server to be ready (up to 15 seconds), then open browser
-(
+# Wait for the server to be ready, then open browser (fully detached)
+{
   for i in $(seq 1 30); do
     if curl -s -o /dev/null http://localhost:3100 2>/dev/null; then
       if command -v open >/dev/null 2>&1; then
@@ -69,10 +69,11 @@ echo "$RELAY_PID $NEXT_PID" > "$PID_FILE"
       elif command -v xdg-open >/dev/null 2>&1; then
         xdg-open http://localhost:3100
       fi
-      exit 0
+      break
     fi
     sleep 0.5
   done
-) &
+} </dev/null >/dev/null 2>&1 &
+disown 2>/dev/null || true
 
 exit 0

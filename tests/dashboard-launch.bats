@@ -26,12 +26,10 @@ echo "$@" >> "$HOME/.agentops/open-calls.log"
 OPENEOF
   chmod +x "$MOCK_BIN/open"
 
-  # Mock nohup: record and simulate background process
+  # Mock nohup: just record the call and exit (do NOT exec the real command)
   cat > "$MOCK_BIN/nohup" << 'NOHUPEOF'
 #!/bin/bash
 echo "$@" >> "$HOME/.agentops/nohup-calls.log"
-# Simulate a backgroundable process - just exit cleanly
-exec "$@"
 NOHUPEOF
   chmod +x "$MOCK_BIN/nohup"
 
@@ -48,6 +46,23 @@ NODEEOF
 echo "mock-npx $@" >> "$HOME/.agentops/npx-calls.log"
 NPXEOF
   chmod +x "$MOCK_BIN/npx"
+
+  # Mock curl: fail by default (server not ready — prevents wait loop from hanging)
+  cat > "$MOCK_BIN/curl" << 'CURLEOF'
+#!/bin/bash
+exit 1
+CURLEOF
+  chmod +x "$MOCK_BIN/curl"
+
+  # Create fake dashboard bin directory so the hook doesn't error on missing binaries
+  DASHBOARD_BIN_DIR="$BATS_TEST_DIRNAME/../dashboard/node_modules/.bin"
+  mkdir -p "$DASHBOARD_BIN_DIR" 2>/dev/null || true
+  for bin in tsx next; do
+    if [ ! -f "$DASHBOARD_BIN_DIR/$bin" ]; then
+      printf '#!/bin/bash\nexit 0\n' > "$DASHBOARD_BIN_DIR/$bin"
+      chmod +x "$DASHBOARD_BIN_DIR/$bin"
+    fi
+  done
 }
 
 teardown() {
@@ -106,8 +121,16 @@ EOF
 }
 
 @test "opens browser after launch" {
-  run bash -c 'echo "{\"session_id\":\"s4\",\"hook_event_name\":\"SessionStart\",\"cwd\":\"$TEST_PROJECT_DIR\"}" | bash hooks/dashboard-launch.sh'
-  [ "$status" -eq 0 ]
+  # Mock curl to succeed (simulates server ready) so the wait loop calls open
+  cat > "$MOCK_BIN/curl" << 'CURLEOF'
+#!/bin/bash
+exit 0
+CURLEOF
+  chmod +x "$MOCK_BIN/curl"
+
+  bash -c 'echo "{\"session_id\":\"s4\",\"hook_event_name\":\"SessionStart\",\"cwd\":\"$TEST_PROJECT_DIR\"}" | bash hooks/dashboard-launch.sh'
+  # Give the background wait loop a moment to execute
+  sleep 1
   [ -f "$HOME/.agentops/open-calls.log" ]
   grep -q "http://localhost:3100" "$HOME/.agentops/open-calls.log"
 }
