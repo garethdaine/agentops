@@ -1,61 +1,122 @@
 import type { Zone, Workstation, Position3D } from '@/types/office';
 
-/** Floor dimensions. */
-export const FLOOR_WIDTH = 20;
-export const FLOOR_DEPTH = 16;
+/** Floor dimensions matching reference 28x22 layout. */
+export const FLOOR_WIDTH = 28;
+export const FLOOR_DEPTH = 22;
 
-/** Zone definitions for the office floor plan. */
+/**
+ * Zone definitions for the office floor plan.
+ * 10 zones matching the reference layout with positions and sizes.
+ */
 export const ZONES: Zone[] = [
+  /** Server racks with LED health indicators and traffic light. */
+  {
+    id: 'serverRack',
+    name: 'Server Room',
+    position: { x: -10.5, y: 0, z: -8.5 },
+    size: { width: 5, depth: 3 },
+  },
+  /** Operations wall with 6-screen display for active run monitoring. */
+  {
+    id: 'warRoom',
+    name: 'War Room',
+    position: { x: 1, y: 0, z: -8.5 },
+    size: { width: 18, depth: 3 },
+  },
+  /** Security checkpoint with barrier gate and runtime-mode LEDs. */
+  {
+    id: 'securityDesk',
+    name: 'Security',
+    position: { x: -11, y: 0, z: -3.5 },
+    size: { width: 4, depth: 5 },
+  },
+  /** Primary agent workspace with 9 desk slots in a 2-row grid. */
   {
     id: 'workstations',
     name: 'Workstations',
-    position: { x: 0, y: 0, z: -1 },
-    size: { width: 16, depth: 8 },
+    position: { x: 2, y: 0, z: -2.5 },
+    size: { width: 22, depth: 7 },
   },
+  /** Communications hub with Discord/Slack/Telegram-style mail stations. */
   {
-    id: 'serverRoom',
-    name: 'Server Room',
-    position: { x: -7, y: 0, z: -6.5 },
-    size: { width: 4, depth: 3 },
+    id: 'mailroom',
+    name: 'Comms Hub',
+    position: { x: -11, y: 0, z: 3 },
+    size: { width: 4, depth: 4 },
   },
+  /** Meeting area with table, 8 chairs, and whiteboard for delegation. */
   {
     id: 'conference',
-    name: 'Conference',
-    position: { x: 6, y: 0, z: 5 },
+    name: 'Conference Room',
+    position: { x: -2, y: 0, z: 7 },
+    size: { width: 12, depth: 4 },
+  },
+  /** Archives with bookshelves and filing cabinet for knowledge storage. */
+  {
+    id: 'vault',
+    name: 'Archives',
+    position: { x: 10, y: 0, z: 6 },
+    size: { width: 6, depth: 3 },
+  },
+  /** Tool benches for filesystem, shell, web, and MCP tool types. */
+  {
+    id: 'toolWorkshop',
+    name: 'Tool Workshop',
+    position: { x: -10, y: 0, z: 7 },
     size: { width: 6, depth: 4 },
   },
+  /** Relaxation area with kitchen counter, ping pong table, and idea board. */
   {
     id: 'breakRoom',
     name: 'Break Room',
-    position: { x: -6, y: 0, z: 5.5 },
-    size: { width: 5, depth: 3 },
+    position: { x: 10, y: 0, z: 9.5 },
+    size: { width: 6, depth: 3 },
+  },
+  /** Alarm zone with pulsing bell for rate-limited or overloaded states. */
+  {
+    id: 'escalation',
+    name: 'Escalation',
+    position: { x: -8, y: 0, z: 1 },
+    size: { width: 2, depth: 2 },
   },
 ];
 
-/** Zone tint colors (hex) — light office-style palette. */
+/** Zone tint colors (hex) — dark office-style palette matching reference. */
 export const ZONE_TINTS: Record<string, string> = {
-  workstations: '#8899aa',
-  serverRoom: '#7788a0',
-  conference: '#99aabb',
-  breakRoom: '#aabbcc',
+  serverRack: '#12182e',
+  warRoom: '#141e36',
+  securityDesk: '#1a1620',
+  workstations: '#16213e',
+  mailroom: '#161e30',
+  conference: '#141a30',
+  vault: '#18162a',
+  toolWorkshop: '#161620',
+  breakRoom: '#1a1e22',
+  escalation: '#1a1020',
 };
 
-/** Base floor color (hex) — light grey concrete. */
-export const BASE_FLOOR_COLOR = '#9ca3af';
+/** Base floor color (hex) — dark navy concrete. */
+export const BASE_FLOOR_COLOR = '#0e1629';
 
-/** Workstation layout positions for 4-6 desks. */
+/** Workstation slot layout definition. */
 export interface WorkstationSlot {
   position: [number, number, number];
   rotation: number;
 }
 
+/** Workstation layout positions — 9 desks in a 2-row grid. */
 export const WORKSTATION_SLOTS: WorkstationSlot[] = [
-  { position: [-4.5, 0, -2], rotation: 0 },
-  { position: [-1.5, 0, -2], rotation: 0 },
-  { position: [1.5, 0, -2], rotation: 0 },
-  { position: [4.5, 0, -2], rotation: 0 },
-  { position: [-3, 0, 1], rotation: Math.PI },
-  { position: [3, 0, 1], rotation: Math.PI },
+  // Row 1 (front): 4 desks facing forward
+  { position: [-6, 0, -4], rotation: 0 },
+  { position: [-3, 0, -4], rotation: 0 },
+  { position: [0, 0, -4], rotation: 0 },
+  { position: [3, 0, -4], rotation: 0 },
+  // Row 2 (back): 5 desks facing backward
+  { position: [-6, 0, -1], rotation: Math.PI },
+  { position: [-3, 0, -1], rotation: Math.PI },
+  { position: [0, 0, -1], rotation: Math.PI },
+  { position: [3, 0, -1], rotation: Math.PI },
+  { position: [6, 0, -1], rotation: Math.PI },
 ];
 
 /** Create initial workstation state objects from the slot definitions. */
@@ -86,19 +147,14 @@ const HALF_D = FLOOR_DEPTH / 2;
 const WALL_Y = WALL_HEIGHT / 2;
 
 export const WALL_PARTITIONS: WallPartition[] = [
-  // ── Outer walls (perimeter) ──
   // Back wall (full width)
   { position: [0, WALL_Y, -HALF_D], size: [FLOOR_WIDTH, WALL_HEIGHT, WALL_THICKNESS], rotation: 0 },
-  // Front wall left section (with door gap in center)
-  { position: [-5.5, WALL_Y, HALF_D], size: [9, WALL_HEIGHT, WALL_THICKNESS], rotation: 0 },
+  // Front wall left section (with door gap)
+  { position: [-(FLOOR_WIDTH / 4), WALL_Y, HALF_D], size: [FLOOR_WIDTH / 2, WALL_HEIGHT, WALL_THICKNESS], rotation: 0 },
   // Front wall right section
-  { position: [5.5, WALL_Y, HALF_D], size: [9, WALL_HEIGHT, WALL_THICKNESS], rotation: 0 },
+  { position: [FLOOR_WIDTH / 4, WALL_Y, HALF_D], size: [FLOOR_WIDTH / 2, WALL_HEIGHT, WALL_THICKNESS], rotation: 0 },
   // Left wall
   { position: [-HALF_W, WALL_Y, 0], size: [WALL_THICKNESS, WALL_HEIGHT, FLOOR_DEPTH], rotation: 0 },
   // Right wall
   { position: [HALF_W, WALL_Y, 0], size: [WALL_THICKNESS, WALL_HEIGHT, FLOOR_DEPTH], rotation: 0 },
-
-  // ── Interior partitions (low, waist-height) ──
-  // Divider between workstation area and back zones
-  { position: [0, 0.5, 3.5], size: [8, 1.0, 0.08], rotation: 0 },
 ];
