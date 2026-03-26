@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability (Critical/High)
+    url: https://github.com/garethdaine/agentops-plugin/security/policy
+    about: For critical or high-severity vulnerabilities, please follow the security policy and report privately.
+  - name: Questions & Discussion
+    url: https://github.com/garethdaine/agentops-plugin/discussions
+    about: Ask questions or discuss ideas before opening an issue.

@@ -1,0 +1,92 @@
+name: Feature Request
+description: Suggest a new hook, command, agent, template, or improvement
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for AgentOps? Describe the problem it solves and how you'd like it to work.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of AgentOps does this relate to?
+      options:
+        - Hook — new security hook or improvement
+        - Hook — new automation hook or improvement
+        - Command — new slash command
+        - Command — improve existing command
+        - Agent — new specialist agent
+        - Template — new or improved template
+        - Feature flag — new toggle or configuration
+        - Build lifecycle — phase improvement
+        - Enterprise feature
+        - CI/CD / tooling
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this feature solve? Why is it needed?
+      placeholder: |
+        Currently there's no way to... which means that during the build lifecycle...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How do you envision this working?
+      placeholder: |
+        Add a new hook `hooks/my-hook.sh` that runs during PostToolUse and...
+        Or add a new flag `my_feature_enabled` that controls...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: lifecycle-phase
+    attributes:
+      label: Build Lifecycle Phase
+      description: If applicable, which phase of the 8.5-phase build lifecycle does this affect?
+      options:
+        - "N/A"
+        - "Phase 1: Brainstorm"
+        - "Phase 2: Interrogation"
+        - "Phase 3: Planning"
+        - "Phase 4: Task Breakdown"
+        - "Phase 4.5: Scaffold"
+        - "Phase 5: Execution"
+        - "Phase 6: Review"
+        - "Phase 7: Verification"
+        - "Phase 8: Approval"
+        - Multiple phases
+        - Pre/post lifecycle (session hooks)
+
+  - type: dropdown
+    id: security-impact
+    attributes:
+      label: Security Impact
+      description: Does this change affect the security posture?
+      options:
+        - No security impact
+        - Improves security
+        - Potentially weakens a security layer (needs review)
+        - New security layer / defence
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any other approaches you've thought about?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Examples, mockups, references to similar tools, related issues.
