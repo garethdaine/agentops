@@ -1,0 +1,128 @@
+name: Bug Report
+description: Report a bug in AgentOps hooks, commands, or build lifecycle
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please fill in the details below so we can reproduce and fix it.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of AgentOps is affected?
+      options:
+        - Hook — security (validate-command, validate-path, validate-env, injection-scan, exfiltration-check, credential-redact, content-trust)
+        - Hook — automation (auto-plan, auto-test, auto-verify, auto-evolve, auto-lesson)
+        - Hook — session lifecycle (session-cleanup, todo-prune, budget-check, integrity-verify)
+        - Command — core (/build, /plan, /interrogate, /verify, /evolve, /configure, /flags)
+        - Command — enterprise (/feature, /scaffold, /review, /test-gen, /reason, /design, /adr)
+        - Agent (code-critic, security-reviewer, researchers, plan-validator)
+        - Template
+        - Feature flags / configuration
+        - CI/CD workflow
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect to happen?
+      placeholder: |
+        **What happened:**
+        The auto-plan hook blocked a non-destructive edit...
+
+        **Expected:**
+        The hook should have allowed the edit and only gated destructive operations...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Minimal steps to trigger the bug.
+      placeholder: |
+        1. Enable `auto_plan_enabled` flag
+        2. Run `/agentops:build` with a simple task
+        3. Attempt to edit a file in `templates/`
+        4. Hook rejects with "plan required"
+    validations:
+      required: true
+
+  - type: textarea
+    id: hook-output
+    attributes:
+      label: Hook / Command Output
+      description: Paste any relevant hook output, error messages, or audit log entries. Redact any secrets.
+      render: shell
+
+  - type: input
+    id: agentops-version
+    attributes:
+      label: AgentOps Version
+      description: "Run: `npm ls @garethdaine/agentops` or check package.json"
+      placeholder: "0.9.3"
+    validations:
+      required: true
+
+  - type: input
+    id: claude-version
+    attributes:
+      label: Claude Code Version
+      description: "Run: `claude --version`"
+      placeholder: "1.0.x"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - macOS
+        - Linux (Debian/Ubuntu)
+        - Linux (other)
+        - Windows (WSL)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: shell
+    attributes:
+      label: Shell
+      options:
+        - zsh
+        - bash
+        - fish
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: autonomy
+    attributes:
+      label: Autonomy Level
+      description: What autonomy mode was active when the bug occurred?
+      options:
+        - guided (default)
+        - supervised
+        - autonomous
+        - "N/A"
+
+  - type: textarea
+    id: flags
+    attributes:
+      label: Relevant Feature Flags
+      description: Paste your `.agentops/flags.json` or list the flags relevant to this bug. Redact any sensitive values.
+      render: json
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Anything else — screenshots, audit log snippets, related issues.

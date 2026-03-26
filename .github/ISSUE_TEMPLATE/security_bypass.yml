@@ -1,0 +1,80 @@
+name: Security Bypass
+description: Report a bypass or weakness in a security hook (non-critical — for critical vulns use SECURITY.md)
+title: "[security] "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **For critical vulnerabilities** (code execution, full hook bypass), please follow the
+        [security policy](../SECURITY.md) and email directly instead of opening an issue.
+
+        Use this template for defence-in-depth weaknesses, partial bypasses, or hardening opportunities
+        that are safe to discuss publicly.
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Security Layer
+      description: Which of the 7 security layers is affected?
+      options:
+        - "Layer 1: Command validation (validate-command.sh)"
+        - "Layer 2: Path validation (validate-path.sh)"
+        - "Layer 3: Environment protection (validate-env.sh)"
+        - "Layer 4: Injection detection (injection-scan.sh)"
+        - "Layer 5: Exfiltration prevention (exfiltration-check.sh)"
+        - "Layer 6: Credential redaction (credential-redact.sh)"
+        - "Layer 7: Content trust (content-trust.sh)"
+        - Supply chain (unicode-firewall, integrity-verify, lockfile-audit)
+        - Feature flag enforcement
+        - Multiple layers
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How impactful is this weakness?
+      options:
+        - Low — hardening opportunity
+        - Medium — defence-in-depth weakness
+        - High — partial bypass of a security layer
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the bypass or weakness. Include the specific pattern or input that triggers it.
+      placeholder: |
+        The injection-scan hook does not detect [pattern] when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Steps or example input to demonstrate the weakness.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Fix
+      description: If you have an idea for how to address this.
+      placeholder: |
+        Add pattern matching for... in the hook's detection regex.
+
+  - type: checkbox
+    id: fail-closed
+    attributes:
+      label: Fail-Closed Check
+      description: Confirm the current behaviour.
+      options:
+        - label: The hook currently fails open (allows the action) rather than fail-closed (blocks it)
