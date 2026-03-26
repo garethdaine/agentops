@@ -202,21 +202,32 @@ run_hook() {
 # ── Edge cases ───────────────────────────────────────────────────────────────
 
 @test "handles empty input gracefully" {
-  result=$(echo "" | bash "$HOOKS_DIR/failure-collector.sh" 2>&1) || true
-  # Should not crash — exit 0 or silently fail
-  true
+  run bash "$HOOKS_DIR/failure-collector.sh" < /dev/null
+  # Should succeed without crashing
+  [ "$status" -eq 0 ]
+  # Should create a log entry (fields may be empty or defaulted)
+  [ -f "$TEST_PROJECT_DIR/.agentops/failures.jsonl" ]
+  local ENTRY
+  ENTRY=$(head -1 "$TEST_PROJECT_DIR/.agentops/failures.jsonl")
+  # Entry must be valid JSON
+  echo "$ENTRY" | jq . >/dev/null 2>&1
 }
 
 @test "handles invalid JSON input gracefully" {
   result=$(echo "not json" | bash "$HOOKS_DIR/failure-collector.sh" 2>&1) || true
-  # Fields default to "unknown"
-  if [ -f "$TEST_PROJECT_DIR/.agentops/failures.jsonl" ]; then
-    local ENTRY
-    ENTRY=$(head -1 "$TEST_PROJECT_DIR/.agentops/failures.jsonl")
-    local TOOL
-    TOOL=$(echo "$ENTRY" | jq -r '.tool')
-    [ "$TOOL" = "unknown" ]
-  fi
+  # Should not crash, and should log an entry with defaulted fields.
+  [ -f "$TEST_PROJECT_DIR/.agentops/failures.jsonl" ]
+
+  local ENTRY
+  ENTRY=$(head -1 "$TEST_PROJECT_DIR/.agentops/failures.jsonl")
+
+  local TOOL
+  TOOL=$(echo "$ENTRY" | jq -r '.tool')
+  [ "$TOOL" = "unknown" ]
+
+  local SESSION
+  SESSION=$(echo "$ENTRY" | jq -r '.session')
+  [ "$SESSION" = "unknown" ]
 }
 
 @test "timestamp is in ISO 8601 UTC format" {
