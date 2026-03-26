@@ -378,6 +378,16 @@ export const PARTITION = {
   opacity: 1.0,
 } as const;
 
+/** Glass material props for windows and glass partitions. */
+export const GLASS_MATERIAL = {
+  transmission: 0.85,
+  roughness: 0.1,
+  thickness: 0.1,
+  color: '#aaddff',
+  transparent: true,
+  opacity: 0.3,
+} as const;
+
 /** Code color palettes for monitor animation, keyed by activity. */
 export const CODE_PALETTES: Record<string, string[]> = {
   typing: ['#66dd88', '#88aaff', '#aaddaa', '#dd8844'],

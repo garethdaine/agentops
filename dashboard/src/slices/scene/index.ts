@@ -2,3 +2,4 @@
 export { default as OfficeFloor } from './OfficeFloor';
 export { default as OfficeWalls } from './OfficeWalls';
 export { default as OfficeLighting } from './OfficeLighting';
+export { default as OfficeDecorations } from './OfficeDecorations';
