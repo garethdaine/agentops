@@ -44,38 +44,75 @@ PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 mkdir -p "$STATE_DIR" 2>/dev/null
 
-# Check if dashboard is already running
+# Ports used by the dashboard
+RELAY_PORT=3099
+NEXT_PORT=3100
+
+# Check if dashboard is already running — verify both ports
 dashboard_running() {
-  # Check PID file exists and port 3100 is in use
-  [ -f "$PID_FILE" ] && lsof -i :3100 >/dev/null 2>&1
+  [ -f "$PID_FILE" ] && lsof -i :"$NEXT_PORT" >/dev/null 2>&1 && lsof -i :"$RELAY_PORT" >/dev/null 2>&1
+}
+
+# Kill stale processes on dashboard ports and clean up PID file
+cleanup_stale() {
+  local stale=false
+  for port in $RELAY_PORT $NEXT_PORT; do
+    local pids
+    pids=$(lsof -ti :"$port" 2>/dev/null) || true
+    if [ -n "$pids" ]; then
+      stale=true
+      echo "$pids" | xargs kill 2>/dev/null || true
+    fi
+  done
+  if [ "$stale" = true ]; then
+    rm -f "$PID_FILE"
+    sleep 1
+  fi
 }
 
 if dashboard_running; then
-  # Dashboard already running — nothing to do
   exit 0
 fi
 
+# Clean up any stale processes from previous sessions
+cleanup_stale
+
 # Launch relay + Next.js in background
-# Use the dashboard's local node_modules binaries directly for reliability
 DASHBOARD_BIN="$PLUGIN_ROOT/dashboard/node_modules/.bin"
 LOG_DIR="$STATE_DIR"
-
 DASHBOARD_DIR="$PLUGIN_ROOT/dashboard"
 
+# Relay — launch from plugin root so relay.ts resolves paths correctly
 nohup "$DASHBOARD_BIN/tsx" "$DASHBOARD_DIR/server/relay.ts" > "$LOG_DIR/relay.log" 2>&1 &
 RELAY_PID=$!
-(cd "$DASHBOARD_DIR" && nohup "$DASHBOARD_BIN/next" dev --port 3100 > "$LOG_DIR/next.log" 2>&1) &
+
+# Next.js — must run from dashboard dir; use exec to avoid subshell nohup issues with Turbopack
+nohup bash -c "cd '$DASHBOARD_DIR' && exec '$DASHBOARD_BIN/next' dev --port $NEXT_PORT" > "$LOG_DIR/next.log" 2>&1 &
 NEXT_PID=$!
+
 echo "$RELAY_PID $NEXT_PID" > "$PID_FILE"
+
+# Verify processes started — clean up if either died immediately
+sleep 1
+if ! kill -0 "$RELAY_PID" 2>/dev/null; then
+  kill "$NEXT_PID" 2>/dev/null || true
+  rm -f "$PID_FILE"
+  exit 0
+fi
+if ! kill -0 "$NEXT_PID" 2>/dev/null; then
+  kill "$RELAY_PID" 2>/dev/null || true
+  rm -f "$PID_FILE"
+  exit 0
+fi
 
 # Wait for the server to be ready, then open browser (fully detached)
 {
   for _i in $(seq 1 30); do
-    if curl -s -o /dev/null http://localhost:3100 2>/dev/null; then
+    if curl -s -o /dev/null "http://localhost:$NEXT_PORT" 2>/dev/null; then
       if command -v open >/dev/null 2>&1; then
-        open http://localhost:3100
+        open "http://localhost:$NEXT_PORT"
       elif command -v xdg-open >/dev/null 2>&1; then
-        xdg-open http://localhost:3100
+        xdg-open "http://localhost:$NEXT_PORT"
       fi
       break
     fi

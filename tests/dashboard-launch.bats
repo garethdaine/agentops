@@ -26,10 +26,12 @@ echo "$@" >> "$HOME/.agentops/open-calls.log"
 OPENEOF
   chmod +x "$MOCK_BIN/open"
 
-  # Mock nohup: just record the call and exit (do NOT exec the real command)
+  # Mock nohup: record the call, then exec sleep so the process stays alive
+  # for the hook's kill -0 verification check
   cat > "$MOCK_BIN/nohup" << 'NOHUPEOF'
 #!/bin/bash
 echo "$@" >> "$HOME/.agentops/nohup-calls.log"
+exec sleep 60
 NOHUPEOF
   chmod +x "$MOCK_BIN/nohup"
 
@@ -66,6 +68,10 @@ CURLEOF
 }
 
 teardown() {
+  # Kill any mock dashboard processes spawned during the test
+  if [ -f "$TEST_PROJECT_DIR/.agentops/dashboard.pid" ]; then
+    xargs kill 2>/dev/null < "$TEST_PROJECT_DIR/.agentops/dashboard.pid" || true
+  fi
   teardown_project_dir
 }
 
