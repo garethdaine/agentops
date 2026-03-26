@@ -6,7 +6,7 @@
 
 A plugin for [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) that wraps every session in 7 security layers, structures work with the STAR methodology, auto-pilots workflows, delegates to 12 specialist agents, learns from failures via self-evolution, and orchestrates full project builds from vision to merged PR.
 
-37 slash commands | 44 hooks | 12 specialist agents | 49 templates | 32+ feature flags
+40 slash commands | 44 hooks | 12 specialist agents | 49 templates | 33+ feature flags | real-time 3D dashboard
 
 [![Tests](https://github.com/garethdaine/agentops/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/garethdaine/agentops/actions/workflows/tests.yml)
 [![Lint](https://github.com/garethdaine/agentops/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/garethdaine/agentops/actions/workflows/lint.yml)
@@ -44,7 +44,7 @@ On first session, the plugin auto-initializes `.agentops/` with default flags an
 | Dimension | AgentOps | GSD (~31K stars) | Superpowers (~50K stars) |
 |-----------|----------|-------------------|--------------------------|
 | **Core identity** | Enterprise guardrailing + full delivery lifecycle | Spec-driven meta-prompting to beat context rot | Skills-based methodology with TDD enforcement |
-| **Commands** | 37 | ~15 | ~10 (skill-based) |
+| **Commands** | 40 | ~15 | ~10 (skill-based) |
 | **Hooks** | 44 shell scripts across 7 lifecycle events | None (prompts only) | None (prompts only) |
 | **Agents** | 12 specialist agents | 4 parallel researchers + planner | Code reviewer agent |
 | **Security** | 7 layers (injection, exfiltration, supply-chain, Unicode, credential, path, env) | Minimal | None |
@@ -61,6 +61,7 @@ On first session, the plugin auto-initializes `.agentops/` with default flags an
 | **Observability** | Audit logs, OTLP telemetry, file provenance, cost budgets | None | None |
 | **Configurable autonomy** | guided / supervised / autonomous | N/A | N/A |
 | **Linear integration** | Task sync (create, status update, close) | None | None |
+| **Real-time dashboard** | 3D office scene (React Three Fiber) + 2D fallback, WebSocket relay | None | None |
 
 ### What AgentOps does that neither competitor does
 
@@ -68,6 +69,7 @@ On first session, the plugin auto-initializes `.agentops/` with default flags an
 2. **EvoSkill self-evolution.** The failure-collector → proposer → skill-builder → feedback-history pipeline auto-generates skills from failures. No manual intervention.
 3. **Full observability.** Structured audit logs, OTLP telemetry export, file provenance tracking, and cost budgets with session-level granularity.
 4. **8.5-phase build lifecycle.** From brainstorm to merged PR with state machine, resumability, human gates, parallel research, TDD enforcement, two-stage review, and Nyquist verification — all configurable via feature flags and autonomy levels.
+5. **Real-time 3D agent dashboard.** A Next.js 16 + React Three Fiber office scene that visualizes agent activity live via WebSocket relay from telemetry JSONL, with 2D fallback for non-GPU environments.
 
 ---
 
@@ -78,7 +80,7 @@ The plugin integrates through four extension points:
 | Extension Point | Location | Count | Purpose |
 |-----------------|----------|-------|---------|
 | **Hooks** | `hooks/hooks.json` | 44 | Intercept tool use at every lifecycle event |
-| **Commands** | `commands/*.md` | 37 | User-facing slash commands (`/agentops:*`) |
+| **Commands** | `commands/*.md` | 40 | User-facing slash commands (`/agentops:*`) |
 | **Agents** | `agents/*.md` | 12 | Specialist subagents for analysis and execution |
 | **Templates** | `templates/**/*.md` | 49 | Standards, architecture patterns, delivery docs |
 
@@ -134,7 +136,7 @@ Plus supply-chain defense: Unicode/Glassworm detection (`unicode-firewall.sh`), 
 
 ---
 
-## Commands (37)
+## Commands (40)
 
 ### Core Commands
 
@@ -181,6 +183,9 @@ Plus supply-chain defense: Unicode/Glassworm detection (`unicode-firewall.sh`), 
 | `/agentops:dev-setup` | Developer environment setup guide |
 | `/agentops:docker-dev` | Docker development environment configuration |
 | `/agentops:e2e` | End-to-end test planning and execution |
+| `/agentops:worklog` | Personal work log for tracking daily contributions |
+| `/agentops:idea` | Structured idea proposals with development and export |
+| `/agentops:search` | Unified search across work log, ideas, git history, and knowledge base |
 | `/agentops:herd` | Multi-agent coordination for complex tasks |
 
 ---
@@ -266,7 +271,7 @@ Standards are enforced via `templates/standards/standards-checklist.md` during P
 
 ---
 
-## Feature Flags (32+)
+## Feature Flags (33+)
 
 All flags default to sensible values and are toggleable via `/agentops:flags` or `.agentops/flags.json`.
 
@@ -281,6 +286,9 @@ All flags default to sensible values and are toggleable via `/agentops:flags` or
 
 ### Build lifecycle flags
 `build_tdd_enforced`, `build_parallel_research`, `build_xml_plans`, `build_linear_sync`, `build_fresh_context`, `build_wave_parallel`, `build_nyquist_enforce`, `build_persuasion`, `build_quick_mode`, `build_scaffold_auto`, `build_standards_inject`, `standards_enforcement_mode`
+
+### Dashboard flags
+`dashboard_enabled`
 
 ### Enterprise flags
 `enterprise_scaffold`, `ai_workflows`, `unified_review`, `architecture_guardrails`, `delivery_lifecycle`, `team_governance`, `client_comms`
@@ -311,6 +319,37 @@ All flags default to sensible values and are toggleable via `/agentops:flags` or
 | Build execution | `.agentops/build-execution.jsonl` | Per-task execution log with TDD phase tracking |
 | Failure log | `.agentops/failures.jsonl` | Tool failures for EvoSkill analysis |
 | Integrity | `.agentops/integrity.jsonl` | SHA-256 manifest of agent-written files |
+
+---
+
+## Agent Office Dashboard
+
+A real-time 3D visualization of agent activity, built with Next.js 16, React Three Fiber, and Shadcn UI.
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| **3D office scene** | Workstations with lighting, agent avatars, and animations via React Three Fiber |
+| **Real-time state** | WebSocket relay server streams agent activity from JSONL telemetry files |
+| **2D fallback** | Activity table with WebGL detection for environments without GPU support |
+| **Session registry** | Auto-registers sessions from incoming telemetry with stale detection |
+| **Connection status** | Live indicator showing relay connection health |
+| **Lifecycle management** | Proper Three.js disposal and resource cleanup |
+
+### How it works
+
+```
+hooks/telemetry.sh → .agentops/telemetry.jsonl
+        ↓
+dashboard/server/file-watcher.ts (byte-offset tracking)
+        ↓
+dashboard/server/relay.ts (WebSocket with origin validation)
+        ↓
+dashboard/src/ (Zustand store → 3D scene / 2D table)
+```
+
+The dashboard launches automatically when `dashboard_enabled` is `true` in `.agentops/flags.json`. The `dashboard-launch.sh` hook starts the Next.js dev server and WebSocket relay on session start.
 
 ---
 
@@ -376,7 +415,11 @@ agentops-plugin/
 │   ├── communication/              # Stakeholder comms templates
 │   ├── workflows/                  # Feature, refactor, spike, bug workflows
 │   └── scaffolds/                  # Error handling, logging, health checks
-├── tests/                          # BATS test suite
+├── dashboard/                      # Agent Office Dashboard (Next.js 16)
+│   ├── src/                        # React components, stores, types
+│   ├── server/                     # WebSocket relay + JSONL file watcher
+│   └── tests/                      # Dashboard unit tests (Vitest)
+├── tests/                          # 20 BATS test files (security, automation, dashboard)
 ├── docs/                           # Architecture docs
 ├── settings.json                   # Plugin permission defaults
 ├── LICENSE                         # MIT
@@ -387,18 +430,37 @@ agentops-plugin/
 
 ## Testing
 
-The plugin includes a BATS test suite covering security hooks:
+The plugin includes 20 BATS test files covering security hooks, automation hooks, and dashboard integration:
 
 ```bash
 # Run all tests
 bats tests/
 
-# Run specific test file
+# Security hooks
 bats tests/validate-command.bats
+bats tests/validate-path.bats
+bats tests/validate-env.bats
 bats tests/injection-scan.bats
 bats tests/exfiltration-check.bats
-bats tests/validate-path.bats
+bats tests/credential-redact.bats
+bats tests/content-trust.bats
 bats tests/feature-flags.bats
+
+# Automation hooks
+bats tests/auto-test.bats
+bats tests/auto-plan.bats
+bats tests/auto-verify.bats
+bats tests/auto-lesson.bats
+bats tests/auto-evolve.bats
+bats tests/auto-delegate.bats
+bats tests/failure-collector.bats
+bats tests/evolve-gate.bats
+
+# Dashboard
+bats tests/dashboard-flag.bats
+bats tests/dashboard-launch.bats
+bats tests/session-registry.bats
+bats tests/telemetry-pretool.bats
 ```
 
 ---
