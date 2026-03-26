@@ -27,7 +27,7 @@ if [ "$EVENT" = "PostToolUse" ]; then
       [ -z "$HASH" ] && exit 0
 
       # Make path relative to project for portability
-      REL_PATH="${FILE_PATH#$PROJECT_DIR/}"
+      REL_PATH="${FILE_PATH#"$PROJECT_DIR"/}"
 
       SESSION=$(echo "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null)
       TS=$(date -u +%FT%TZ)
@@ -69,7 +69,7 @@ if [ "$EVENT" = "SessionStart" ]; then
 
     if [ "$ACTUAL" != "$EXPECTED" ]; then
       MISMATCH_COUNT=$((MISMATCH_COUNT + 1))
-      REL="${ABS#$PROJECT_DIR/}"
+      REL="${ABS#"$PROJECT_DIR"/}"
       MISMATCHES="${MISMATCHES}\n  - ${REL} (expected: ${EXPECTED:0:12}... got: ${ACTUAL:0:12}...)"
     fi
   done

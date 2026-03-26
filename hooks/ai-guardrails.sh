@@ -32,7 +32,6 @@ fi
 FILENAME=$(basename "$FILE_PATH")
 EXTENSION="${FILENAME##*.}"
 DIR=$(dirname "$FILE_PATH")
-CWD=$(echo "$INPUT" | jq -r '.cwd // "."' 2>/dev/null)
 
 MESSAGES=()
 

@@ -9,7 +9,6 @@ INPUT=$(cat) || exit 0
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || exit 0
 
 SENSITIVE_EXTENSIONS='\.(env|pem|key|crt|secret|p12|pfx|credential|token|password|ssh)'
-SENSITIVE_CONFIG='\.(json|yaml|yml|toml|cfg|ini)$'
 
 # Handle Read tool — warn when reading sensitive files
 if [ "$TOOL" = "Read" ]; then
