@@ -10,11 +10,12 @@ TS=$(date -u +%FT%TZ)
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // "unknown"' 2>/dev/null) || EVENT="unknown"
 SESSION=$(echo "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null) || SESSION="unknown"
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL=""
+CWD=$(echo "$INPUT" | jq -r '.cwd // ""' 2>/dev/null) || CWD=""
 
 jq -nc \
   --arg ts "$TS" --arg event "$EVENT" --arg session "$SESSION" \
-  --arg tool "$TOOL" \
-  '{ts:$ts, event:$event, session:$session, tool:$tool}' >> "$LOG_FILE" 2>/dev/null || true
+  --arg tool "$TOOL" --arg cwd "$CWD" \
+  '{ts:$ts, event:$event, session:$session, tool:$tool, cwd:$cwd}' >> "$LOG_FILE" 2>/dev/null || true
 
 # Forward to OTLP if configured — validate endpoint with hostname allowlist
 if [ -n "${OTLP_ENDPOINT:-}" ]; then
@@ -52,14 +53,14 @@ if [ -n "${OTLP_ENDPOINT:-}" ]; then
 
   PAYLOAD=$(tail -1 "$LOG_FILE" 2>/dev/null) || true
   if [ -n "$PAYLOAD" ]; then
-    AUTH_HEADER=""
+    CURL_ARGS=(
+      -sf --max-time 10 --connect-timeout 5 --no-location
+      -X POST "$OTLP_ENDPOINT/v1/logs"
+      -H "Content-Type: application/json"
+    )
     if [ -n "${OTLP_AUTH_TOKEN:-}" ]; then
-      AUTH_HEADER="-H \"Authorization: Bearer ${OTLP_AUTH_TOKEN}\""
+      CURL_ARGS+=(-H "Authorization: Bearer ${OTLP_AUTH_TOKEN}")
     fi
-    eval curl -sf --max-time 10 --connect-timeout 5 --no-location \
-      -X POST "$OTLP_ENDPOINT/v1/logs" \
-      -H "Content-Type: application/json" \
-      $AUTH_HEADER \
-      -d "'$PAYLOAD'" '&>/dev/null &'
+    printf '%s' "$PAYLOAD" | curl "${CURL_ARGS[@]}" --data-binary @- &>/dev/null &
   fi
 fi

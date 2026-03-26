@@ -31,6 +31,9 @@ Available flags:
 - `lockfile_audit_enabled` (bool) — Scan lockfiles for Unicode anomalies and suspicious registries
 - `enforcement_mode` ("advisory"|"blocking") — Advisory uses "ask", blocking uses "deny"
 
+Dashboard flags:
+- `dashboard_enabled` (bool) — Enable the Agent Office Dashboard auto-launch on session start
+
 Enterprise extension flags:
 - `enterprise_scaffold` (bool) — Enable project scaffolding system
 - `ai_workflows` (bool) — Enable AI-first workflow commands
