@@ -65,8 +65,9 @@ seed_tracker() {
 @test "exits silently when auto_delegate_enabled is false" {
   set_flag "auto_delegate_enabled" "false"
   seed_tracker 10
-  result=$(run_hook "$(write_event "src/app.ts")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "src/app.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "runs when auto_delegate_enabled is true" {
@@ -82,22 +83,25 @@ seed_tracker() {
 @test "ignores non-Write/Edit tools (Read)" {
   set_flag "auto_delegate_enabled" "true"
   seed_tracker 10
-  result=$(run_hook "$(other_tool_event "Read" "src/app.ts")")
-  [ -z "$result" ]
+  run run_hook "$(other_tool_event "Read" "src/app.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "ignores Bash tool events" {
   set_flag "auto_delegate_enabled" "true"
   seed_tracker 10
-  result=$(run_hook "$(other_tool_event "Bash" "src/app.ts")")
-  [ -z "$result" ]
+  run run_hook "$(other_tool_event "Bash" "src/app.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "ignores Glob tool events" {
   set_flag "auto_delegate_enabled" "true"
   seed_tracker 10
-  result=$(run_hook "$(other_tool_event "Glob" "src/app.ts")")
-  [ -z "$result" ]
+  run run_hook "$(other_tool_event "Glob" "src/app.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "responds to Write events" {
@@ -119,22 +123,25 @@ seed_tracker() {
 @test "ignores non-source-code files (markdown)" {
   set_flag "auto_delegate_enabled" "true"
   seed_tracker 10
-  result=$(run_hook "$(write_event "docs/README.md")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "docs/README.md")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "ignores config files (json)" {
   set_flag "auto_delegate_enabled" "true"
   seed_tracker 10
-  result=$(run_hook "$(write_event "package.json")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "package.json")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "ignores yaml files" {
   set_flag "auto_delegate_enabled" "true"
   seed_tracker 10
-  result=$(run_hook "$(write_event ".github/workflows/ci.yml")")
-  [ -z "$result" ]
+  run run_hook "$(write_event ".github/workflows/ci.yml")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 # ── Tracker dependency ───────────────────────────────────────────────────────
@@ -142,16 +149,18 @@ seed_tracker() {
 @test "exits silently when modified-files.txt does not exist" {
   set_flag "auto_delegate_enabled" "true"
   # Do NOT create the tracker file
-  result=$(run_hook "$(write_event "src/app.ts")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "src/app.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "exits silently when modified-files.txt is empty" {
   set_flag "auto_delegate_enabled" "true"
   mkdir -p "$TEST_PROJECT_DIR/.agentops"
   : > "$TEST_PROJECT_DIR/.agentops/modified-files.txt"
-  result=$(run_hook "$(write_event "src/app.ts")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "src/app.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 # ── Threshold behavior ───────────────────────────────────────────────────────
@@ -159,8 +168,9 @@ seed_tracker() {
 @test "no delegation for fewer than 5 unique source files" {
   set_flag "auto_delegate_enabled" "true"
   seed_tracker 4
-  result=$(run_hook "$(write_event "src/app.ts")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "src/app.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "delegation triggers at exactly 5 unique source files" {
@@ -190,8 +200,9 @@ src/a.ts
 src/b.ts
 src/c.ts
 EOF
-  result=$(run_hook "$(write_event "src/d.py")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "src/d.py")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "mixed source and non-source entries — only source files count" {
@@ -207,8 +218,9 @@ config.yaml
 src/d.rs
 EOF
   # 4 unique source files — still under threshold
-  result=$(run_hook "$(write_event "src/e.ts")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "src/e.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 # ── Delegation output structure ──────────────────────────────────────────────
@@ -297,8 +309,9 @@ EOF
   # Pre-create the marker
   mkdir -p "$TEST_PROJECT_DIR/.agentops"
   date -u +%FT%TZ > "$TEST_PROJECT_DIR/.agentops/delegate-sent"
-  result=$(run_hook "$(write_event "src/app.ts")")
-  [ -z "$result" ]
+  run run_hook "$(write_event "src/app.ts")"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "delegate-sent marker contains a timestamp" {
@@ -322,8 +335,9 @@ EOF
     tool_input: { file_path: "" },
     cwd: $cwd
   }')
-  result=$(run_hook "$event")
-  [ -z "$result" ]
+  run run_hook "$event"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "handles missing file_path field gracefully" {
@@ -335,11 +349,12 @@ EOF
     tool_input: {},
     cwd: $cwd
   }')
-  result=$(run_hook "$event")
-  [ -z "$result" ]
+  run run_hook "$event"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
-@test "empty input does not crash the hook" {
+@test "minimal JSON input does not crash the hook" {
   set_flag "auto_delegate_enabled" "true"
   run bash "$HOOKS_DIR/auto-delegate.sh" <<< '{}'
   [ "$status" -eq 0 ]
