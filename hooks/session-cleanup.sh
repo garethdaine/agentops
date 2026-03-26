@@ -3,9 +3,19 @@ set -uo pipefail
 
 INPUT=$(cat) || exit 0
 CWD=$(echo "$INPUT" | jq -r '.cwd // "."' 2>/dev/null) || CWD="."
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // ""' 2>/dev/null) || SESSION_ID=""
 STATE_DIR="${CWD}/.agentops"
 
 mkdir -p "$STATE_DIR" 2>/dev/null
+
+# ── Session Registry Cleanup ─────────────────────────────────────────────────
+# Remove previous session entry from the global active-sessions registry.
+REGISTRY_FILE="$HOME/.agentops/active-sessions.jsonl"
+if [ -n "$SESSION_ID" ] && [ -f "$REGISTRY_FILE" ]; then
+  TMP_REG=$(mktemp)
+  grep -v "\"session_id\":\"${SESSION_ID}\"" "$REGISTRY_FILE" > "$TMP_REG" 2>/dev/null || true
+  mv "$TMP_REG" "$REGISTRY_FILE" 2>/dev/null || true
+fi
 
 # Mark session start time for staleness checks
 date -u +%FT%TZ > "${STATE_DIR}/session-start" 2>/dev/null

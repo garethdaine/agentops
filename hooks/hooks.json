@@ -11,7 +11,8 @@
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/budget-check.sh", "timeout": 10 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/unicode-scan-session.sh", "timeout": 30 },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/integrity-verify.sh", "timeout": 15 },
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lockfile-audit.sh", "timeout": 15 }
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lockfile-audit.sh", "timeout": 15 },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/dashboard-launch.sh", "timeout": 5 }
         ]
       }
     ],
