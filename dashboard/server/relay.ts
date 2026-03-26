@@ -1,5 +1,6 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer, Server, IncomingMessage } from 'http';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { IdleDetector, cleanupPidFile } from './lifecycle';
@@ -80,19 +81,45 @@ export function startRelay(options: RelayOptions = {}): Promise<RelayHandle> {
       },
     });
 
+    // Grace period timer: shuts down when all browser tabs close
+    const DISCONNECT_GRACE_MS = 30_000; // 30 seconds
+    let disconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function clearDisconnectTimer(): void {
+      if (disconnectTimer) {
+        clearTimeout(disconnectTimer);
+        disconnectTimer = null;
+      }
+    }
+
+    function startDisconnectTimer(): void {
+      if (clients.size > 0) return;
+      clearDisconnectTimer();
+      log('info', `All clients disconnected — shutting down in ${DISCONNECT_GRACE_MS / 1000}s unless a client reconnects`);
+      disconnectTimer = setTimeout(() => {
+        if (clients.size === 0) {
+          log('info', 'Grace period expired with no clients — shutting down');
+          wss.emit('all-clients-gone');
+        }
+      }, DISCONNECT_GRACE_MS);
+    }
+
     wss.on('connection', (ws, req) => {
       const origin = req.headers.origin ?? 'unknown';
       clients.add(ws);
+      clearDisconnectTimer();
       log('info', `Client connected (origin: ${origin}, total: ${clients.size})`);
 
       ws.on('close', () => {
         clients.delete(ws);
         log('info', `Client disconnected (total: ${clients.size})`);
+        startDisconnectTimer();
       });
 
       ws.on('error', (err) => {
         log('error', `Client error: ${err.message}`);
         clients.delete(ws);
+        startDisconnectTimer();
       });
     });
 
@@ -168,6 +195,17 @@ if (isEntryPoint) {
       idleDetector?.stop();
       await fileWatcher?.stop();
       await Promise.all(sessionWatchers.map(w => w.stop()));
+
+      // Kill the Next.js companion process (PID file format: "RELAY_PID NEXT_PID")
+      try {
+        const pidContent = fs.readFileSync(pidFilePath, 'utf-8').trim();
+        const nextPid = parseInt(pidContent.split(' ')[1], 10);
+        if (nextPid && !isNaN(nextPid)) {
+          log('info', `Killing Next.js process (PID ${nextPid})`);
+          try { process.kill(nextPid, 'SIGTERM'); } catch { /* already gone */ }
+        }
+      } catch { /* PID file missing or unreadable */ }
+
       await cleanupPidFile(pidFilePath);
       await relay.close();
       process.exit(0);
@@ -184,6 +222,12 @@ if (isEntryPoint) {
       void shutdown();
     });
     idleDetector.start();
+
+    // Browser-close shutdown: all WebSocket clients disconnected for 30s
+    relay.wss.on('all-clients-gone', () => {
+      log('info', 'All browser tabs closed — initiating shutdown');
+      void shutdown();
+    });
 
     // Wire FileWatcher to relay broadcast (SPEC-001 fix)
     // Discover session directories from registry, watch each .agentops/ dir

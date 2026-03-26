@@ -47,18 +47,18 @@ mkdir -p "$STATE_DIR" 2>/dev/null
 RELAY_PORT=3099
 NEXT_PORT=3100
 
-# Quick check: if dashboard is already running with valid PID file and both ports, exit
-if [ -f "$PID_FILE" ] && lsof -i :"$NEXT_PORT" >/dev/null 2>&1 && lsof -i :"$RELAY_PORT" >/dev/null 2>&1; then
+# Quick check: if dashboard is already running with valid PID file and both ports LISTENING, exit
+if [ -f "$PID_FILE" ] && lsof -iTCP:"$NEXT_PORT" -sTCP:LISTEN >/dev/null 2>&1 && lsof -iTCP:"$RELAY_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
   exit 0
 fi
 
 # Detach the full cleanup + launch sequence so the hook returns immediately.
 # This avoids the hook timeout (5s) killing the launch mid-flight.
 (
-  # Kill stale processes on dashboard ports
+  # Kill stale server processes on dashboard ports (only LISTEN sockets, not browser clients)
   stale=false
   for port in $RELAY_PORT $NEXT_PORT; do
-    pids=$(lsof -ti :"$port" 2>/dev/null) || true
+    pids=$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null) || true
     if [ -n "$pids" ]; then
       stale=true
       echo "$pids" | xargs kill 2>/dev/null || true
@@ -70,7 +70,7 @@ fi
     # Wait for ports to actually be released (up to 5 seconds)
     attempts=0
     while [ $attempts -lt 10 ]; do
-      if ! lsof -ti :"$RELAY_PORT" >/dev/null 2>&1 && ! lsof -ti :"$NEXT_PORT" >/dev/null 2>&1; then
+      if ! lsof -tiTCP:"$RELAY_PORT" -sTCP:LISTEN >/dev/null 2>&1 && ! lsof -tiTCP:"$NEXT_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
         break
       fi
       sleep 0.5
@@ -79,7 +79,7 @@ fi
     # Force-kill if still hanging after graceful attempt
     if [ $attempts -ge 10 ]; then
       for port in $RELAY_PORT $NEXT_PORT; do
-        pids=$(lsof -ti :"$port" 2>/dev/null) || true
+        pids=$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null) || true
         [ -n "$pids" ] && echo "$pids" | xargs kill -9 2>/dev/null || true
       done
       sleep 1
@@ -89,7 +89,7 @@ fi
   # Ensure both ports are free before launching (handles TIME_WAIT / slow teardown)
   for port in $RELAY_PORT $NEXT_PORT; do
     attempts=0
-    while lsof -ti :"$port" >/dev/null 2>&1 && [ $attempts -lt 10 ]; do
+    while lsof -tiTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1 && [ $attempts -lt 10 ]; do
       sleep 0.5
       attempts=$((attempts + 1))
     done
