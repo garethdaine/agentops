@@ -5,9 +5,6 @@ import { startRelay, isLocalhostOrigin } from './relay';
 import type { Server } from 'http';
 import type { WebSocketServer } from 'ws';
 
-const RELAY_PORT = 3099;
-const RELAY_URL = `ws://localhost:${RELAY_PORT}`;
-
 interface RelayHandle {
   wss: WebSocketServer;
   httpServer: Server;
@@ -15,9 +12,17 @@ interface RelayHandle {
   close: () => Promise<void>;
 }
 
-function connectClient(origin?: string): Promise<WebSocket> {
+function getRelayUrl(relay: RelayHandle): string {
+  const addr = relay.httpServer.address();
+  if (addr && typeof addr === 'object') {
+    return `ws://localhost:${addr.port}`;
+  }
+  throw new Error('Server not listening');
+}
+
+function connectClient(relay: RelayHandle, origin?: string): Promise<WebSocket> {
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(RELAY_URL, {
+    const ws = new WebSocket(getRelayUrl(relay), {
       headers: origin ? { origin } : {},
     });
     ws.on('open', () => resolve(ws));
@@ -48,42 +53,42 @@ describe('WebSocket Relay', () => {
     }
   });
 
-  it('should start on port 3099', async () => {
-    relay = await startRelay({ port: RELAY_PORT });
-    const client = await connectClient('http://localhost:3100');
+  it('should start on a given port', async () => {
+    relay = await startRelay({ port: 0 });
+    const client = await connectClient(relay, 'http://localhost:3100');
     clients.push(client);
     expect(client.readyState).toBe(WebSocket.OPEN);
   });
 
   it('should reject non-localhost origins', async () => {
-    relay = await startRelay({ port: RELAY_PORT });
+    relay = await startRelay({ port: 0 });
 
     await expect(
-      connectClient('http://evil.example.com'),
+      connectClient(relay, 'http://evil.example.com'),
     ).rejects.toThrow();
   });
 
   it('should accept connections with various localhost origins', async () => {
-    relay = await startRelay({ port: RELAY_PORT });
+    relay = await startRelay({ port: 0 });
 
-    const c1 = await connectClient('http://localhost:3100');
+    const c1 = await connectClient(relay, 'http://localhost:3100');
     clients.push(c1);
     expect(c1.readyState).toBe(WebSocket.OPEN);
 
-    const c2 = await connectClient('http://127.0.0.1:3100');
+    const c2 = await connectClient(relay, 'http://127.0.0.1:3100');
     clients.push(c2);
     expect(c2.readyState).toBe(WebSocket.OPEN);
 
-    const c3 = await connectClient('http://[::1]:3100');
+    const c3 = await connectClient(relay, 'http://[::1]:3100');
     clients.push(c3);
     expect(c3.readyState).toBe(WebSocket.OPEN);
   });
 
   it('should broadcast events to connected clients', async () => {
-    relay = await startRelay({ port: RELAY_PORT });
+    relay = await startRelay({ port: 0 });
 
-    const c1 = await connectClient('http://localhost:3100');
-    const c2 = await connectClient('http://localhost:3100');
+    const c1 = await connectClient(relay, 'http://localhost:3100');
+    const c2 = await connectClient(relay, 'http://localhost:3100');
     clients.push(c1, c2);
 
     const msg1 = waitForMessage(c1);
@@ -98,10 +103,10 @@ describe('WebSocket Relay', () => {
   });
 
   it('should handle client disconnect without crash', async () => {
-    relay = await startRelay({ port: RELAY_PORT });
+    relay = await startRelay({ port: 0 });
 
-    const c1 = await connectClient('http://localhost:3100');
-    const c2 = await connectClient('http://localhost:3100');
+    const c1 = await connectClient(relay, 'http://localhost:3100');
+    const c2 = await connectClient(relay, 'http://localhost:3100');
     clients.push(c2);
 
     // Close first client
@@ -119,7 +124,7 @@ describe('WebSocket Relay', () => {
   });
 
   it('should handle broadcast with no connected clients', async () => {
-    relay = await startRelay({ port: RELAY_PORT });
+    relay = await startRelay({ port: 0 });
 
     // Broadcasting with no clients should not throw
     expect(() => {
