@@ -138,7 +138,7 @@ run_hook() {
 
 # ── Infinite loop prevention (Bash lesson operations) ────────────────────────
 
-@test "skips Bash failure when command references lessons." {
+@test "skips Bash failure when command references lessons" {
   result=$(run_hook "$(bash_failure_event "cat tasks/lessons.md" "file not found")")
   [ -z "$result" ]
 }
@@ -162,7 +162,7 @@ run_hook() {
 # ── Error truncation ────────────────────────────────────────────────────────
 
 @test "truncates long error messages to 300 characters" {
-  long_error=$(python3 -c "print('x' * 500)")
+  long_error=$(head -c 500 /dev/zero | tr '\0' 'x')
   result=$(run_hook "$(failure_event "Bash" "$long_error")")
   msg=$(echo "$result" | jq -r '.systemMessage')
   # The error portion in the message should be truncated
@@ -208,9 +208,13 @@ run_hook() {
 
 @test "handles missing tool_name gracefully" {
   input=$(jq -nc '{hook_event: "PostToolUseFailure", tool_result: "some error"}')
-  result=$(echo "$input" | bash "$HOOKS_DIR/auto-lesson.sh")
-  # Should exit cleanly (no crash), output may be empty or minimal
-  true  # If we got here without crash, the test passes
+  run bash "$HOOKS_DIR/auto-lesson.sh" <<<"$input"
+  # Should exit cleanly (no crash)
+  [ "$status" -eq 0 ]
+  # Output may be empty or minimal, but if present it should be valid JSON
+  if [ -n "$output" ]; then
+    echo "$output" | jq -e . >/dev/null
+  fi
 }
 
 @test "benign filter is case-insensitive" {
