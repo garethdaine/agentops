@@ -11,12 +11,24 @@ let intentionalClose = false;
 
 function handleMessage(event: MessageEvent): void {
   try {
-    const data = JSON.parse(event.data) as TelemetryEvent;
-    if (data.session) {
-      useAgentStore.getState().addEvent(data.session, data);
+    const data = JSON.parse(event.data);
+    const store = useAgentStore.getState();
+
+    if (data.event === 'delegation' && data.agent) {
+      // Delegation event: spawn a new subagent avatar (REQ-039, SPEC-010)
+      store.updateAgent({
+        session_id: data.session || `subagent-${Date.now()}`,
+        name: data.agent,
+        type: data.agent,
+        status: 'active',
+        currentTool: null,
+        lastEventAt: data.ts || new Date().toISOString(),
+      });
+    } else if (data.session) {
+      store.addEvent(data.session, data as TelemetryEvent);
     }
-  } catch {
-    // Skip malformed messages
+  } catch (err) {
+    console.debug('[ws] Skipping malformed message:', err);
   }
 }
 
