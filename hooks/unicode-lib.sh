@@ -15,9 +15,9 @@ UNICODE_PATTERN='[\x{200B}-\x{200F}\x{2060}-\x{2064}\x{FEFF}\x{202A}-\x{202E}\x{
 #        unicode_detect "filepath"
 unicode_detect() {
   if [ $# -gt 0 ]; then
-    perl -CSD -ne "if (/$UNICODE_PATTERN/) { exit 0 } END { exit 1 }" "$1" 2>/dev/null
+    perl -CSD -ne "BEGIN{\$r=1} if (/$UNICODE_PATTERN/) {\$r=0;last} END{exit \$r}" "$1" 2>/dev/null
   else
-    perl -CSD -ne "if (/$UNICODE_PATTERN/) { exit 0 } END { exit 1 }" 2>/dev/null
+    perl -CSD -ne "BEGIN{\$r=1} if (/$UNICODE_PATTERN/) {\$r=0;last} END{exit \$r}" 2>/dev/null
   fi
 }
 
@@ -25,7 +25,6 @@ unicode_detect() {
 # Usage: unicode_classify < file    OR    echo "$text" | unicode_classify
 #        unicode_classify "filepath"
 unicode_classify() {
-  local _ARGS=("$@")
   perl -CSD -ne '
     BEGIN { %c = () }
     $c{"zero-width chars"}++            if /[\x{200B}-\x{200F}\x{2060}-\x{2064}\x{FEFF}]/;
@@ -34,7 +33,7 @@ unicode_classify() {
     $c{"tag characters"}++              if /[\x{E0001}-\x{E007F}]/;
     $c{"variation sel. supplement"}++   if /[\x{E0100}-\x{E01EF}]/;
     END { print join(", ", sort keys %c) if %c }
-  ' "${_ARGS[@]}" 2>/dev/null
+  ' "$@" 2>/dev/null
 }
 
 # Count affected lines.
