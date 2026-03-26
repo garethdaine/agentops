@@ -1,0 +1,41 @@
+title: "[Workflow] "
+labels: ["workflow", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Delivery Workflow Discussion
+
+        Discuss the STAR methodology, build orchestration, review agents, feature flags, autonomy levels, and how you structure your AgentOps-powered workflows.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What's your question or topic?
+      description: Describe what you're trying to achieve or discuss.
+      placeholder: "e.g. How do others configure the auto-delegate threshold for monorepo projects?"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this relate to?
+      multiple: true
+      options:
+        - "/agentops:build lifecycle"
+        - STAR methodology
+        - Auto-planning / auto-test / auto-delegate
+        - Feature flags & presets
+        - Autonomy levels (guided / supervised / autonomous)
+        - Specialist agents
+        - EvoSkill self-evolution
+        - Linear integration
+        - Templates & standards
+        - General workflow
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Your current configuration, project type, or anything else relevant.

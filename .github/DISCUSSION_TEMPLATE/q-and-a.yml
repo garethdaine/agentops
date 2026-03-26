@@ -1,0 +1,37 @@
+title: ""
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Q&A
+
+        Ask anything about installing, configuring, or using AgentOps. No question is too basic.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What do you need help with?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Topic area (optional)
+      options:
+        - Installation / setup
+        - Configuration / feature flags
+        - Security hooks
+        - Build lifecycle
+        - Slash commands
+        - Agents
+        - Observability / audit logs
+        - Other
+
+  - type: textarea
+    id: context
+    attributes:
+      label: What have you tried? (optional)
+      description: Any relevant error messages, config snippets, or steps you've already taken.

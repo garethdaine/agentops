@@ -1,0 +1,40 @@
+title: "[Idea] "
+labels: ["idea", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Ideas
+
+        Got an idea for a new hook, command, agent, or capability? Share it here for community discussion before it becomes a formal feature request.
+
+        > **Tip:** Once an idea has community support, it can be promoted to a [feature request issue](https://github.com/garethdaine/agentops/issues/new?template=feature_request.yml).
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Describe your idea
+      description: What would you like AgentOps to do? What problem does it solve?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this idea relate to?
+      options:
+        - New hook
+        - New slash command
+        - New specialist agent
+        - New template
+        - Security enhancement
+        - Workflow improvement
+        - Integration (Linear, CI, etc.)
+        - Documentation
+        - Other
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered (optional)
+      description: Have you considered other approaches or workarounds?
