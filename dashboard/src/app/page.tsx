@@ -21,9 +21,11 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center relative">
-      <h1 className="text-4xl font-bold">Agent Office Dashboard</h1>
-      <div className="w-full flex-1">
+    <main className="flex h-screen flex-col relative overflow-hidden">
+      <header className="flex items-center justify-center py-2 bg-gray-900 text-white z-10 shrink-0">
+        <h1 className="text-lg font-bold">Agent Office Dashboard</h1>
+      </header>
+      <div className="flex-1 w-full relative" style={{ minHeight: 0 }}>
         {webglSupported === null ? null : webglSupported ? (
           <OfficeCanvas />
         ) : (

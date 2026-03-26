@@ -11,7 +11,7 @@ export const DESK = {
   surfaceY: 0.74,
   legRadius: 0.03,
   legHeight: 0.72,
-  color: '#8B7355',
+  color: '#b8956a',
   legColor: '#555555',
 } as const;
 
@@ -68,8 +68,8 @@ export const STATUS_COLORS: Record<string, string> = {
 
 /** Wall partition dimensions. */
 export const PARTITION = {
-  color: '#0f3460',
-  opacity: 0.9,
+  color: '#5a7d9a',
+  opacity: 0.85,
 } as const;
 
 /** Code color palettes for monitor animation, keyed by activity. */

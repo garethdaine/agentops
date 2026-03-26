@@ -32,16 +32,16 @@ export const ZONES: Zone[] = [
   },
 ];
 
-/** Zone tint colors (hex). */
+/** Zone tint colors (hex) — light office-style palette. */
 export const ZONE_TINTS: Record<string, string> = {
-  workstations: '#16213e',
-  serverRoom: '#12182e',
-  conference: '#141a30',
-  breakRoom: '#1a1e22',
+  workstations: '#8899aa',
+  serverRoom: '#7788a0',
+  conference: '#99aabb',
+  breakRoom: '#aabbcc',
 };
 
-/** Base floor color (hex). */
-export const BASE_FLOOR_COLOR = '#0e1629';
+/** Base floor color (hex) — light grey concrete. */
+export const BASE_FLOOR_COLOR = '#9ca3af';
 
 /** Workstation layout positions for 4-6 desks. */
 export interface WorkstationSlot {

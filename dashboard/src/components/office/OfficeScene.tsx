@@ -57,9 +57,14 @@ export default function OfficeScene() {
     <Canvas
       frameloop="demand"
       shadows
-      camera={{ position: [15, 12, 15], fov: 50 }}
+      camera={{ position: [18, 14, 18], fov: 45 }}
       gl={{ antialias: true }}
+      style={{ background: '#1a1a2e' }}
     >
+      {/* Sky-like gradient background */}
+      <color attach="background" args={['#1a1a2e']} />
+      <fog attach="fog" args={['#1a1a2e', 35, 60]} />
+
       <OfficeLighting />
       <OfficeFloor />
       <OfficeWalls />
