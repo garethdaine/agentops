@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { ActivityTable, detectWebGL } from '@/components/panels/ActivityTable';
-import { ConnectionStatus } from '@/components/panels/ConnectionStatus';
 import { connectWebSocket, disconnectWebSocket } from '@/hooks/useWebSocket';
 import { startWeatherPolling, classifyWeather } from '@/lib/weather-service';
 import { useOfficeStore } from '@/stores/office-store';
@@ -209,7 +208,6 @@ export default function Home() {
         </main>
       </div>
 
-      <ConnectionStatus />
     </div>
   );
 }

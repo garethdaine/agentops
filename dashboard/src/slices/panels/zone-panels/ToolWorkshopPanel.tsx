@@ -16,7 +16,7 @@ export default function ToolWorkshopPanel() {
 
   for (const events of recentEvents.values()) {
     for (const event of events) {
-      const tool = (event as Record<string, unknown>).tool as string | undefined;
+      const tool = (event as unknown as Record<string, unknown>).tool as string | undefined;
       if (tool && tool in toolCounts) {
         toolCounts[tool]++;
       }

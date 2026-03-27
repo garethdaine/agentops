@@ -2,13 +2,6 @@
 
 import React, { useMemo } from 'react';
 import { useStore } from 'zustand';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useOfficeStore } from '@/stores/office-store';
 import { useAgentStore } from '@/stores/agent-store';
@@ -107,43 +100,56 @@ export default function AgentDetailPanel() {
 
   const events = rawEvents as EventEntryData[];
 
+  if (!detailPanelOpen) return null;
+
   return (
-    <Sheet open={detailPanelOpen} onOpenChange={setDetailPanelOpen}>
-      <SheetContent side="right" className="w-[400px]">
-        <SheetHeader>
-          <SheetTitle>{agent?.name ?? 'Agent'}</SheetTitle>
-          <SheetDescription>{agent?.type ?? ''}</SheetDescription>
-        </SheetHeader>
+    <div className="fixed top-0 right-0 h-full w-[400px] z-50 bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-100">{agent?.name ?? 'Agent'}</h2>
+          <p className="text-xs text-gray-400">{agent?.type ?? ''}</p>
+        </div>
+        <button
+          onClick={() => setDetailPanelOpen(false)}
+          className="p-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors"
+          aria-label="Close panel"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-        {agent && (
-          <>
-            <Tabs defaultValue="overview" className="px-4">
-              <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="events">Events</TabsTrigger>
-                <TabsTrigger value="tools">Tools</TabsTrigger>
-              </TabsList>
+      {/* Content */}
+      {agent && (
+        <div className="flex-1 overflow-y-auto">
+          <Tabs defaultValue="overview" className="px-4 pt-2">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="tools">Tools</TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="overview">
-                {renderOverviewTab(agent)}
-              </TabsContent>
+            <TabsContent value="overview">
+              {renderOverviewTab(agent)}
+            </TabsContent>
 
-              <TabsContent value="events">
-                {renderEventsTab(events)}
-              </TabsContent>
+            <TabsContent value="events">
+              {renderEventsTab(events)}
+            </TabsContent>
 
-              <TabsContent value="tools">
-                {renderToolsTab(events)}
-              </TabsContent>
-            </Tabs>
+            <TabsContent value="tools">
+              {renderToolsTab(events)}
+            </TabsContent>
+          </Tabs>
 
-            <ControlPanel
-              agentStatus={(agent.status ?? 'idle') as AgentStatus}
-              sessionId={agent.session_id}
-            />
-          </>
-        )}
-      </SheetContent>
-    </Sheet>
+          <ControlPanel
+            agentStatus={(agent.status ?? 'idle') as AgentStatus}
+            sessionId={agent.session_id}
+          />
+        </div>
+      )}
+    </div>
   );
 }

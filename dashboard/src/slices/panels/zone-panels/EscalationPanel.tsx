@@ -13,7 +13,7 @@ export default function EscalationPanel() {
   let errorCount = 0;
   for (const events of recentEvents.values()) {
     for (const event of events) {
-      const e = event as Record<string, unknown>;
+      const e = event as unknown as Record<string, unknown>;
       if (e.event === 'error' || e.status === 'failure') {
         errorCount++;
       }

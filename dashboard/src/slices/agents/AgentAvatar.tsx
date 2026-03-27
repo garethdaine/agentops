@@ -16,11 +16,11 @@ import {
   getSittingPose,
 } from '@/lib/avatar-animations';
 
-/** Body geometry dimensions (REQ-035). */
-export const AVATAR_BODY = { width: 0.6, height: 1.2, depth: 0.4 } as const;
+/** Body geometry dimensions (REQ-035) — matched to reference avatar proportions. */
+export const AVATAR_BODY = { width: 0.35, height: 0.5, depth: 0.2 } as const;
 
-/** Head geometry dimensions (REQ-035). */
-export const AVATAR_HEAD = { radius: 0.25 } as const;
+/** Head geometry dimensions (REQ-035) — matched to reference avatar proportions. */
+export const AVATAR_HEAD = { radius: 0.14 } as const;
 
 interface AgentAvatarProps {
   /** Display name for the nameplate. */
@@ -54,10 +54,10 @@ export default function AgentAvatar({
   const rightArmRef = useRef<THREE.Mesh>(null);
   const leftLegRef = useRef<THREE.Mesh>(null);
   const rightLegRef = useRef<THREE.Mesh>(null);
-  const bodyBaseY = 0.6;
-  const headBaseY = 1.35;
-  const armBaseY = 0.6;
-  const legBaseY = 0.15;
+  const bodyBaseY = 0.25;
+  const headBaseY = 0.6;
+  const armBaseY = 0.25;
+  const legBaseY = -0.12;
 
   const transparent = opacity < 1;
 
@@ -161,8 +161,8 @@ export default function AgentAvatar({
       </mesh>
 
       {/* Left arm */}
-      <mesh ref={leftArmRef} position={[-0.38, armBaseY, 0]} castShadow>
-        <boxGeometry args={[0.1, 0.45, 0.1]} />
+      <mesh ref={leftArmRef} position={[-0.22, armBaseY, 0]} castShadow>
+        <boxGeometry args={[0.08, 0.35, 0.08]} />
         <meshStandardMaterial
           color={color}
           roughness={0.6}
@@ -173,8 +173,8 @@ export default function AgentAvatar({
       </mesh>
 
       {/* Right arm */}
-      <mesh ref={rightArmRef} position={[0.38, armBaseY, 0]} castShadow>
-        <boxGeometry args={[0.1, 0.45, 0.1]} />
+      <mesh ref={rightArmRef} position={[0.22, armBaseY, 0]} castShadow>
+        <boxGeometry args={[0.08, 0.35, 0.08]} />
         <meshStandardMaterial
           color={color}
           roughness={0.6}
@@ -185,10 +185,10 @@ export default function AgentAvatar({
       </mesh>
 
       {/* Left leg (REQ-035) */}
-      <mesh ref={leftLegRef} position={[-0.12, legBaseY, 0]} castShadow>
-        <boxGeometry args={[0.1, 0.45, 0.1]} />
+      <mesh ref={leftLegRef} position={[-0.08, legBaseY, 0]} castShadow>
+        <boxGeometry args={[0.08, 0.25, 0.08]} />
         <meshStandardMaterial
-          color={color}
+          color="#333333"
           roughness={0.6}
           metalness={0.1}
           transparent={transparent}
@@ -197,10 +197,10 @@ export default function AgentAvatar({
       </mesh>
 
       {/* Right leg (REQ-035) */}
-      <mesh ref={rightLegRef} position={[0.12, legBaseY, 0]} castShadow>
-        <boxGeometry args={[0.1, 0.45, 0.1]} />
+      <mesh ref={rightLegRef} position={[0.08, legBaseY, 0]} castShadow>
+        <boxGeometry args={[0.08, 0.25, 0.08]} />
         <meshStandardMaterial
-          color={color}
+          color="#333333"
           roughness={0.6}
           metalness={0.1}
           transparent={transparent}
@@ -210,12 +210,12 @@ export default function AgentAvatar({
 
       {/* Nameplate (drei Text above head) */}
       <Text
-        position={[0, 1.75, 0]}
-        fontSize={0.15}
+        position={[0, 0.85, 0]}
+        fontSize={0.08}
         color="#e0e8ff"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.008}
+        outlineWidth={0.006}
         outlineColor="#0f1428"
       >
         {name}
