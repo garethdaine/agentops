@@ -1,12 +1,5 @@
 'use client';
 
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
 import type { Zone } from '@/types/office';
 import type { AgentState } from '@/stores/agent-store';
 import { ZONE_PANEL_MAP } from './zone-panels';
@@ -17,61 +10,56 @@ interface ZoneDetailPanelProps {
   agents: AgentState[];
 }
 
-/** Slide-in panel showing zone-specific content when zone furniture is clicked. */
+/** Side panel showing zone-specific content when zone furniture is clicked. No overlay/blur. */
 export default function ZoneDetailPanel({ zone, onClose, agents }: ZoneDetailPanelProps) {
-  const PanelContent = zone ? ZONE_PANEL_MAP[zone.id] : null;
+  if (!zone) return null;
+
+  const PanelContent = ZONE_PANEL_MAP[zone.id] ?? null;
 
   return (
-    <Sheet open={!!zone} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <SheetContent
-        side="right"
-        className="w-[400px] bg-gray-900/95 border-gray-700 text-gray-100 overflow-y-auto"
-      >
-        <SheetHeader>
-          <SheetTitle className="text-gray-100">{zone?.name ?? 'Zone'}</SheetTitle>
-          <SheetDescription className="sr-only">Zone details</SheetDescription>
-        </SheetHeader>
-
-        <div className="px-4">
-          {PanelContent ? (
-            <PanelContent />
-          ) : (
-            zone && (
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-gray-400">Position</h3>
-                  <p className="text-sm text-gray-200">
-                    x: {zone.position.x}, z: {zone.position.z}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-gray-400">Size</h3>
-                  <p className="text-sm text-gray-200">
-                    {zone.size.width} x {zone.size.depth}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-gray-400">
-                    Agents ({agents.length})
-                  </h3>
-                  {agents.length === 0 ? (
-                    <p className="text-sm text-gray-400">No agents in this zone</p>
-                  ) : (
-                    <ul className="space-y-1">
-                      {agents.map((a) => (
-                        <li key={a.session_id} className="text-sm flex justify-between text-gray-200">
-                          <span>{a.name}</span>
-                          <span className="text-gray-400">{a.status ?? 'idle'}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
-            )
-          )}
+    <div className="fixed top-0 right-0 h-full w-[400px] z-50 bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-100">{zone.name}</h2>
         </div>
-      </SheetContent>
-    </Sheet>
+        <button
+          onClick={onClose}
+          className="p-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors"
+          aria-label="Close panel"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        {PanelContent ? (
+          <PanelContent />
+        ) : (
+          <div className="space-y-4 p-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-gray-400">
+                Agents ({agents.length})
+              </h3>
+              {agents.length === 0 ? (
+                <p className="text-sm text-gray-400">No agents in this zone</p>
+              ) : (
+                <ul className="space-y-1">
+                  {agents.map((a) => (
+                    <li key={a.session_id} className="text-sm flex justify-between text-gray-200">
+                      <span>{a.name}</span>
+                      <span className="text-gray-400">{a.status ?? 'idle'}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
