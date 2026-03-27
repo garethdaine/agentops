@@ -163,7 +163,8 @@ export default function DayNightCycle() {
     }
 
     updateFog(scene, factor, delta, dayFogColor.current, nightFogColor.current);
-    updateBackground(scene, factor, delta, dayBgColor.current, nightBgColor.current);
+    // Don't set scene.background -- let the Sky shader render as the background
+    scene.background = null;
 
     // Thunderstorm lightning flash effect
     if (weather === 'thunderstorm' && factor > 0.1) {
@@ -192,11 +193,14 @@ export default function DayNightCycle() {
   return (
     <>
       <Sky
-        sunPosition={sunVec}
+        distance={450000}
+        sunPosition={[sunVec.x, sunVec.y, sunVec.z]}
         turbidity={skyOverrides.turbidity}
         rayleigh={skyOverrides.rayleigh}
         mieCoefficient={skyOverrides.mieCoefficient}
         mieDirectionalG={skyOverrides.mieDirectionalG}
+        inclination={undefined}
+        azimuth={undefined}
       />
       <Stars
         ref={starsRef}
