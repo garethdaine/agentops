@@ -13,6 +13,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useOfficeStore } from '@/stores/office-store';
 import { useAgentStore } from '@/stores/agent-store';
 import type { AgentState } from '@/stores/agent-store';
+
+const EMPTY_EVENTS: EventEntryData[] = [];
 import ControlPanel from '@/slices/control/ControlPanel';
 import type { AgentStatus } from '@/types/agent';
 
@@ -100,13 +102,10 @@ export default function AgentDetailPanel() {
     s.activeAgents.find((a: AgentState) => a.session_id === selectedAgentId),
   );
   const rawEvents = useStore(useAgentStore, (s) =>
-    selectedAgentId ? (s.recentEvents.get(selectedAgentId) ?? []) : [],
+    selectedAgentId ? (s.recentEvents.get(selectedAgentId) ?? EMPTY_EVENTS) : EMPTY_EVENTS,
   );
 
-  const events = useMemo(
-    () => rawEvents as EventEntryData[],
-    [rawEvents.length],
-  );
+  const events = rawEvents as EventEntryData[];
 
   return (
     <Sheet open={detailPanelOpen} onOpenChange={setDetailPanelOpen}>
