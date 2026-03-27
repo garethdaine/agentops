@@ -4,6 +4,7 @@ export type TelemetryEventName =
   | 'PostToolUse'
   | 'PostToolUseFailure'
   | 'Notification'
+  | 'AssistantMessage'
   | 'SessionStart'
   | 'SessionEnd';
 

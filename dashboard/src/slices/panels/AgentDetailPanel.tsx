@@ -147,7 +147,7 @@ function renderEventsTab(events: EventEntryData[]) {
 }
 
 function renderMessagesTab(events: EventEntryData[]) {
-  const messages = events.filter((e) => e.event === 'Notification' && e.content && e.content.length > 0);
+  const messages = events.filter((e) => (e.event === 'Notification' || e.event === 'AssistantMessage') && e.content && e.content.length > 0);
   const limited = messages.slice(-50);
   return (
     <div className="overflow-y-auto max-h-[60vh]">
