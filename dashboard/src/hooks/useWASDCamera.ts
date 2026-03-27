@@ -56,34 +56,19 @@ export function processWASD(
 
   // Handle horizontal movement (WASD)
   if (hasMovement) {
+    // Match reference: _forward from camera, project to XZ, compute _right via crossVectors
     camera.getWorldDirection(_forward);
-    // Project to XZ plane
     _forward.y = 0;
-    const len = Math.sqrt(_forward.x * _forward.x + _forward.z * _forward.z);
-    if (len > 0.001) {
-      _forward.x /= len;
-      _forward.z /= len;
-    }
+    _forward.normalize();
 
-    // Right vector = cross(up, forward) = (fz, 0, -fx)
-    const rightX = _forward.z;
-    const rightZ = -_forward.x;
+    _right.crossVectors(_forward, UP).normalize();
 
-    _move.x = 0;
-    _move.y = 0;
-    _move.z = 0;
+    _move.set(0, 0, 0);
 
-    if (keysDown.has('w')) { _move.x += _forward.x; _move.z += _forward.z; }
-    if (keysDown.has('s')) { _move.x -= _forward.x; _move.z -= _forward.z; }
-    if (keysDown.has('d')) { _move.x += rightX; _move.z += rightZ; }
-    if (keysDown.has('a')) { _move.x -= rightX; _move.z -= rightZ; }
-
-    // Normalize diagonal movement
-    const moveLen = Math.sqrt(_move.x * _move.x + _move.z * _move.z);
-    if (moveLen > 0.001) {
-      _move.x = (_move.x / moveLen) * speed;
-      _move.z = (_move.z / moveLen) * speed;
-    }
+    if (keysDown.has('w')) { _move.x += _forward.x * speed; _move.z += _forward.z * speed; }
+    if (keysDown.has('s')) { _move.x -= _forward.x * speed; _move.z -= _forward.z * speed; }
+    if (keysDown.has('a')) { _move.x -= _right.x * speed; _move.z -= _right.z * speed; }
+    if (keysDown.has('d')) { _move.x += _right.x * speed; _move.z += _right.z * speed; }
 
     // Move both camera and target together
     camera.position.add(_move);
