@@ -16,8 +16,12 @@ const ACTIVITY_LABELS: Record<string, string> = {
   working: 'Working',
 };
 
-/** Bottom status bar showing agents, day/night toggle, and WASD hints. */
-export default function StatusBar() {
+interface StatusBarProps {
+  onActivityOpen?: () => void;
+}
+
+/** Bottom status bar showing agents, day/night toggle, activity button, and WASD hints. */
+export default function StatusBar({ onActivityOpen }: StatusBarProps) {
   const activeAgents = useStore(useAgentStore, (s) => s.activeAgents);
   const envOverride = useStore(useOfficeStore, (s) => s.envOverride);
   const setEnvOverride = useStore(useOfficeStore, (s) => s.setEnvOverride);
@@ -88,8 +92,27 @@ export default function StatusBar() {
         })}
       </div>
 
-      {/* Right side: Day/Night/Auto + WASD */}
+      {/* Right side: Activity + Day/Night/Auto + WASD */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 16, flexShrink: 0 }}>
+        {/* Activity feed button */}
+        <button
+          onClick={onActivityOpen}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            padding: '4px 10px', borderRadius: 6,
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.05)',
+            color: '#9ca3af',
+            cursor: 'pointer',
+            fontSize: 11, fontWeight: 500,
+            transition: 'all 0.15s',
+          }}
+        >
+          Activity
+        </button>
+
+        <span style={{ color: 'rgba(255,255,255,0.15)' }}>|</span>
+
         {/* Day/Night/Auto toggle */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 2,

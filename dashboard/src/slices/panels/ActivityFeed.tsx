@@ -1,7 +1,14 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { getAgentColor } from '@/lib/avatar-animations';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -50,7 +57,7 @@ export function shouldAutoScroll(
 /** Creates a simple collapse-state object (framework-agnostic for testability). */
 export function createFeedState() {
   const state = {
-    isCollapsed: true,
+    isCollapsed: false,
     toggle() {
       state.isCollapsed = !state.isCollapsed;
     },
@@ -79,7 +86,7 @@ function FeedEntryRow({ entry }: FeedEntryRowProps) {
       </span>
       <span className="text-gray-300 truncate">
         {entry.tool}
-        {entry.filePath ? ` → ${entry.filePath}` : ''}
+        {entry.filePath ? ` \u2192 ${entry.filePath}` : ''}
       </span>
       <span className="ml-auto shrink-0">{renderStatusIcon(entry.status)}</span>
     </div>
@@ -97,17 +104,21 @@ function formatTime(iso: string): string {
 
 /** Return a status indicator character. */
 function renderStatusIcon(status: string): string {
-  if (status === 'success') return '✓';
-  if (status === 'failure') return '✗';
-  if (status === 'pending') return '⋯';
-  return '·';
+  if (status === 'success') return '\u2713';
+  if (status === 'failure') return '\u2717';
+  if (status === 'pending') return '\u22EF';
+  return '\u00B7';
 }
 
 // ── Main component ─────────────────────────────────────────────────────
 
-/** Collapsible activity feed sidebar showing merged events across sessions. */
-export default function ActivityFeed() {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+interface ActivityFeedProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+/** Activity feed rendered as a Shadcn Sheet slide-in panel. */
+export default function ActivityFeed({ open = false, onOpenChange }: ActivityFeedProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef(true);
 
@@ -133,49 +144,30 @@ export default function ActivityFeed() {
     }
   }, [entries.length]);
 
-  const toggleCollapse = useCallback(() => {
-    setIsCollapsed((prev) => !prev);
-  }, []);
-
-  if (isCollapsed) {
-    return (
-      <div className="w-8 bg-gray-900 border-l border-gray-700 flex flex-col items-center pt-2">
-        <button
-          onClick={toggleCollapse}
-          className="text-gray-400 hover:text-white text-xs"
-          aria-label="Expand activity feed"
-        >
-          ◀
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-72 bg-gray-900 border-l border-gray-700 flex flex-col shrink-0">
-      <div className="flex items-center justify-between px-2 py-1 border-b border-gray-700">
-        <span className="text-xs font-semibold text-gray-300">Activity Feed</span>
-        <button
-          onClick={toggleCollapse}
-          className="text-gray-400 hover:text-white text-xs"
-          aria-label="Collapse activity feed"
-        >
-          ▶
-        </button>
-      </div>
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto"
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-[360px] bg-gray-900/95 border-gray-700 text-gray-100"
       >
-        {entries.length === 0 ? (
-          <div className="text-gray-500 text-xs text-center py-4">No events yet</div>
-        ) : (
-          entries.map((entry, i) => (
-            <FeedEntryRow key={`${entry.ts}-${i}`} entry={entry} />
-          ))
-        )}
-      </div>
-    </div>
+        <SheetHeader>
+          <SheetTitle className="text-gray-100">Activity Feed</SheetTitle>
+          <SheetDescription className="text-gray-400">Real-time event stream from all sessions</SheetDescription>
+        </SheetHeader>
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-2"
+        >
+          {entries.length === 0 ? (
+            <div className="text-gray-500 text-xs text-center py-4">No events yet</div>
+          ) : (
+            entries.map((entry, i) => (
+              <FeedEntryRow key={`${entry.ts}-${i}`} entry={entry} />
+            ))
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

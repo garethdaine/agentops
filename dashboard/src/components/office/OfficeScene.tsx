@@ -235,6 +235,7 @@ export default function OfficeScene() {
         return (
           <group
             key={i}
+            onClick={(e) => { e.stopPropagation(); handleZoneClick('workstations'); }}
             onPointerOver={handlePointerOver}
             onPointerOut={handlePointerOut}
           >

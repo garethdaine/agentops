@@ -1,6 +1,7 @@
 import { Vector3 } from 'three';
 
 export const WASD_SPEED = 12;
+const UP = new Vector3(0, 1, 0);
 export const SHIFT_MULTIPLIER = 2.2;
 export const VERTICAL_SPEED_FACTOR = 0.5;
 export const MIN_Y = 4;
@@ -27,6 +28,7 @@ interface ControlsLike {
 
 // Cached vectors to avoid per-frame allocation
 const _forward = new Vector3();
+const _right = new Vector3();
 const _move = new Vector3();
 
 export function processWASD(
