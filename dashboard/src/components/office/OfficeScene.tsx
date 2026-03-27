@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { OfficeFloor, OfficeWalls, OfficeLighting } from '@/slices/scene';
@@ -14,6 +14,15 @@ import { useOfficeStore } from '@/stores/office-store';
 import { getAgentColor } from '@/lib/avatar-animations';
 import { mapToolToActivity } from '@/lib/event-mapper';
 import AgentDetailPanel from '@/slices/panels/AgentDetailPanel';
+import ParticleEmitter, {
+  createParticlePool,
+  emitParticles,
+  updateParticles,
+  PRESETS,
+  PresetName,
+  type Particle,
+  type ParticlePool,
+} from '@/slices/environment/ParticleEmitter';
 import type { AgentState as StoreAgentState } from '@/stores/agent-store';
 import type { AgentActivity } from '@/types/agent';
 
@@ -30,6 +39,10 @@ export default function OfficeScene() {
   const activeAgents = useStore(useAgentStore, (s) => s.activeAgents);
   const selectedAgent = useStore(useOfficeStore, (s) => s.selectedAgent);
   const setSelectedAgent = useStore(useOfficeStore, (s) => s.setSelectedAgent);
+
+  const poolRef = useRef<ParticlePool>(createParticlePool());
+  const activeParticlesRef = useRef<Particle[]>([]);
+  const dirtyRef = useRef(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -101,6 +114,12 @@ export default function OfficeScene() {
           </group>
         );
       })}
+
+      <ParticleEmitter
+        activeParticles={activeParticlesRef.current}
+        dirty={dirtyRef.current}
+        onFrameUpdate={() => { dirtyRef.current = false; }}
+      />
 
       <OrbitControls
         makeDefault
