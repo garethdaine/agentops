@@ -9,6 +9,12 @@ const OfficeScene = dynamic(
   { ssr: false }
 );
 
+/** Dynamic import for PostProcessing — requires WebGL context (REQ-101) */
+const PostProcessing = dynamic(
+  () => import('@/slices/scene/PostProcessing'),
+  { ssr: false }
+);
+
 export default function OfficeCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
 
