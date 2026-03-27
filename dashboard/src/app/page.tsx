@@ -173,8 +173,6 @@ export default function Home() {
             {webglSupported === null ? null : webglSupported ? (
               <>
                 <OfficeCanvas />
-                <WeatherIndicator />
-                <StatusBar onActivityOpen={() => setActivityOpen(true)} />
 
                 {/* Fullscreen toggle */}
                 <button
@@ -197,6 +195,14 @@ export default function Home() {
               <ActivityTable />
             )}
           </div>
+
+          {/* Overlay panels - positioned over the canvas area but outside the canvas wrapper */}
+          {webglSupported && (
+            <>
+              <WeatherIndicator />
+              <StatusBar onActivityOpen={() => setActivityOpen(true)} />
+            </>
+          )}
 
           {/* Activity Feed Sheet */}
           <ActivityFeed open={activityOpen} onOpenChange={setActivityOpen} />

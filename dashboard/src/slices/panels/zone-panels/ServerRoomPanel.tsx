@@ -2,7 +2,7 @@
 
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
-import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem, OpenFullViewButton } from './ZonePanelLayout';
+import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem } from './ZonePanelLayout';
 
 export default function ServerRoomPanel() {
   const connectionStatus = useStore(useAgentStore, (s) => s.connectionStatus);
@@ -30,7 +30,6 @@ export default function ServerRoomPanel() {
         <ListItem label="Active Sessions" value={String(sessionCount)} />
         <ListItem label="WebSocket Clients" value={String(agentCount)} />
       </ListSection>
-      <OpenFullViewButton />
     </div>
   );
 }

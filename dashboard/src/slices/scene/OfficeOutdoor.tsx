@@ -218,16 +218,11 @@ function WalkwaySurface() {
   );
 }
 
-/** Full outdoor environment: parking lot, cars, flower beds, benches, lamp posts, bollards, walkway. */
+/** Full outdoor environment: flower beds, benches, lamp posts, walkway. Cars/parking removed. */
 export default function OfficeOutdoor() {
   return (
     <group>
-      <ParkingLotSurface />
       <WalkwaySurface />
-
-      {CAR_POSITIONS.map((car, i) => (
-        <Car key={`car-${i}`} car={car} />
-      ))}
 
       {FLOWER_BED_POSITIONS.map((bed, i) => (
         <FlowerBed key={`bed-${i}`} bed={bed} />
@@ -239,10 +234,6 @@ export default function OfficeOutdoor() {
 
       {LAMP_POST_POSITIONS.map((lamp, i) => (
         <LampPost key={`lamp-${i}`} lamp={lamp} />
-      ))}
-
-      {BOLLARD_POSITIONS.map((pos, i) => (
-        <Bollard key={`bollard-${i}`} pos={pos} />
       ))}
     </group>
   );

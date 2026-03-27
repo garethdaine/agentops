@@ -2,7 +2,7 @@
 
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
-import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem, OpenFullViewButton } from './ZonePanelLayout';
+import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem } from './ZonePanelLayout';
 
 export default function CommsHubPanel() {
   const connectionStatus = useStore(useAgentStore, (s) => s.connectionStatus);
@@ -27,7 +27,6 @@ export default function CommsHubPanel() {
         <ListItem label="Connected Clients" value={String(agents.length)} />
         <ListItem label="Protocol" value="ws://localhost:3001" />
       </ListSection>
-      <OpenFullViewButton />
     </div>
   );
 }

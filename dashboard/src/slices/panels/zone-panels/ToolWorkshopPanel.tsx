@@ -2,7 +2,7 @@
 
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
-import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem, OpenFullViewButton } from './ZonePanelLayout';
+import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem } from './ZonePanelLayout';
 
 const TOOL_NAMES = ['Read', 'Write', 'Edit', 'Bash', 'Grep', 'Glob'];
 
@@ -43,7 +43,6 @@ export default function ToolWorkshopPanel() {
           />
         ))}
       </ListSection>
-      <OpenFullViewButton />
     </div>
   );
 }

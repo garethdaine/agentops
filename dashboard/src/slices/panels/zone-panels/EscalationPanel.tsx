@@ -2,7 +2,7 @@
 
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
-import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem, OpenFullViewButton } from './ZonePanelLayout';
+import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem } from './ZonePanelLayout';
 
 export default function EscalationPanel() {
   const agents = useStore(useAgentStore, (s) => s.activeAgents);
@@ -42,7 +42,6 @@ export default function EscalationPanel() {
           ))
         )}
       </ListSection>
-      <OpenFullViewButton />
     </div>
   );
 }

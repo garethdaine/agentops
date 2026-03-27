@@ -9,7 +9,7 @@ export { default as ToolWorkshopPanel } from './ToolWorkshopPanel';
 export { default as CommsHubPanel } from './CommsHubPanel';
 export { default as EscalationPanel } from './EscalationPanel';
 
-export { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem, OpenFullViewButton } from './ZonePanelLayout';
+export { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem } from './ZonePanelLayout';
 
 import type { ComponentType } from 'react';
 import ServerRoomPanel from './ServerRoomPanel';

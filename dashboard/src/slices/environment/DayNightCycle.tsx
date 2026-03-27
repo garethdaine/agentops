@@ -26,6 +26,28 @@ export const ATMOSPHERE_CONFIG = {
   },
 } as const;
 
+/* ── Weather-based sky overrides ─────────────────────────────────── */
+
+type Weather = 'clear' | 'cloudy' | 'fog' | 'rain' | 'snow' | 'showers' | 'thunderstorm';
+
+interface SkyOverrides {
+  turbidity: number;
+  rayleigh: number;
+  mieCoefficient: number;
+  mieDirectionalG: number;
+  bgTint?: string;
+}
+
+const WEATHER_SKY_OVERRIDES: Record<Weather, SkyOverrides> = {
+  clear: { turbidity: 2, rayleigh: 1, mieCoefficient: 0.005, mieDirectionalG: 0.8 },
+  cloudy: { turbidity: 20, rayleigh: 0.2, mieCoefficient: 0.01, mieDirectionalG: 0.7, bgTint: '#8899aa' },
+  fog: { turbidity: 25, rayleigh: 0.1, mieCoefficient: 0.03, mieDirectionalG: 0.6, bgTint: '#9999a8' },
+  rain: { turbidity: 30, rayleigh: 0.1, mieCoefficient: 0.02, mieDirectionalG: 0.5, bgTint: '#556677' },
+  snow: { turbidity: 15, rayleigh: 0.3, mieCoefficient: 0.01, mieDirectionalG: 0.6, bgTint: '#aab0bb' },
+  showers: { turbidity: 22, rayleigh: 0.15, mieCoefficient: 0.015, mieDirectionalG: 0.6, bgTint: '#667788' },
+  thunderstorm: { turbidity: 40, rayleigh: 0.05, mieCoefficient: 0.03, mieDirectionalG: 0.4, bgTint: '#334455' },
+};
+
 /* ── Light intensity ranges ──────────────────────────────────────── */
 
 const LIGHT_RANGES = {
@@ -106,6 +128,7 @@ export default function DayNightCycle() {
   const { scene } = useThree();
   const setDayFactor = useStore(useOfficeStore, (s) => s.setDayFactor);
   const envOverride = useStore(useOfficeStore, (s) => s.envOverride);
+  const weather = useStore(useOfficeStore, (s) => s.weather) as Weather;
 
   const sunPosRef = useRef(new Vector3(0, 1, 0));
   const dayBgColor = useRef(new Color(DAY_BG));
@@ -114,6 +137,7 @@ export default function DayNightCycle() {
   const nightFogColor = useRef(new Color(NIGHT_FOG));
   const starsRef = useRef<ThreePoints>(null);
   const prevDayFactor = useRef<number | null>(null);
+  const flashRef = useRef(0);
 
   useFrame((_, delta) => {
     const hour = resolveHour(envOverride);
@@ -126,8 +150,31 @@ export default function DayNightCycle() {
     }
 
     updateSunPosition(hour, sunPosRef.current);
+
+    // Weather-tinted fog/background for overcast conditions
+    const skyOverrides = WEATHER_SKY_OVERRIDES[weather] ?? WEATHER_SKY_OVERRIDES.clear;
+    if (skyOverrides.bgTint && factor > 0.3) {
+      const tintColor = new Color(skyOverrides.bgTint);
+      dayBgColor.current.lerp(tintColor, delta * 2);
+      dayFogColor.current.lerp(tintColor, delta * 2);
+    } else {
+      dayBgColor.current.lerp(new Color(DAY_BG), delta);
+      dayFogColor.current.lerp(new Color(DAY_FOG), delta);
+    }
+
     updateFog(scene, factor, delta, dayFogColor.current, nightFogColor.current);
     updateBackground(scene, factor, delta, dayBgColor.current, nightBgColor.current);
+
+    // Thunderstorm lightning flash effect
+    if (weather === 'thunderstorm' && factor > 0.1) {
+      flashRef.current -= delta;
+      if (flashRef.current <= 0 && Math.random() < 0.005) {
+        flashRef.current = 0.1;
+      }
+      if (flashRef.current > 0 && scene.background instanceof Color) {
+        (scene.background as Color).lerp(new Color('#ffffff'), 0.3);
+      }
+    }
 
     // FIX-009: Lerp stars opacity with nightFactor
     if (starsRef.current) {
@@ -140,16 +187,16 @@ export default function DayNightCycle() {
 
   const hour = resolveHour(envOverride);
   const sunVec = computeSunVector(...Object.values(getSunPosition(hour)) as [number, number]);
-  const nightFactor = 1 - getDayFactor(hour);
+  const skyOverrides = WEATHER_SKY_OVERRIDES[weather] ?? WEATHER_SKY_OVERRIDES.clear;
 
   return (
     <>
       <Sky
         sunPosition={sunVec}
-        turbidity={ATMOSPHERE_CONFIG.sky.turbidity}
-        rayleigh={ATMOSPHERE_CONFIG.sky.rayleigh}
-        mieCoefficient={ATMOSPHERE_CONFIG.sky.mieCoefficient}
-        mieDirectionalG={ATMOSPHERE_CONFIG.sky.mieDirectionalG}
+        turbidity={skyOverrides.turbidity}
+        rayleigh={skyOverrides.rayleigh}
+        mieCoefficient={skyOverrides.mieCoefficient}
+        mieDirectionalG={skyOverrides.mieDirectionalG}
       />
       <Stars
         ref={starsRef}

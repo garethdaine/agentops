@@ -1,6 +1,6 @@
 'use client';
 
-import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem, OpenFullViewButton } from './ZonePanelLayout';
+import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem } from './ZonePanelLayout';
 
 export default function SecurityPanel() {
   return (
@@ -17,7 +17,6 @@ export default function SecurityPanel() {
         <ListItem label="Protected Paths" value="Active" dotColor="#22c55e" />
         <ListItem label="Hook Validation" value="Enabled" dotColor="#22c55e" />
       </ListSection>
-      <OpenFullViewButton />
     </div>
   );
 }

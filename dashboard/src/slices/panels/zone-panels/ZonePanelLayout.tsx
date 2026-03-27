@@ -82,10 +82,3 @@ export function ListItem({ label, value, dotColor }: ListItemProps) {
   );
 }
 
-export function OpenFullViewButton() {
-  return (
-    <button className="w-full mt-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:bg-gray-700 hover:text-gray-100 transition-colors">
-      Open Full View
-    </button>
-  );
-}

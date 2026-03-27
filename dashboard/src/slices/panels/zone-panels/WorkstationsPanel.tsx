@@ -2,7 +2,7 @@
 
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
-import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem, OpenFullViewButton } from './ZonePanelLayout';
+import { ZonePanelHeader, MetricGrid, Metric, ListSection, ListItem } from './ZonePanelLayout';
 
 export default function WorkstationsPanel() {
   const agents = useStore(useAgentStore, (s) => s.activeAgents);
@@ -55,7 +55,6 @@ export default function WorkstationsPanel() {
           ))
         )}
       </ListSection>
-      <OpenFullViewButton />
     </div>
   );
 }

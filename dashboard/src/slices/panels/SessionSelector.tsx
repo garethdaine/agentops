@@ -66,7 +66,7 @@ export default function SessionSelector() {
       <SelectTrigger className="w-[200px]">
         <SelectValue placeholder="All Sessions" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent position="popper" sideOffset={4}>
         {options.map((opt) => (
           <SelectItem key={opt.value} value={opt.value}>
             {opt.label}

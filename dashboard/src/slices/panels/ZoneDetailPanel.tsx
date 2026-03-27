@@ -29,7 +29,7 @@ export default function ZoneDetailPanel({ zone, onClose, agents }: ZoneDetailPan
       >
         <SheetHeader>
           <SheetTitle className="text-gray-100">{zone?.name ?? 'Zone'}</SheetTitle>
-          <SheetDescription className="text-gray-400">Zone: {zone?.id ?? ''}</SheetDescription>
+          <SheetDescription className="sr-only">Zone details</SheetDescription>
         </SheetHeader>
 
         <div className="px-4">
