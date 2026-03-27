@@ -1,5 +1,7 @@
 import type { StateCreator } from 'zustand';
 import type { Command as ProtocolCommand, CommandAck } from './control-protocol';
+import type { OptimisticState } from './control-panel-logic';
+import type { AgentStatus } from '@/types/agent';
 
 /** A command queued for execution. */
 export interface Command {
@@ -20,17 +22,21 @@ export interface PendingCommand {
 export interface ControlSliceState {
   commandQueue: Command[];
   pendingCommands: Map<string, PendingCommand>;
+  optimisticStates: Map<string, OptimisticState>;
   enqueueCommand: (command: Command) => void;
   dequeueCommand: () => void;
   trackCommand: (cmd: ProtocolCommand) => void;
   resolveCommand: (ack: CommandAck) => void;
   timeoutCommand: (commandId: string) => void;
+  applyOptimistic: (agentId: string, state: OptimisticState) => void;
+  rollbackOptimistic: (agentId: string) => void;
 }
 
 /** Creates the control slice with command queue management. */
 export const createControlSlice: StateCreator<ControlSliceState, [], [], ControlSliceState> = (set, get) => ({
   commandQueue: [],
   pendingCommands: new Map(),
+  optimisticStates: new Map(),
 
   enqueueCommand: (command: Command) => {
     set({ commandQueue: [...get().commandQueue, command] });
@@ -60,5 +66,17 @@ export const createControlSlice: StateCreator<ControlSliceState, [], [], Control
     if (!entry) return;
     next.set(commandId, { ...entry, status: 'timeout' });
     set({ pendingCommands: next });
+  },
+
+  applyOptimistic: (agentId: string, state: OptimisticState) => {
+    const next = new Map(get().optimisticStates);
+    next.set(agentId, state);
+    set({ optimisticStates: next });
+  },
+
+  rollbackOptimistic: (agentId: string) => {
+    const next = new Map(get().optimisticStates);
+    next.delete(agentId);
+    set({ optimisticStates: next });
   },
 });

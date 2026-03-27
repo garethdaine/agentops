@@ -13,6 +13,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useOfficeStore } from '@/stores/office-store';
 import { useAgentStore } from '@/stores/agent-store';
 import type { AgentState } from '@/stores/agent-store';
+import ControlPanel from '@/slices/control/ControlPanel';
+import type { AgentStatus } from '@/types/agent';
 
 interface EventEntryData {
   event: string;
@@ -116,25 +118,32 @@ export default function AgentDetailPanel() {
         </SheetHeader>
 
         {agent && (
-          <Tabs defaultValue="overview" className="px-4">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
-              <TabsTrigger value="tools">Tools</TabsTrigger>
-            </TabsList>
+          <>
+            <Tabs defaultValue="overview" className="px-4">
+              <TabsList>
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="events">Events</TabsTrigger>
+                <TabsTrigger value="tools">Tools</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="overview">
-              {renderOverviewTab(agent)}
-            </TabsContent>
+              <TabsContent value="overview">
+                {renderOverviewTab(agent)}
+              </TabsContent>
 
-            <TabsContent value="events">
-              {renderEventsTab(events)}
-            </TabsContent>
+              <TabsContent value="events">
+                {renderEventsTab(events)}
+              </TabsContent>
 
-            <TabsContent value="tools">
-              {renderToolsTab(events)}
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="tools">
+                {renderToolsTab(events)}
+              </TabsContent>
+            </Tabs>
+
+            <ControlPanel
+              agentStatus={(agent.status ?? 'idle') as AgentStatus}
+              sessionId={agent.session_id}
+            />
+          </>
         )}
       </SheetContent>
     </Sheet>
