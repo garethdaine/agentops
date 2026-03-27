@@ -201,14 +201,12 @@ export default function DayNightCycle() {
   return (
     <>
       <Sky
-        distance={450000}
-        sunPosition={[sunVec.x, sunVec.y, sunVec.z]}
+        distance={500}
+        sunPosition={[sunVec.x * 100, sunVec.y * 100, sunVec.z * 100]}
         turbidity={skyOverrides.turbidity}
         rayleigh={skyOverrides.rayleigh}
         mieCoefficient={skyOverrides.mieCoefficient}
         mieDirectionalG={skyOverrides.mieDirectionalG}
-        inclination={undefined}
-        azimuth={undefined}
       />
       <Stars
         ref={starsRef}
