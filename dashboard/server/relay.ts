@@ -53,6 +53,27 @@ function log(level: 'info' | 'warn' | 'error', message: string): void {
 }
 
 /**
+ * Handle an incoming message from a dashboard client.
+ * Routes command messages to all other connected clients (broadcast-forward).
+ */
+function handleClientMessage(raw: string, sender: WebSocket, clients: Set<WebSocket>): void {
+  try {
+    const data = JSON.parse(raw);
+    if (data.type !== 'command') return;
+
+    log('info', `Command received: ${data.command} → ${data.target} (id: ${data.id})`);
+
+    for (const client of clients) {
+      if (client !== sender && client.readyState === WebSocket.OPEN) {
+        client.send(raw);
+      }
+    }
+  } catch {
+    log('warn', 'Received malformed message from client');
+  }
+}
+
+/**
  * Start the WebSocket relay server.
  * Returns a handle with broadcast() and close() methods.
  */
@@ -109,6 +130,10 @@ export function startRelay(options: RelayOptions = {}): Promise<RelayHandle> {
       clients.add(ws);
       clearDisconnectTimer();
       log('info', `Client connected (origin: ${origin}, total: ${clients.size})`);
+
+      ws.on('message', (raw) => {
+        handleClientMessage(raw.toString(), ws, clients);
+      });
 
       ws.on('close', () => {
         clients.delete(ws);

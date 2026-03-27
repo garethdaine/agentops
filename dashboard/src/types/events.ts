@@ -51,7 +51,9 @@ export type RelayMessageType =
   | 'delegation'
   | 'failure'
   | 'hydration'
-  | 'session-update';
+  | 'session-update'
+  | 'command'
+  | 'command-ack';
 
 /** A message sent from the WebSocket relay to dashboard clients. */
 export interface RelayMessage {

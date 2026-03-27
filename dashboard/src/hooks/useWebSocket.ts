@@ -1,6 +1,7 @@
 import { useAgentStore, type TelemetryEvent } from '@/stores/agent-store';
 import { createEventBatcher, THROTTLE_MS, type EventBatcher } from '@/lib/event-batcher';
 import { SessionRecorder } from '@/slices/session/session-recorder';
+import { parseAck, serializeCommand, type Command } from '@/slices/control/control-protocol';
 
 const WS_URL = 'ws://localhost:3099';
 const INITIAL_BACKOFF_MS = 1000;
@@ -11,6 +12,7 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let backoffMs = INITIAL_BACKOFF_MS;
 let intentionalClose = false;
 let eventBatcher: EventBatcher<TelemetryEvent> | null = null;
+let ackListener: ((ack: NonNullable<ReturnType<typeof parseAck>>) => void) | null = null;
 
 /** Shared session recorder instance for capturing raw inbound events. */
 export const sessionRecorder = new SessionRecorder();
@@ -38,6 +40,13 @@ function destroyBatcher(): void {
 
 function handleMessage(event: MessageEvent): void {
   try {
+    // Check for command-ack messages first
+    const ack = parseAck(event.data);
+    if (ack && ackListener) {
+      ackListener(ack);
+      return;
+    }
+
     const data = JSON.parse(event.data);
     const store = useAgentStore.getState();
 
@@ -131,4 +140,16 @@ export function disconnectWebSocket(): void {
   }
   backoffMs = INITIAL_BACKOFF_MS;
   useAgentStore.getState().setConnectionStatus('disconnected');
+}
+
+/** Send a command to the relay server. Returns false if WebSocket is not connected. */
+export function sendCommand(cmd: Command): boolean {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return false;
+  ws.send(serializeCommand(cmd));
+  return true;
+}
+
+/** Register a listener for command acknowledgements. */
+export function onCommandAck(listener: (ack: NonNullable<ReturnType<typeof parseAck>>) => void): void {
+  ackListener = listener;
 }
