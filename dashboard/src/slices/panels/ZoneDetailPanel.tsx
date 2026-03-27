@@ -17,7 +17,7 @@ export default function ZoneDetailPanel({ zone, onClose, agents }: ZoneDetailPan
   const PanelContent = ZONE_PANEL_MAP[zone.id] ?? null;
 
   return (
-    <div className="fixed top-16 right-2 bottom-16 w-[380px] z-50 bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right-10 duration-300">
+    <div className="fixed top-20 right-14 bottom-24 w-[380px] z-50 bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right-10 duration-300">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
         <div>

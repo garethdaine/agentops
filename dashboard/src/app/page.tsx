@@ -184,10 +184,10 @@ export default function Home() {
               {/* Weather widget - top left, overlapping canvas */}
               <WeatherIndicator />
 
-              {/* Fullscreen toggle - top right, overlapping canvas edge */}
+              {/* Fullscreen toggle - top right corner of canvas */}
               <button
                 onClick={toggleFullscreen}
-                className="absolute top-3 right-3 z-20 flex items-center justify-center h-9 w-9 rounded-lg border border-gray-700/50 bg-gray-900/80 backdrop-blur-sm shadow-lg text-gray-400 hover:text-gray-100 hover:bg-gray-800/90 transition-colors"
+                className="absolute top-12 right-12 z-20 flex items-center justify-center h-9 w-9 rounded-lg border border-gray-700/50 bg-gray-900/80 backdrop-blur-sm shadow-lg text-gray-400 hover:text-gray-100 hover:bg-gray-800/90 transition-colors"
                 title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
               >
                 {isFullscreen ? (

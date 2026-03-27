@@ -200,7 +200,7 @@ export default function OfficeScene() {
     <>
     <Canvas
       shadows
-      camera={{ position: [20, 14, 20], fov: 50 }}
+      camera={{ position: [20, 14, 20], fov: 50, near: 0.1, far: 500000 }}
       gl={{ antialias: true }}
       style={{ background: '#1a1a2e' }}
     >
