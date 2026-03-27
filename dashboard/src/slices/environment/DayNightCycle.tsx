@@ -69,7 +69,7 @@ const CEILING_BOOST = {
 export function getSunPosition(timeOfDay: number): { elevation: number; azimuth: number } {
   const noon = 12;
   const hourAngle = ((timeOfDay - noon) / 12) * Math.PI;
-  const elevation = Math.cos(hourAngle) * 70;
+  const elevation = Math.cos(hourAngle) * 45;
   const azimuth = Math.sin(hourAngle) * 180;
   return { elevation, azimuth };
 }
@@ -201,7 +201,7 @@ export default function DayNightCycle() {
     <>
       <Sky
         distance={500}
-        sunPosition={[sunVec.x * 100, sunVec.y * 100, sunVec.z * 100]}
+        sunPosition={[sunVec.x, sunVec.y, sunVec.z]}
         turbidity={skyOverrides.turbidity}
         rayleigh={skyOverrides.rayleigh}
         mieCoefficient={skyOverrides.mieCoefficient}

@@ -268,7 +268,8 @@ export default function OfficeScene() {
             <AgentAvatar
               name={agent.name || `Agent ${i + 1}`}
               color={getAgentColor(agent.type)}
-              position={[slot.position[0], slot.position[1] + 0.25, avatarZ]}
+              position={[slot.position[0], slot.position[1] + 0.35, avatarZ]}
+              rotation={[0, slot.rotation === Math.PI ? 0 : Math.PI, 0]}
               activity={deriveActivity(agent)}
             />
           </group>

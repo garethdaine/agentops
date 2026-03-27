@@ -33,6 +33,8 @@ interface AgentAvatarProps {
   activity: AgentActivity;
   /** Opacity for fade-out animation (REQ-040). 0-1 range. */
   opacity?: number;
+  /** Euler rotation [x, y, z] for facing direction. */
+  rotation?: [number, number, number];
 }
 
 /**
@@ -46,6 +48,7 @@ export default function AgentAvatar({
   position,
   activity,
   opacity = 1,
+  rotation = [0, 0, 0],
 }: AgentAvatarProps) {
   const groupRef = useRef<THREE.Group>(null);
   const bodyRef = useRef<THREE.Mesh>(null);
@@ -136,7 +139,7 @@ export default function AgentAvatar({
   });
 
   return (
-    <group ref={groupRef} position={position}>
+    <group ref={groupRef} position={position} rotation={rotation}>
       {/* Body (box) */}
       <mesh ref={bodyRef} position={[0, bodyBaseY, 0]} castShadow>
         <boxGeometry args={[AVATAR_BODY.width, AVATAR_BODY.height, AVATAR_BODY.depth]} />
