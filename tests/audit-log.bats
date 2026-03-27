@@ -186,7 +186,7 @@ AUDIT_FILE() {
     bash "$HOOKS_DIR/audit-log.sh"
   local TOOL
   TOOL=$(jq -r '.tool' "$(AUDIT_FILE)")
-  [ "$TOOL" = "" ]
+  [ "$TOOL" = "unknown" ]
 }
 
 @test "handles missing tool_input gracefully" {

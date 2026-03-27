@@ -11,7 +11,7 @@ mkdir -p "$LOG_DIR" 2>/dev/null
 TS=$(date -u +%FT%TZ)
 SESSION=$(echo "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null) || SESSION="unknown"
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // "unknown"' 2>/dev/null) || EVENT="unknown"
-TOOL=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL=""
+TOOL=$(echo "$INPUT" | jq -r '.tool_name // "unknown"' 2>/dev/null) || TOOL="unknown"
 TOOL_INPUT=$(echo "$INPUT" | jq -r '.tool_input // {} | tostring | .[:500]' 2>/dev/null) || TOOL_INPUT="{}"
 
 # Redact secrets using canonical shared function
