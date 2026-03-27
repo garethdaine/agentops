@@ -187,7 +187,7 @@ export default function Home() {
               {/* Fullscreen toggle - top right corner of canvas */}
               <button
                 onClick={toggleFullscreen}
-                className="absolute -top-4 -right-4 z-20 flex items-center justify-center h-9 w-9 rounded-lg border border-gray-700/50 bg-gray-900/80 backdrop-blur-sm shadow-lg text-gray-400 hover:text-gray-100 hover:bg-gray-800/90 transition-colors"
+                className="absolute top-1 right-1 z-20 flex items-center justify-center h-9 w-9 rounded-lg border border-gray-700/50 bg-gray-900/80 backdrop-blur-sm shadow-lg text-gray-400 hover:text-gray-100 hover:bg-gray-800/90 transition-colors"
                 title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
               >
                 {isFullscreen ? (

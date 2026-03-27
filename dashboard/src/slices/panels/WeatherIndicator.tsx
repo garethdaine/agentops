@@ -52,8 +52,8 @@ export default function WeatherIndicator() {
     <div
       style={{
         position: 'absolute',
-        top: -16,
-        left: -16,
+        top: 4,
+        left: 4,
         background: 'rgba(0, 0, 0, 0.60)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',

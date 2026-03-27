@@ -40,12 +40,12 @@ interface SkyOverrides {
 
 const WEATHER_SKY_OVERRIDES: Record<Weather, SkyOverrides> = {
   clear: { turbidity: 2, rayleigh: 1, mieCoefficient: 0.005, mieDirectionalG: 0.8 },
-  cloudy: { turbidity: 20, rayleigh: 0.2, mieCoefficient: 0.01, mieDirectionalG: 0.7, bgTint: '#8899aa' },
-  fog: { turbidity: 25, rayleigh: 0.1, mieCoefficient: 0.03, mieDirectionalG: 0.6, bgTint: '#9999a8' },
-  rain: { turbidity: 30, rayleigh: 0.1, mieCoefficient: 0.02, mieDirectionalG: 0.5, bgTint: '#556677' },
-  snow: { turbidity: 15, rayleigh: 0.3, mieCoefficient: 0.01, mieDirectionalG: 0.6, bgTint: '#aab0bb' },
-  showers: { turbidity: 22, rayleigh: 0.15, mieCoefficient: 0.015, mieDirectionalG: 0.6, bgTint: '#667788' },
-  thunderstorm: { turbidity: 40, rayleigh: 0.05, mieCoefficient: 0.03, mieDirectionalG: 0.4, bgTint: '#334455' },
+  cloudy: { turbidity: 10, rayleigh: 0.5, mieCoefficient: 0.01, mieDirectionalG: 0.7, bgTint: '#8899aa' },
+  fog: { turbidity: 10, rayleigh: 0.3, mieCoefficient: 0.03, mieDirectionalG: 0.6, bgTint: '#9999a8' },
+  rain: { turbidity: 10, rayleigh: 0.4, mieCoefficient: 0.02, mieDirectionalG: 0.5, bgTint: '#556677' },
+  snow: { turbidity: 8, rayleigh: 0.5, mieCoefficient: 0.01, mieDirectionalG: 0.6, bgTint: '#aab0bb' },
+  showers: { turbidity: 10, rayleigh: 0.4, mieCoefficient: 0.015, mieDirectionalG: 0.6, bgTint: '#667788' },
+  thunderstorm: { turbidity: 10, rayleigh: 0.2, mieCoefficient: 0.03, mieDirectionalG: 0.4, bgTint: '#334455' },
 };
 
 /* ── Light intensity ranges ──────────────────────────────────────── */
@@ -164,15 +164,8 @@ export default function DayNightCycle() {
 
     updateFog(scene, factor, delta, dayFogColor.current, nightFogColor.current);
 
-    // Set scene.background as a weather-appropriate color (Sky mesh renders on top)
-    const bgTarget = skyOverrides.bgTint
-      ? new Color(skyOverrides.bgTint)
-      : (factor > 0.5 ? dayBgColor.current : nightBgColor.current);
-    if (!scene.background || !(scene.background instanceof Color)) {
-      scene.background = bgTarget.clone();
-    } else {
-      (scene.background as Color).lerp(bgTarget, delta * 2);
-    }
+    // Clear scene.background so Sky shader is visible as the background
+    scene.background = null;
 
     // Thunderstorm lightning flash effect
     if (weather === 'thunderstorm' && factor > 0.1) {
