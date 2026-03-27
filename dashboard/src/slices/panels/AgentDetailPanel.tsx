@@ -21,29 +21,48 @@ interface EventEntryData {
   agentId?: string;
 }
 
-/** Extract a human-readable summary from tool input or content */
+/** Extract a human-readable summary from an event */
 function summarize(entry: EventEntryData): string | null {
   // For Notifications, show the message text
-  if (entry.event === 'Notification' && entry.content) return entry.content;
-
-  // For tool events, show the tool input summary
-  const input = entry.toolInput || '';
-  if (!input || input === '{}') return null;
-
-  // Try to parse as JSON for a clean summary
-  try {
-    const parsed = JSON.parse(input);
-    if (typeof parsed === 'string') return parsed;
-    if (parsed.command) return `$ ${parsed.command}`;
-    if (parsed.file_path) return parsed.file_path.split('/').slice(-2).join('/');
-    if (parsed.pattern) return `/${parsed.pattern}/`;
-    if (parsed.prompt) return parsed.prompt.slice(0, 100);
-    if (parsed.description) return parsed.description;
-    return null;
-  } catch {
-    // Already a string summary from the hook
-    return input.length > 0 ? input : null;
+  if (entry.event === 'Notification') {
+    const c = entry.content || '';
+    return c.length > 0 ? c : null;
   }
+
+  // Prefer toolInput (the cleaned summary from the hook)
+  const input = entry.toolInput || '';
+  if (input && input !== '{}' && input !== '""' && input.length > 2) {
+    // If it starts with $ or / it's already a readable summary
+    if (input.startsWith('$') || input.startsWith('/') || !input.startsWith('{')) {
+      return input;
+    }
+    // Try to extract a readable part from JSON
+    try {
+      const parsed = JSON.parse(input);
+      if (typeof parsed === 'string') return parsed;
+      if (parsed.command) return `$ ${parsed.command}`;
+      if (parsed.file_path) return parsed.file_path.split('/').pop();
+      if (parsed.pattern) return `/${parsed.pattern}/`;
+      return null;
+    } catch {
+      return input.length > 2 ? input : null;
+    }
+  }
+
+  // Fallback: try to extract from content (old events)
+  const content = entry.content || '';
+  if (content && content.length > 2) {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.filePath) return parsed.filePath.split('/').pop();
+      if (parsed.command) return `$ ${parsed.command}`;
+      return null; // Don't show raw JSON
+    } catch {
+      return content.startsWith('{') ? null : content.slice(0, 100);
+    }
+  }
+
+  return null;
 }
 
 function EventEntry({ entry }: { entry: EventEntryData }) {
@@ -108,12 +127,29 @@ function renderOverviewTab(agent: AgentState) {
 }
 
 function renderEventsTab(events: EventEntryData[]) {
-  const limited = events.slice(-100);
+  // Filter to meaningful events only: must have a tool name or be a Notification
+  const meaningful = events.filter((e) => {
+    if (e.event === 'Notification') return true;
+    if (e.event === 'PreToolUse' || e.event === 'PostToolUse') return !!e.tool;
+    return false;
+  });
+  // Deduplicate: show PostToolUse instead of PreToolUse for the same timestamp+tool
+  const deduped = meaningful.filter((e, i, arr) => {
+    if (e.event === 'PreToolUse') {
+      return !arr.some((other) => other.event === 'PostToolUse' && other.tool === e.tool && other.ts === e.ts);
+    }
+    return true;
+  });
+  const limited = deduped.slice(-100);
   return (
     <div className="overflow-y-auto max-h-[60vh]">
-      {limited.map((entry, i) => (
-        <EventEntry key={`${entry.ts}-${i}`} entry={entry} />
-      ))}
+      {limited.length === 0 ? (
+        <div className="text-gray-500 text-xs text-center py-8">No events yet</div>
+      ) : (
+        limited.map((entry, i) => (
+          <EventEntry key={`${entry.ts}-${i}`} entry={entry} />
+        ))
+      )}
     </div>
   );
 }
