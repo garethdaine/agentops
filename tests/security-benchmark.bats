@@ -11,8 +11,9 @@
 #   LLM07 — System Prompt Leakage (injection-scan.sh)
 #   LLM10 — Unbounded Consumption (validate-command.sh)
 #
-# NOTE: Test payloads are constructed at runtime to avoid triggering
-# the injection scanner on this file itself.
+# NOTE: Test payloads are constructed at runtime to reduce the chance of
+# triggering the injection scanner on this file itself, but some trigger-like
+# phrases remain in comments for documentation and may still trip the scanner.
 #
 # KNOWN DETECTION GAPS (documented inline as GAP comments):
 #   1. "ignore all previous instructions" — non-adjacent word variants evade role-switch detection
@@ -443,8 +444,8 @@ bp() {
   [ "$(get_decision "$result")" = "deny" ]
 }
 
-@test "EVASION.3: symlink bypass of path protection" {
-  # validate-path resolves symlinks — path traversal via .. is caught
+@test "EVASION.3: path traversal bypass of path protection" {
+  # Path traversal via .. to escape allowed directories is caught
   result=$(file_tool_input "Read" "/app/../../proc/self/environ" | bash "$HOOKS_DIR/validate-path.sh")
   [ "$(get_decision "$result")" = "deny" ]
 }
