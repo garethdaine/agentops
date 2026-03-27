@@ -20,28 +20,39 @@ const mockEvents = [
 const mockSetDetailPanelOpen = vi.fn();
 const mockSetSelectedAgent = vi.fn();
 
+const officeState = {
+  selectedAgent: 'sess-001',
+  panelVisible: true,
+  detailPanelOpen: true,
+  setDetailPanelOpen: mockSetDetailPanelOpen,
+  setSelectedAgent: mockSetSelectedAgent,
+  clearSelection: vi.fn(),
+  togglePanel: vi.fn(),
+};
+
+const agentState = {
+  activeAgents: [mockAgent],
+  recentEvents: new Map([['sess-001', mockEvents]]),
+};
+
+const mockUseAgentStore = { getState: () => agentState };
+const mockUseOfficeStore = { getState: () => officeState };
+
 vi.mock('zustand', () => ({
-  useStore: vi.fn((_store: unknown, selector: (s: unknown) => unknown) => {
-    const state = {
-      selectedAgent: 'sess-001',
-      panelVisible: true,
-      detailPanelOpen: true,
-      setDetailPanelOpen: mockSetDetailPanelOpen,
-      setSelectedAgent: mockSetSelectedAgent,
-      clearSelection: vi.fn(),
-      togglePanel: vi.fn(),
-    };
-    return selector(state);
+  useStore: vi.fn((store: unknown, selector: (s: unknown) => unknown) => {
+    if (store === mockUseAgentStore) {
+      return selector(agentState);
+    }
+    return selector(officeState);
   }),
 }));
 
 vi.mock('@/stores/agent-store', () => ({
-  useAgentStore: {
-    getState: () => ({
-      activeAgents: [mockAgent],
-      recentEvents: new Map([['sess-001', mockEvents]]),
-    }),
-  },
+  useAgentStore: mockUseAgentStore,
+}));
+
+vi.mock('@/stores/office-store', () => ({
+  useOfficeStore: mockUseOfficeStore,
 }));
 
 // Use React context to track active tab value in mock

@@ -12,6 +12,7 @@ export const AGENT_COLORS: Record<string, string> = {
   'spec-compliance-reviewer': '#f59e0b',
   Explore: '#06b6d4',
   'claude-code-guide': '#ec4899',
+  'test-runner': '#14b8a6',
 };
 
 const FALLBACK_COLOR = '#8b5cf6';

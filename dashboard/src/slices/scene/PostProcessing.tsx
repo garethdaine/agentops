@@ -1,5 +1,8 @@
 'use client';
 
+import { useRef, useState } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { EffectComposer, Bloom, SelectiveBloom } from '@react-three/postprocessing';
 import type { Object3D } from 'three';
 
 /** Bloom effect configuration (REQ-097) */
@@ -75,10 +78,42 @@ export function getOutlineProps(
 }
 
 /**
- * PostProcessing component placeholder.
- * Full EffectComposer integration will be wired when
- * Canvas/scene children are composed (REQ-097, REQ-098, REQ-100).
+ * PostProcessing component with EffectComposer + Bloom.
+ * Uses performance-based hysteresis to disable effects when FPS drops.
+ * (REQ-097, REQ-098, REQ-100)
  */
 export default function PostProcessing() {
-  return null;
+  const [disabled, setDisabled] = useState(false);
+  const fpsRef = useRef(60);
+  const frameCount = useRef(0);
+  const lastTime = useRef(performance.now());
+
+  useFrame(() => {
+    frameCount.current++;
+    const now = performance.now();
+    const elapsed = now - lastTime.current;
+    if (elapsed >= 1000) {
+      fpsRef.current = (frameCount.current / elapsed) * 1000;
+      frameCount.current = 0;
+      lastTime.current = now;
+      const nextDisabled = shouldDisableEffects(fpsRef.current, disabled);
+      if (nextDisabled !== disabled) {
+        setDisabled(nextDisabled);
+      }
+    }
+  });
+
+  const bloomProps = getBloomProps(disabled);
+
+  if (disabled) return null;
+
+  return (
+    <EffectComposer>
+      <Bloom
+        luminanceThreshold={bloomProps.luminanceThreshold}
+        luminanceSmoothing={bloomProps.luminanceSmoothing}
+        intensity={bloomProps.intensity}
+      />
+    </EffectComposer>
+  );
 }

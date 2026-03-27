@@ -96,13 +96,12 @@ export default function AgentDetailPanel() {
   const detailPanelOpen = useStore(useOfficeStore, (s) => s.detailPanelOpen);
   const setDetailPanelOpen = useStore(useOfficeStore, (s) => s.setDetailPanelOpen);
 
-  const storeState = useAgentStore.getState();
-  const agent = storeState.activeAgents.find(
-    (a: AgentState) => a.session_id === selectedAgentId,
+  const agent = useStore(useAgentStore, (s) =>
+    s.activeAgents.find((a: AgentState) => a.session_id === selectedAgentId),
   );
-  const rawEvents = selectedAgentId
-    ? (storeState.recentEvents.get(selectedAgentId) ?? [])
-    : [];
+  const rawEvents = useStore(useAgentStore, (s) =>
+    selectedAgentId ? (s.recentEvents.get(selectedAgentId) ?? []) : [],
+  );
 
   const events = useMemo(
     () => rawEvents as EventEntryData[],

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useMemo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 import type { AgentActivity } from '@/types/agent';
@@ -10,6 +10,10 @@ import {
   getIdleTransform,
   getTypingTransform,
   getReadingTransform,
+  getWalkingTransform,
+  getChattingTransform,
+  getWaitingTransform,
+  getSittingPose,
 } from '@/lib/avatar-animations';
 
 /** Body geometry dimensions (REQ-035). */
@@ -50,8 +54,6 @@ export default function AgentAvatar({
   const rightArmRef = useRef<THREE.Mesh>(null);
   const leftLegRef = useRef<THREE.Mesh>(null);
   const rightLegRef = useRef<THREE.Mesh>(null);
-  const { invalidate } = useThree();
-
   const bodyBaseY = 0.6;
   const headBaseY = 1.35;
   const armBaseY = 0.6;
@@ -78,21 +80,59 @@ export default function AgentAvatar({
       }
     } else if (animState === 'typing') {
       const transforms = getTypingTransform(t);
+      const sitting = getSittingPose();
+      if (bodyRef.current) bodyRef.current.position.y = bodyBaseY - sitting.bodyDrop;
       if (leftArmRef.current) leftArmRef.current.rotation.x = transforms.leftArmRotationX;
       if (rightArmRef.current) rightArmRef.current.rotation.x = transforms.rightArmRotationX;
       if (headRef.current) headRef.current.rotation.x = transforms.headRotationX;
+      if (leftLegRef.current) leftLegRef.current.rotation.x = sitting.legRotationX;
+      if (rightLegRef.current) rightLegRef.current.rotation.x = sitting.legRotationX;
     } else if (animState === 'reading') {
       const transforms = getReadingTransform(t);
+      const sitting = getSittingPose();
+      if (bodyRef.current) bodyRef.current.position.y = bodyBaseY - sitting.bodyDrop;
       if (headRef.current) {
         headRef.current.rotation.x = transforms.headRotationX;
         headRef.current.rotation.y = transforms.headRotationY;
       }
+      if (leftLegRef.current) leftLegRef.current.rotation.x = sitting.legRotationX;
+      if (rightLegRef.current) rightLegRef.current.rotation.x = sitting.legRotationX;
       // Reset arms for reading
       if (leftArmRef.current) leftArmRef.current.rotation.x = 0;
       if (rightArmRef.current) rightArmRef.current.rotation.x = 0;
+    } else if (animState === 'walking') {
+      const transforms = getWalkingTransform(t);
+      if (bodyRef.current) bodyRef.current.position.y = bodyBaseY + transforms.bodyBob;
+      if (headRef.current) headRef.current.position.y = headBaseY + transforms.headBob;
+      if (leftArmRef.current) leftArmRef.current.rotation.x = transforms.leftArmRotationX;
+      if (rightArmRef.current) rightArmRef.current.rotation.x = transforms.rightArmRotationX;
+      if (leftLegRef.current) leftLegRef.current.rotation.x = 0;
+      if (rightLegRef.current) rightLegRef.current.rotation.x = 0;
+    } else if (animState === 'chatting') {
+      const transforms = getChattingTransform(t);
+      if (bodyRef.current) bodyRef.current.position.y = bodyBaseY + transforms.bodySway;
+      if (leftArmRef.current) {
+        leftArmRef.current.rotation.x = transforms.leftArmRotationX;
+        leftArmRef.current.rotation.z = transforms.leftArmRotationZ;
+      }
+      if (rightArmRef.current) {
+        rightArmRef.current.rotation.x = transforms.rightArmRotationX;
+        rightArmRef.current.rotation.z = transforms.rightArmRotationZ;
+      }
+      if (headRef.current) {
+        headRef.current.rotation.x = transforms.headRotationX;
+        headRef.current.rotation.y = transforms.headRotationY;
+      }
+      if (leftLegRef.current) leftLegRef.current.rotation.x = 0;
+      if (rightLegRef.current) rightLegRef.current.rotation.x = 0;
+    } else if (animState === 'waiting') {
+      const transforms = getWaitingTransform(t);
+      if (bodyRef.current) bodyRef.current.position.y = bodyBaseY + transforms.bodySway;
+      if (leftArmRef.current) leftArmRef.current.rotation.x = 0;
+      if (rightArmRef.current) rightArmRef.current.rotation.x = 0;
+      if (leftLegRef.current) leftLegRef.current.rotation.x = 0;
+      if (rightLegRef.current) rightLegRef.current.rotation.x = 0;
     }
-
-    invalidate();
   });
 
   return (

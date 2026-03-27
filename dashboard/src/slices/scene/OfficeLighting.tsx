@@ -13,7 +13,8 @@ import {
   DIRECTIONAL_CONFIG,
   FILL_LIGHT_CONFIG,
 } from '@/lib/lighting-config';
-import { lerpLightIntensity } from '@/slices/environment/DayNightCycle';
+import { lerpLightIntensity, getSunPosition } from '@/slices/environment/DayNightCycle';
+import { Vector3 as ThreeVector3 } from 'three';
 import type { SpotLight, DirectionalLight, AmbientLight, HemisphereLight } from 'three';
 
 /** Per-zone ceiling SpotLight that dims/brightens based on occupancy. */
@@ -62,6 +63,8 @@ export default function OfficeLighting() {
   const hemiRef = useRef<HemisphereLight>(null);
   const fillRef = useRef<DirectionalLight>(null);
 
+  const weather = useStore(useOfficeStore, (s) => s.weather);
+  const envOverride = useStore(useOfficeStore, (s) => s.envOverride);
   const ceilingLightsOn = dayFactor < 0.5;
 
   useFrame((_, delta) => {
@@ -69,6 +72,21 @@ export default function OfficeLighting() {
     applyDynamicIntensity(ambientRef.current, 'ambient', dayFactor, delta, ceilingLightsOn);
     applyDynamicIntensity(hemiRef.current, 'hemi', dayFactor, delta, ceilingLightsOn);
     applyDynamicIntensity(fillRef.current, 'fill', dayFactor, delta, ceilingLightsOn);
+
+    // Sync directional light position to sun position
+    if (sunRef.current) {
+      const hour = envOverride === 'day' ? 12 : envOverride === 'night' ? 0 : new Date().getHours() + new Date().getMinutes() / 60;
+      const { elevation, azimuth } = getSunPosition(hour);
+      const phi = MathUtils.degToRad(90 - elevation);
+      const theta = MathUtils.degToRad(azimuth);
+      const sunVec = new ThreeVector3().setFromSphericalCoords(50, phi, theta);
+      sunRef.current.position.copy(sunVec);
+    }
+
+    // Thunderstorm flash: 0.3% chance per frame to spike directional light intensity
+    if (weather === 'thunderstorm' && sunRef.current && Math.random() < 0.003) {
+      sunRef.current.intensity = 3.0;
+    }
   });
 
   return (

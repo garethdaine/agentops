@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useStore } from 'zustand';
 import {
   Select,
   SelectContent,
@@ -51,9 +52,9 @@ export function filterAgentsBySession(
 
 /** Session selector dropdown for multi-session filtering. */
 export default function SessionSelector() {
-  const sessions = useAgentStore.getState().sessions;
-  const selectedSessionId = useOfficeStore.getState().selectedSessionId;
-  const setSelectedSession = useOfficeStore.getState().setSelectedSession;
+  const sessions = useStore(useAgentStore, (s) => s.sessions);
+  const selectedSessionId = useStore(useOfficeStore, (s) => s.selectedSessionId);
+  const setSelectedSession = useStore(useOfficeStore, (s) => s.setSelectedSession);
 
   const options = useMemo(
     () => buildSessionOptions(sessions),

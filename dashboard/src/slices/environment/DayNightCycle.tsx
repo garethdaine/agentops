@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Sky, Stars } from '@react-three/drei';
+import type { Points as ThreePoints, PointsMaterial } from 'three';
 import { MathUtils, Vector3, Color, type Scene, type Fog } from 'three';
 import { useStore } from 'zustand';
 import { useOfficeStore } from '@/stores/office-store';
@@ -111,15 +112,30 @@ export default function DayNightCycle() {
   const nightBgColor = useRef(new Color(NIGHT_BG));
   const dayFogColor = useRef(new Color(DAY_FOG));
   const nightFogColor = useRef(new Color(NIGHT_FOG));
+  const starsRef = useRef<ThreePoints>(null);
+  const prevDayFactor = useRef<number | null>(null);
 
   useFrame((_, delta) => {
     const hour = resolveHour(envOverride);
     const factor = getDayFactor(hour);
-    setDayFactor(factor);
+
+    // FIX-011: Only update store when value actually changes (threshold check)
+    if (prevDayFactor.current === null || Math.abs(factor - prevDayFactor.current) > 0.001) {
+      setDayFactor(factor);
+      prevDayFactor.current = factor;
+    }
 
     updateSunPosition(hour, sunPosRef.current);
     updateFog(scene, factor, delta, dayFogColor.current, nightFogColor.current);
     updateBackground(scene, factor, delta, dayBgColor.current, nightBgColor.current);
+
+    // FIX-009: Lerp stars opacity with nightFactor
+    if (starsRef.current) {
+      const nightFactor = 1 - factor;
+      const mat = starsRef.current.material as PointsMaterial;
+      mat.opacity = MathUtils.lerp(mat.opacity, nightFactor, delta * 2);
+      mat.transparent = true;
+    }
   });
 
   const hour = resolveHour(envOverride);
@@ -136,6 +152,7 @@ export default function DayNightCycle() {
         mieDirectionalG={ATMOSPHERE_CONFIG.sky.mieDirectionalG}
       />
       <Stars
+        ref={starsRef}
         radius={ATMOSPHERE_CONFIG.stars.radius}
         depth={ATMOSPHERE_CONFIG.stars.depth}
         count={ATMOSPHERE_CONFIG.stars.count}
@@ -143,9 +160,6 @@ export default function DayNightCycle() {
         fade={ATMOSPHERE_CONFIG.stars.fade}
         saturation={0}
       />
-      {/* Stars opacity driven via material in useFrame is not directly available;
-          we use a group opacity wrapper to scale visibility */}
-      <group visible={nightFactor > 0.05} />
     </>
   );
 }
