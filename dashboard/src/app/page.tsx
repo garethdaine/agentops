@@ -169,7 +169,7 @@ export default function Home() {
           {/* Canvas */}
           <div
             id="canvas-wrapper"
-            className="relative h-full w-full rounded-xl overflow-hidden border border-gray-800"
+            className="relative h-full w-full rounded-xl border border-gray-800"
           >
             {webglSupported === null ? null : webglSupported ? (
               <OfficeCanvas />

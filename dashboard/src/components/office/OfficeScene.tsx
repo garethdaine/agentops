@@ -257,7 +257,7 @@ export default function OfficeScene() {
       {activeAgents.map((agent, i) => {
         if (i >= WORKSTATION_SLOTS.length) return null;
         const slot = WORKSTATION_SLOTS[i];
-        const avatarZ = slot.rotation === Math.PI ? slot.position[2] - 1 : slot.position[2] + 1;
+        const avatarZ = slot.rotation === Math.PI ? slot.position[2] - 0.6 : slot.position[2] + 0.6;
         return (
           <group
             key={agent.session_id}
@@ -268,7 +268,7 @@ export default function OfficeScene() {
             <AgentAvatar
               name={agent.name || `Agent ${i + 1}`}
               color={getAgentColor(agent.type)}
-              position={[slot.position[0], slot.position[1], avatarZ]}
+              position={[slot.position[0], slot.position[1] + 0.25, avatarZ]}
               activity={deriveActivity(agent)}
             />
           </group>
