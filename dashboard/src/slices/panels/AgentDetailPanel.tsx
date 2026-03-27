@@ -147,7 +147,23 @@ function renderEventsTab(events: EventEntryData[]) {
 }
 
 function renderMessagesTab(events: EventEntryData[]) {
-  const messages = events.filter((e) => (e.event === 'Notification' || e.event === 'AssistantMessage') && e.content && e.content.length > 0);
+  const messages = events
+    .filter((e) => e.content && e.content.length > 2)
+    .filter((e) => e.event === 'Notification' || e.event === 'AssistantMessage' || e.event === 'PostToolUse')
+    .map((e) => {
+      // Extract readable content from PostToolUse JSON responses
+      let displayContent = e.content || '';
+      if (e.event === 'PostToolUse' && displayContent.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(displayContent);
+          if (parsed.stdout) displayContent = parsed.stdout;
+          else if (typeof parsed === 'string') displayContent = parsed;
+          else displayContent = '';
+        } catch { /* keep as-is */ }
+      }
+      return { ...e, displayContent: displayContent.trim() };
+    })
+    .filter((e) => e.displayContent.length > 2);
   const limited = messages.slice(-50);
   return (
     <div className="overflow-y-auto max-h-[60vh]">
@@ -156,14 +172,20 @@ function renderMessagesTab(events: EventEntryData[]) {
       ) : (
         limited.map((msg, i) => {
           const time = new Date(msg.ts).toLocaleTimeString();
+          const isToolResponse = msg.event === 'PostToolUse';
           return (
             <div key={`${msg.ts}-${i}`} className="py-3 px-3 border-b border-gray-800">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] text-gray-500">{time}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Response</span>
+                <div className="flex items-center gap-1.5">
+                  {msg.tool && <span className="text-[10px] font-mono text-gray-400">{msg.tool}</span>}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                    isToolResponse ? 'bg-emerald-500/20 text-emerald-300' : 'bg-indigo-500/20 text-indigo-300'
+                  }`}>{isToolResponse ? 'Output' : 'Message'}</span>
+                </div>
               </div>
-              <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">
-                {msg.content}
+              <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap line-clamp-6 font-mono">
+                {msg.displayContent}
               </p>
             </div>
           );
