@@ -70,6 +70,23 @@ function handleMessage(event: MessageEvent): void {
           pid: 0,
         });
       }
+
+      // Create/update agent avatar from tool-use events
+      if (data.event === 'PreToolUse' || data.event === 'PostToolUse') {
+        const sessionInfo = store.sessions.get(data.session);
+        const projectName = sessionInfo?.project_dir
+          ? sessionInfo.project_dir.split('/').pop() || 'main'
+          : 'main';
+        store.updateAgent({
+          session_id: data.session,
+          name: projectName,
+          type: data.agentId ? 'general-purpose' : 'main',
+          status: 'active',
+          currentTool: data.tool || null,
+          lastEventAt: data.ts || new Date().toISOString(),
+        });
+      }
+
       // Capture raw event before batching for session recording (REQ-105)
       sessionRecorder.appendEvent(data as TelemetryEvent);
       ensureBatcher().push(data as TelemetryEvent);
