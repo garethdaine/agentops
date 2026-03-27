@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 import { ActivityTable, detectWebGL } from '@/components/panels/ActivityTable';
 import { ConnectionStatus } from '@/components/panels/ConnectionStatus';
 import { connectWebSocket, disconnectWebSocket } from '@/hooks/useWebSocket';
+import { startWeatherPolling, classifyWeather } from '@/lib/weather-service';
+import { useOfficeStore } from '@/stores/office-store';
 import SessionSelector from '@/slices/panels/SessionSelector';
 import ActivityFeed from '@/slices/panels/ActivityFeed';
 import WeatherIndicator from '@/slices/panels/WeatherIndicator';
@@ -21,7 +23,21 @@ export default function Home() {
   useEffect(() => {
     setWebglSupported(detectWebGL());
     connectWebSocket();
-    return () => disconnectWebSocket();
+
+    // Start weather polling on mount — fetch real data from Open-Meteo
+    const stopWeather = startWeatherPolling((data) => {
+      const store = useOfficeStore.getState();
+      store.setWeatherData(data);
+      // Only update weather type if no demo override is active
+      if (!store.demoWeatherOverride) {
+        store.setWeather(classifyWeather(data.weatherCode));
+      }
+    });
+
+    return () => {
+      disconnectWebSocket();
+      stopWeather();
+    };
   }, []);
 
   return (

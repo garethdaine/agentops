@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useFrame, useThree, Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { OfficeFloor, OfficeWalls, OfficeLighting, OfficeDecorations, OfficeOutdoor } from '@/slices/scene';
 import WallDecorations from '@/slices/scene/WallDecorations';
 import { Workstation, ZoneFurniture } from '@/slices/zones';
+import { ZONE_FURNITURE_MAP } from '@/lib/floorplan';
+import FurnitureRenderer from '@/slices/zones/furniture/FurnitureRenderer';
 import { AgentAvatar } from '@/slices/agents';
 import DayNightCycle from '@/slices/environment/DayNightCycle';
 import WeatherParticles from '@/slices/environment/WeatherParticles';
 import ZoneLabels from '@/slices/zones/ZoneLabels';
-import { WORKSTATION_SLOTS } from '@/lib/floorplan';
+import { WORKSTATION_SLOTS, ZONES } from '@/lib/floorplan';
 import { FOG_CONFIG } from '@/lib/lighting-config';
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
@@ -18,6 +20,8 @@ import { useOfficeStore } from '@/stores/office-store';
 import { getAgentColor } from '@/lib/avatar-animations';
 import { mapToolToActivity } from '@/lib/event-mapper';
 import AgentDetailPanel from '@/slices/panels/AgentDetailPanel';
+import ZoneDetailPanel from '@/slices/panels/ZoneDetailPanel';
+import * as THREE from 'three';
 import { processWASD, shouldIgnoreInput } from '@/hooks/useWASDCamera';
 import ParticleEmitter, {
   createParticlePool,
@@ -36,6 +40,45 @@ import type { AgentActivity } from '@/types/agent';
 const IDLE_PHRASES = ['Thinking...', 'Hmm...', 'Pondering...', 'Considering...'];
 
 const INACTIVITY_TIMEOUT_MS = 60_000;
+
+const HIGHLIGHT_COLOR = new THREE.Color(0x4488ff);
+const HIGHLIGHT_INTENSITY = 0.35;
+
+/** Apply emissive highlight to all meshes in a group on hover. */
+function applyEmissiveHighlight(group: THREE.Object3D, on: boolean) {
+  group.traverse((child: THREE.Object3D) => {
+    if (!(child instanceof THREE.Mesh)) return;
+    const mat = child.material as THREE.MeshStandardMaterial;
+    if (!mat?.emissive) return;
+    if (on) {
+      if (!child.userData._savedEmissive) {
+        child.userData._savedEmissive = mat.emissive.clone();
+        child.userData._savedEmissiveIntensity = mat.emissiveIntensity ?? 0;
+      }
+      mat.emissive.copy(HIGHLIGHT_COLOR);
+      mat.emissiveIntensity = HIGHLIGHT_INTENSITY;
+    } else if (child.userData._savedEmissive) {
+      mat.emissive.copy(child.userData._savedEmissive);
+      mat.emissiveIntensity = child.userData._savedEmissiveIntensity ?? 0;
+      delete child.userData._savedEmissive;
+      delete child.userData._savedEmissiveIntensity;
+    }
+  });
+}
+
+function handlePointerOver(e: any) {
+  e.stopPropagation();
+  document.body.style.cursor = 'pointer';
+  const group = e.eventObject;
+  applyEmissiveHighlight(group, true);
+}
+
+function handlePointerOut(e: any) {
+  e.stopPropagation();
+  document.body.style.cursor = 'default';
+  const group = e.eventObject;
+  applyEmissiveHighlight(group, false);
+}
 
 /** WASD camera controller - must be a child of Canvas to access useFrame/useThree. */
 function WASDCameraController({ controlsRef }: { controlsRef: React.RefObject<any> }) {
@@ -79,6 +122,7 @@ export default function OfficeScene() {
   const selectedAgent = useStore(useOfficeStore, (s) => s.selectedAgent);
   const setSelectedAgent = useStore(useOfficeStore, (s) => s.setSelectedAgent);
 
+  const [selectedZone, setSelectedZone] = useState<typeof ZONES[number] | null>(null);
   const controlsRef = useRef<any>(null);
   const poolRef = useRef<ParticlePool>(createParticlePool());
   const activeParticlesRef = useRef<Particle[]>([]);
@@ -140,6 +184,13 @@ export default function OfficeScene() {
     }
   }, [selectedAgent, setSelectedAgent, clearSelection]);
 
+  const handleZoneClick = useCallback((zoneId: string) => {
+    const zone = ZONES.find((z) => z.id === zoneId);
+    if (zone) {
+      setSelectedZone(zone);
+    }
+  }, []);
+
   return (
     <>
     <Canvas
@@ -159,19 +210,41 @@ export default function OfficeScene() {
       <OfficeDecorations />
       <OfficeOutdoor />
       <WallDecorations />
-      <ZoneFurniture />
+      {/* Zone furniture with hover highlight and click-to-inspect */}
+      <group name="zoneFurniture">
+        {Object.entries(ZONE_FURNITURE_MAP).map(([zoneId, placements]) => (
+          <group
+            key={zoneId}
+            onClick={(e) => { e.stopPropagation(); handleZoneClick(zoneId); }}
+            onPointerOver={handlePointerOver}
+            onPointerOut={handlePointerOut}
+          >
+            {placements.map((placement, index) => (
+              <FurnitureRenderer
+                key={`${zoneId}-${placement.type}-${index}`}
+                placement={placement}
+              />
+            ))}
+          </group>
+        ))}
+      </group>
       <ZoneLabels />
 
       {WORKSTATION_SLOTS.map((slot, i) => {
         const agent = activeAgents[i];
         return (
-          <Workstation
+          <group
             key={i}
-            position={slot.position}
-            rotation={slot.rotation}
-            status={agent ? 'active' : 'idle'}
-            activity={agent ? deriveActivity(agent) : 'idle'}
-          />
+            onPointerOver={handlePointerOver}
+            onPointerOut={handlePointerOut}
+          >
+            <Workstation
+              position={slot.position}
+              rotation={slot.rotation}
+              status={agent ? 'active' : 'idle'}
+              activity={agent ? deriveActivity(agent) : 'idle'}
+            />
+          </group>
         );
       })}
 
@@ -183,8 +256,8 @@ export default function OfficeScene() {
           <group
             key={agent.session_id}
             onClick={(e) => { e.stopPropagation(); handleAvatarClick(agent.session_id); }}
-            onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
-            onPointerOut={() => { document.body.style.cursor = 'default'; }}
+            onPointerOver={handlePointerOver}
+            onPointerOut={handlePointerOut}
           >
             <AgentAvatar
               name={agent.name || `Agent ${i + 1}`}
@@ -215,6 +288,22 @@ export default function OfficeScene() {
       />
     </Canvas>
     <AgentDetailPanel />
+    <ZoneDetailPanel
+      zone={selectedZone}
+      onClose={() => setSelectedZone(null)}
+      agents={activeAgents.filter((a, i) => {
+        if (!selectedZone || i >= WORKSTATION_SLOTS.length) return false;
+        const slot = WORKSTATION_SLOTS[i];
+        const zp = selectedZone.position;
+        const zs = selectedZone.size;
+        return (
+          slot.position[0] >= zp.x - zs.width / 2 &&
+          slot.position[0] <= zp.x + zs.width / 2 &&
+          slot.position[2] >= zp.z - zs.depth / 2 &&
+          slot.position[2] <= zp.z + zs.depth / 2
+        );
+      })}
+    />
     </>
   );
 }

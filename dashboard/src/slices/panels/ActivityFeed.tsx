@@ -50,7 +50,7 @@ export function shouldAutoScroll(
 /** Creates a simple collapse-state object (framework-agnostic for testability). */
 export function createFeedState() {
   const state = {
-    isCollapsed: false,
+    isCollapsed: true,
     toggle() {
       state.isCollapsed = !state.isCollapsed;
     },
@@ -107,7 +107,7 @@ function renderStatusIcon(status: string): string {
 
 /** Collapsible activity feed sidebar showing merged events across sessions. */
 export default function ActivityFeed() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef(true);
 
