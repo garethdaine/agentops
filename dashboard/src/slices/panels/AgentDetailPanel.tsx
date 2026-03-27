@@ -103,7 +103,7 @@ export default function AgentDetailPanel() {
   if (!detailPanelOpen) return null;
 
   return (
-    <div className="absolute top-2 -right-2 bottom-14 w-[380px] z-50 bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right-10 duration-300">
+    <div className="fixed top-16 right-6 lg:right-8 bottom-20 w-[380px] z-50 bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right-10 duration-300">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
         <div>
