@@ -29,10 +29,8 @@ export default function StatusBar({ onActivityOpen }: StatusBarProps) {
   return (
     <div
       style={{
-        position: 'absolute',
-        bottom: 4,
-        left: 4,
-        right: 4,
+        position: 'relative',
+        width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',

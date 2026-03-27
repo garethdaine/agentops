@@ -166,47 +166,51 @@ export default function Home() {
 
         {/* Content area with generous padding for breakout overlays */}
         <main id="office-main" className="flex-1 relative p-10 lg:p-16 bg-gray-950" style={{ minHeight: 0 }}>
-          {/* Canvas */}
+          {/* Canvas with all overlays inside for correct relative positioning */}
           <div
             id="canvas-wrapper"
-            className="relative h-full w-full rounded-xl border border-gray-800"
+            className="relative h-full w-full rounded-xl border border-gray-800 overflow-visible"
           >
             {webglSupported === null ? null : webglSupported ? (
-              <OfficeCanvas />
+              <>
+                <OfficeCanvas />
+
+                {/* All breakout overlays positioned relative to canvas-wrapper */}
+                {/* They use negative margins to "break out" ~12px past the canvas border */}
+
+                {/* Weather widget - top left corner, breaks out */}
+                <div className="absolute -top-3 -left-3 z-20">
+                  <WeatherIndicator />
+                </div>
+
+                {/* Fullscreen toggle - top right corner, breaks out */}
+                <button
+                  onClick={toggleFullscreen}
+                  className="absolute -top-3 -right-3 z-20 flex items-center justify-center h-9 w-9 rounded-lg border border-gray-700/50 bg-gray-900/80 backdrop-blur-sm shadow-lg text-gray-400 hover:text-gray-100 hover:bg-gray-800/90 transition-colors"
+                  title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                >
+                  {isFullscreen ? (
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" />
+                    </svg>
+                  ) : (
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Status bar - bottom edge, breaks out */}
+                <div className="absolute -bottom-3 -left-3 -right-3 z-20">
+                  <StatusBar onActivityOpen={() => setActivityOpen(true)} />
+                </div>
+              </>
             ) : (
               <ActivityTable />
             )}
           </div>
 
-          {/* Breakout overlays - positioned relative to main, overlapping canvas edges */}
-          {webglSupported && (
-            <>
-              {/* Weather widget - top left, overlapping canvas */}
-              <WeatherIndicator />
-
-              {/* Fullscreen toggle - top right corner of canvas */}
-              <button
-                onClick={toggleFullscreen}
-                className="absolute top-1 right-1 z-20 flex items-center justify-center h-9 w-9 rounded-lg border border-gray-700/50 bg-gray-900/80 backdrop-blur-sm shadow-lg text-gray-400 hover:text-gray-100 hover:bg-gray-800/90 transition-colors"
-                title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-              >
-                {isFullscreen ? (
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" />
-                  </svg>
-                ) : (
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                  </svg>
-                )}
-              </button>
-
-              {/* Status bar - bottom, overlapping canvas edge */}
-              <StatusBar onActivityOpen={() => setActivityOpen(true)} />
-            </>
-          )}
-
-          {/* Activity Feed Sheet */}
+          {/* Activity Feed panel */}
           <ActivityFeed open={activityOpen} onOpenChange={setActivityOpen} />
         </main>
       </div>
