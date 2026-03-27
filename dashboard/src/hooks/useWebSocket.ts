@@ -1,5 +1,6 @@
 import { useAgentStore, type TelemetryEvent } from '@/stores/agent-store';
 import { createEventBatcher, THROTTLE_MS, type EventBatcher } from '@/lib/event-batcher';
+import { SessionRecorder } from '@/slices/session/session-recorder';
 
 const WS_URL = 'ws://localhost:3099';
 const INITIAL_BACKOFF_MS = 1000;
@@ -10,6 +11,9 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let backoffMs = INITIAL_BACKOFF_MS;
 let intentionalClose = false;
 let eventBatcher: EventBatcher<TelemetryEvent> | null = null;
+
+/** Shared session recorder instance for capturing raw inbound events. */
+export const sessionRecorder = new SessionRecorder();
 
 function flushEvents(events: TelemetryEvent[]): void {
   const store = useAgentStore.getState();
@@ -57,6 +61,8 @@ function handleMessage(event: MessageEvent): void {
           pid: 0,
         });
       }
+      // Capture raw event before batching for session recording (REQ-105)
+      sessionRecorder.appendEvent(data as TelemetryEvent);
       ensureBatcher().push(data as TelemetryEvent);
     }
   } catch (err) {
