@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { OfficeFloor, OfficeWalls, OfficeLighting } from '@/slices/scene';
 import { Workstation } from '@/slices/zones';
 import { AgentAvatar } from '@/slices/agents';
@@ -10,9 +10,10 @@ import { WORKSTATION_SLOTS } from '@/lib/floorplan';
 import { FOG_CONFIG } from '@/lib/lighting-config';
 import { useStore } from 'zustand';
 import { useAgentStore } from '@/stores/agent-store';
-import { useUIStore } from '@/stores/ui-store';
+import { useOfficeStore } from '@/stores/office-store';
 import { getAgentColor } from '@/lib/avatar-animations';
 import { mapToolToActivity } from '@/lib/event-mapper';
+import AgentDetailPanel from '@/slices/panels/AgentDetailPanel';
 import type { AgentState as StoreAgentState } from '@/stores/agent-store';
 import type { AgentActivity } from '@/types/agent';
 
@@ -25,38 +26,10 @@ function deriveActivity(agent: StoreAgentState): AgentActivity {
   return 'idle';
 }
 
-function SelectedAgentPanel({ agent }: { agent: StoreAgentState }) {
-  const clearSelection = useStore(useUIStore, (s) => s.clearSelection);
-  return (
-    <Html position={[0, 3, 0]} center distanceFactor={10} style={{ pointerEvents: 'auto' }}>
-      <div
-        style={{
-          background: 'rgba(0,0,0,0.85)',
-          color: 'white',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          fontSize: '13px',
-          lineHeight: '1.5',
-          minWidth: '180px',
-          border: '1px solid rgba(255,255,255,0.15)',
-        }}
-        onClick={(e) => { e.stopPropagation(); clearSelection(); }}
-      >
-        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{agent.name || agent.session_id}</div>
-        <div>Type: {agent.type}</div>
-        <div>Status: {agent.status}</div>
-        <div>Tool: {agent.currentTool || 'none'}</div>
-        <div>Activity: {deriveActivity(agent)}</div>
-        <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>Click to dismiss</div>
-      </div>
-    </Html>
-  );
-}
-
 export default function OfficeScene() {
   const activeAgents = useStore(useAgentStore, (s) => s.activeAgents);
-  const selectedAgent = useStore(useUIStore, (s) => s.selectedAgent);
-  const setSelectedAgent = useStore(useUIStore, (s) => s.setSelectedAgent);
+  const selectedAgent = useStore(useOfficeStore, (s) => s.selectedAgent);
+  const setSelectedAgent = useStore(useOfficeStore, (s) => s.setSelectedAgent);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,7 +44,7 @@ export default function OfficeScene() {
     return () => clearInterval(interval);
   }, []);
 
-  const clearSelection = useStore(useUIStore, (s) => s.clearSelection);
+  const clearSelection = useStore(useOfficeStore, (s) => s.clearSelection);
   const handleAvatarClick = useCallback((sessionId: string) => {
     if (sessionId === selectedAgent) {
       clearSelection();
@@ -81,6 +54,7 @@ export default function OfficeScene() {
   }, [selectedAgent, setSelectedAgent, clearSelection]);
 
   return (
+    <>
     <Canvas
       shadows
       camera={{ position: [20, 14, 20], fov: 50 }}
@@ -111,7 +85,6 @@ export default function OfficeScene() {
         if (i >= WORKSTATION_SLOTS.length) return null;
         const slot = WORKSTATION_SLOTS[i];
         const avatarZ = slot.rotation === Math.PI ? slot.position[2] - 1 : slot.position[2] + 1;
-        const isSelected = selectedAgent === agent.session_id;
         return (
           <group
             key={agent.session_id}
@@ -125,11 +98,6 @@ export default function OfficeScene() {
               position={[slot.position[0], slot.position[1], avatarZ]}
               activity={deriveActivity(agent)}
             />
-            {isSelected && (
-              <group position={[slot.position[0], slot.position[1], avatarZ]}>
-                <SelectedAgentPanel agent={agent} />
-              </group>
-            )}
           </group>
         );
       })}
@@ -144,5 +112,7 @@ export default function OfficeScene() {
         target={[0, 0, 0]}
       />
     </Canvas>
+    <AgentDetailPanel />
+    </>
   );
 }
