@@ -46,10 +46,11 @@ export default function Home() {
   }, []);
 
   const toggleFullscreen = useCallback(() => {
-    const wrapper = document.getElementById('canvas-wrapper');
-    if (!wrapper) return;
+    // Fullscreen the main content area (not just canvas) so overlays remain visible
+    const main = document.getElementById('office-main');
+    if (!main) return;
     if (!document.fullscreenElement) {
-      wrapper.requestFullscreen().catch(() => {});
+      main.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen().catch(() => {});
     }
@@ -164,7 +165,7 @@ export default function Home() {
         </header>
 
         {/* Content area with generous padding for breakout overlays */}
-        <main className="flex-1 relative p-6 lg:p-8" style={{ minHeight: 0 }}>
+        <main id="office-main" className="flex-1 relative p-6 lg:p-8 bg-gray-950" style={{ minHeight: 0 }}>
           {/* Canvas */}
           <div
             id="canvas-wrapper"
