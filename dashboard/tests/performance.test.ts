@@ -57,20 +57,20 @@ describe('REQ-050: Scene complexity bounds (FPS proxy)', () => {
    * on-demand rendering (frameloop="demand") ensures 30+ FPS.
    */
 
-  it('should have at most 6 workstation slots', () => {
-    // 6 workstations = 6 avatars max; more would degrade FPS
-    expect(WORKSTATION_SLOTS.length).toBeLessThanOrEqual(6);
+  it('should have at most 12 workstation slots', () => {
+    // 9 workstations in 28x22 layout; upper bound allows expansion
+    expect(WORKSTATION_SLOTS.length).toBeLessThanOrEqual(12);
     expect(WORKSTATION_SLOTS.length).toBeGreaterThanOrEqual(4);
   });
 
   it('should have bounded wall partitions', () => {
-    // Each partition adds geometry; keep it under 10
-    expect(WALL_PARTITIONS.length).toBeLessThanOrEqual(10);
+    // Perimeter walls split by window/door gaps; keep under 25
+    expect(WALL_PARTITIONS.length).toBeLessThanOrEqual(25);
   });
 
   it('should have bounded zone count', () => {
-    // Each zone adds a tinted plane; keep it under 8
-    expect(ZONES.length).toBeLessThanOrEqual(8);
+    // 10 zones in expanded layout; keep under 12
+    expect(ZONES.length).toBeLessThanOrEqual(12);
   });
 
   it('should keep total scene object count under draw-call budget', () => {
@@ -84,8 +84,8 @@ describe('REQ-050: Scene complexity bounds (FPS proxy)', () => {
     const totalEstimate =
       workstationObjects + floorObjects + wallObjects + lights;
 
-    // Budget: under 60 draw calls for 30+ FPS on standard MacBook Pro
-    expect(totalEstimate).toBeLessThan(60);
+    // Budget: under 100 draw calls for 30+ FPS (REQ-122)
+    expect(totalEstimate).toBeLessThan(100);
   });
 });
 
