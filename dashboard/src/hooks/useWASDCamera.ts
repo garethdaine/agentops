@@ -63,9 +63,9 @@ export function processWASD(
       _forward.z /= len;
     }
 
-    // Right vector = cross(forward, up) projected to XZ
-    const rightX = -_forward.z;
-    const rightZ = _forward.x;
+    // Right vector = cross(up, forward) = (fz, 0, -fx)
+    const rightX = _forward.z;
+    const rightZ = -_forward.x;
 
     _move.x = 0;
     _move.y = 0;
@@ -73,8 +73,8 @@ export function processWASD(
 
     if (keysDown.has('w')) { _move.x += _forward.x; _move.z += _forward.z; }
     if (keysDown.has('s')) { _move.x -= _forward.x; _move.z -= _forward.z; }
-    if (keysDown.has('d')) { _move.x -= rightX; _move.z -= rightZ; }
-    if (keysDown.has('a')) { _move.x += rightX; _move.z += rightZ; }
+    if (keysDown.has('d')) { _move.x += rightX; _move.z += rightZ; }
+    if (keysDown.has('a')) { _move.x -= rightX; _move.z -= rightZ; }
 
     // Normalize diagonal movement
     const moveLen = Math.sqrt(_move.x * _move.x + _move.z * _move.z);
