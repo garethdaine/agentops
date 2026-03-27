@@ -64,11 +64,18 @@ mark_tests_ran() {
 
 # ── Plan gate tests ─────────────────────────────────────────────────────────
 
-@test "plan gate: silent when disabled" {
-  seed_modified_files 10
+@test "plan gate: silent when disabled even if other gates trigger" {
+  # Enable verification + test gates so they can fire; only plan gate is disabled
+  set_flag "verification_gate_enabled" "true"
+  set_flag "test_gate_enabled" "true"
+  seed_modified_files 5
+  create_todo "- [ ] pending"
   run run_hook "$(stop_event)"
   [ "$status" -eq 0 ]
-  [ -z "$output" ]
+  # Other gates fire, but plan gate does not
+  echo "$output" | grep -q "Verification gate"
+  echo "$output" | grep -q "Test gate"
+  ! echo "$output" | grep -q "Plan gate"
 }
 
 @test "plan gate: silent when no modified-files tracker exists" {
@@ -179,11 +186,15 @@ mark_tests_ran() {
 
 # ── Test gate tests ──────────────────────────────────────────────────────────
 
-@test "test gate: silent when disabled" {
+@test "test gate: silent when disabled even if other gates trigger" {
+  # Enable verification gate so it fires; only test gate is disabled
+  set_flag "verification_gate_enabled" "true"
   seed_modified_files 10
+  create_todo "- [ ] pending\n- [x] done"
   run run_hook "$(stop_event)"
   [ "$status" -eq 0 ]
-  [ -z "$output" ]
+  echo "$output" | grep -q "Verification gate"
+  ! echo "$output" | grep -q "Test gate"
 }
 
 @test "test gate: silent when no modified-files tracker exists" {
@@ -251,17 +262,16 @@ mark_tests_ran() {
   echo "$output" | grep -q "Test gate"
 }
 
-@test "all three gates trigger simultaneously" {
+@test "plan and verification gates are mutually exclusive" {
   set_flag "plan_gate_enabled" "true"
   set_flag "verification_gate_enabled" "true"
   set_flag "test_gate_enabled" "true"
   seed_modified_files 5
-  # No todo.md → plan gate triggers
-  # Create a separate todo for verification gate — but plan checks for existence...
-  # Actually, without todo.md: plan triggers, verification doesn't (no todo), test triggers
+  # No todo.md → plan gate triggers, verification gate does not (no todo to check)
   run run_hook "$(stop_event)"
   [ "$status" -eq 0 ]
   echo "$output" | grep -q "Plan gate"
+  ! echo "$output" | grep -q "Verification gate"
   echo "$output" | grep -q "Test gate"
 }
 
