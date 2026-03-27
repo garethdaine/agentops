@@ -16,15 +16,31 @@ interface EventEntryData {
   tool?: string;
   ts: string;
   session: string;
+  content?: string;
+  agentId?: string;
 }
 
 function EventEntry({ entry }: { entry: EventEntryData }) {
   const time = new Date(entry.ts).toLocaleTimeString();
+  const hasContent = entry.content && entry.content.length > 0;
   return (
-    <div data-testid="event-entry" className="flex items-center justify-between py-1 px-2 text-xs border-b border-border/50">
-      <span className="text-muted-foreground">{time}</span>
-      <span>{entry.event}</span>
-      {entry.tool && <span className="font-mono">{entry.tool}</span>}
+    <div data-testid="event-entry" className="py-2 px-3 text-xs border-b border-gray-800">
+      <div className="flex items-center justify-between">
+        <span className="text-gray-500">{time}</span>
+        <div className="flex items-center gap-2">
+          {entry.tool && <span className="font-mono text-gray-300">{entry.tool}</span>}
+          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+            entry.event === 'Notification' ? 'bg-indigo-500/20 text-indigo-300' :
+            entry.event === 'PostToolUse' ? 'bg-emerald-500/20 text-emerald-300' :
+            'bg-gray-700 text-gray-400'
+          }`}>{entry.event}</span>
+        </div>
+      </div>
+      {hasContent && (
+        <p className="mt-1 text-[11px] text-gray-400 leading-relaxed line-clamp-3 whitespace-pre-wrap">
+          {entry.content}
+        </p>
+      )}
     </div>
   );
 }

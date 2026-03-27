@@ -165,7 +165,7 @@ export default function Home() {
         </header>
 
         {/* Content area with generous padding for breakout overlays */}
-        <main id="office-main" className="flex-1 relative p-8 lg:p-12 bg-gray-950" style={{ minHeight: 0 }}>
+        <main id="office-main" className="flex-1 relative p-10 lg:p-16 bg-gray-950" style={{ minHeight: 0 }}>
           {/* Canvas */}
           <div
             id="canvas-wrapper"

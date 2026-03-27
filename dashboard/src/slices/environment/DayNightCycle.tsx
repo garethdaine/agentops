@@ -163,8 +163,16 @@ export default function DayNightCycle() {
     }
 
     updateFog(scene, factor, delta, dayFogColor.current, nightFogColor.current);
-    // Don't set scene.background -- let the Sky shader render as the background
-    scene.background = null;
+
+    // Set scene.background as a weather-appropriate color (Sky mesh renders on top)
+    const bgTarget = skyOverrides.bgTint
+      ? new Color(skyOverrides.bgTint)
+      : (factor > 0.5 ? dayBgColor.current : nightBgColor.current);
+    if (!scene.background || !(scene.background instanceof Color)) {
+      scene.background = bgTarget.clone();
+    } else {
+      (scene.background as Color).lerp(bgTarget, delta * 2);
+    }
 
     // Thunderstorm lightning flash effect
     if (weather === 'thunderstorm' && factor > 0.1) {

@@ -3,6 +3,7 @@ export type TelemetryEventName =
   | 'PreToolUse'
   | 'PostToolUse'
   | 'PostToolUseFailure'
+  | 'Notification'
   | 'SessionStart'
   | 'SessionEnd';
 
@@ -18,6 +19,10 @@ export interface TelemetryEvent {
   tool: string;
   /** Working directory at the time of the event. */
   cwd: string;
+  /** Assistant message content or tool result (truncated, for dashboard display). */
+  content?: string;
+  /** Agent ID for subagent tracking. */
+  agentId?: string;
 }
 
 /** An audit event as written to audit.jsonl. */
