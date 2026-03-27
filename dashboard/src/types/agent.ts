@@ -1,5 +1,5 @@
 /** Activity state of an agent avatar in the 3D scene. */
-export type AgentActivity = 'idle' | 'typing' | 'reading' | 'chatting' | 'waiting';
+export type AgentActivity = 'idle' | 'walking' | 'typing' | 'reading' | 'chatting' | 'waiting';
 
 /** Known agent types that can appear in the office. */
 export type AgentType =

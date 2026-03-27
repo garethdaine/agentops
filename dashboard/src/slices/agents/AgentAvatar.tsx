@@ -48,11 +48,14 @@ export default function AgentAvatar({
   const headRef = useRef<THREE.Mesh>(null);
   const leftArmRef = useRef<THREE.Mesh>(null);
   const rightArmRef = useRef<THREE.Mesh>(null);
+  const leftLegRef = useRef<THREE.Mesh>(null);
+  const rightLegRef = useRef<THREE.Mesh>(null);
   const { invalidate } = useThree();
 
   const bodyBaseY = 0.6;
   const headBaseY = 1.35;
   const armBaseY = 0.6;
+  const legBaseY = 0.15;
 
   const transparent = opacity < 1;
 
@@ -131,6 +134,30 @@ export default function AgentAvatar({
 
       {/* Right arm */}
       <mesh ref={rightArmRef} position={[0.38, armBaseY, 0]} castShadow>
+        <boxGeometry args={[0.1, 0.45, 0.1]} />
+        <meshStandardMaterial
+          color={color}
+          roughness={0.6}
+          metalness={0.1}
+          transparent={transparent}
+          opacity={opacity}
+        />
+      </mesh>
+
+      {/* Left leg (REQ-035) */}
+      <mesh ref={leftLegRef} position={[-0.12, legBaseY, 0]} castShadow>
+        <boxGeometry args={[0.1, 0.45, 0.1]} />
+        <meshStandardMaterial
+          color={color}
+          roughness={0.6}
+          metalness={0.1}
+          transparent={transparent}
+          opacity={opacity}
+        />
+      </mesh>
+
+      {/* Right leg (REQ-035) */}
+      <mesh ref={rightLegRef} position={[0.12, legBaseY, 0]} castShadow>
         <boxGeometry args={[0.1, 0.45, 0.1]} />
         <meshStandardMaterial
           color={color}
