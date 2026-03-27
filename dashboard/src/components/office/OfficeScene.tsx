@@ -176,20 +176,25 @@ export default function OfficeScene() {
   }, []);
 
   const clearSelection = useStore(useOfficeStore, (s) => s.clearSelection);
+  const setDetailPanelOpen = useStore(useOfficeStore, (s) => s.setDetailPanelOpen);
   const handleAvatarClick = useCallback((sessionId: string) => {
+    setSelectedZone(null); // Close zone panel
     if (sessionId === selectedAgent) {
       clearSelection();
     } else {
       setSelectedAgent(sessionId);
+      setDetailPanelOpen(true);
     }
-  }, [selectedAgent, setSelectedAgent, clearSelection]);
+  }, [selectedAgent, setSelectedAgent, clearSelection, setDetailPanelOpen]);
 
   const handleZoneClick = useCallback((zoneId: string) => {
+    clearSelection(); // Close agent panel
+    setDetailPanelOpen(false);
     const zone = ZONES.find((z) => z.id === zoneId);
     if (zone) {
       setSelectedZone(zone);
     }
-  }, []);
+  }, [clearSelection, setDetailPanelOpen]);
 
   return (
     <>

@@ -20,7 +20,7 @@ function Chair() {
   const armX = CHAIR.seatWidth / 2 - CHAIR.armWidth / 2;
 
   return (
-    <group position={[0, 0, CHAIR.offsetZ]}>
+    <group position={[0, 0, CHAIR.offsetZ]} rotation={[0, Math.PI, 0]}>
       {/* Pneumatic cylinder */}
       <mesh position={[0, CHAIR.cylinderHeight / 2, 0]}>
         <cylinderGeometry args={[CHAIR.cylinderRadius, CHAIR.cylinderRadius, CHAIR.cylinderHeight, 8]} />

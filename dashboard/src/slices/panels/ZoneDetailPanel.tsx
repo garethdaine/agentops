@@ -17,7 +17,7 @@ export default function ZoneDetailPanel({ zone, onClose, agents }: ZoneDetailPan
   const PanelContent = ZONE_PANEL_MAP[zone.id] ?? null;
 
   return (
-    <div className="fixed top-0 right-0 h-full w-[400px] z-50 bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col overflow-hidden">
+    <div className="absolute top-4 right-4 bottom-16 w-[380px] z-50 bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl shadow-2xl flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
         <div>
@@ -35,7 +35,7 @@ export default function ZoneDetailPanel({ zone, onClose, agents }: ZoneDetailPan
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-4">
         {PanelContent ? (
           <PanelContent />
         ) : (
