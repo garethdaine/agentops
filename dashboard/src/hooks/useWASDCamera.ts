@@ -1,4 +1,4 @@
-import type { Camera } from 'three';
+import { Vector3 } from 'three';
 
 export const WASD_SPEED = 12;
 export const SHIFT_MULTIPLIER = 2.2;
@@ -16,26 +16,18 @@ export function shouldIgnoreInput(element: Element | null): boolean {
   return false;
 }
 
-interface Vec3Like {
-  x: number;
-  y: number;
-  z: number;
-  add(v: Vec3Like): void;
-}
-
 interface CameraLike {
-  position: Vec3Like;
-  getWorldDirection(target: Vec3Like): Vec3Like;
-  up: Vec3Like;
+  position: Vector3;
+  getWorldDirection(target: Vector3): Vector3;
 }
 
 interface ControlsLike {
-  target: Vec3Like;
+  target: Vector3;
 }
 
 // Cached vectors to avoid per-frame allocation
-const _forward = { x: 0, y: 0, z: 0, add() {} };
-const _move = { x: 0, y: 0, z: 0, add() {} };
+const _forward = new Vector3();
+const _move = new Vector3();
 
 export function processWASD(
   keysDown: Set<string>,
@@ -72,8 +64,8 @@ export function processWASD(
     }
 
     // Right vector = cross(forward, up) projected to XZ
-    const rightX = _forward.z;
-    const rightZ = -_forward.x;
+    const rightX = -_forward.z;
+    const rightZ = _forward.x;
 
     _move.x = 0;
     _move.y = 0;
