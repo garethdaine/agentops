@@ -127,20 +127,12 @@ function renderOverviewTab(agent: AgentState) {
 }
 
 function renderEventsTab(events: EventEntryData[]) {
-  // Filter to meaningful events only: must have a tool name or be a Notification
-  const meaningful = events.filter((e) => {
-    if (e.event === 'Notification') return true;
+  // Filter to tool events only (Notifications go to Messages tab)
+  const toolEvents = events.filter((e) => {
     if (e.event === 'PreToolUse' || e.event === 'PostToolUse') return !!e.tool;
     return false;
   });
-  // Deduplicate: show PostToolUse instead of PreToolUse for the same timestamp+tool
-  const deduped = meaningful.filter((e, i, arr) => {
-    if (e.event === 'PreToolUse') {
-      return !arr.some((other) => other.event === 'PostToolUse' && other.tool === e.tool && other.ts === e.ts);
-    }
-    return true;
-  });
-  const limited = deduped.slice(-100);
+  const limited = toolEvents.slice(-100);
   return (
     <div className="overflow-y-auto max-h-[60vh]">
       {limited.length === 0 ? (
@@ -149,6 +141,33 @@ function renderEventsTab(events: EventEntryData[]) {
         limited.map((entry, i) => (
           <EventEntry key={`${entry.ts}-${i}`} entry={entry} />
         ))
+      )}
+    </div>
+  );
+}
+
+function renderMessagesTab(events: EventEntryData[]) {
+  const messages = events.filter((e) => e.event === 'Notification' && e.content && e.content.length > 0);
+  const limited = messages.slice(-50);
+  return (
+    <div className="overflow-y-auto max-h-[60vh]">
+      {limited.length === 0 ? (
+        <div className="text-gray-500 text-xs text-center py-8">No messages yet</div>
+      ) : (
+        limited.map((msg, i) => {
+          const time = new Date(msg.ts).toLocaleTimeString();
+          return (
+            <div key={`${msg.ts}-${i}`} className="py-3 px-3 border-b border-gray-800">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-gray-500">{time}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Response</span>
+              </div>
+              <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">
+                {msg.content}
+              </p>
+            </div>
+          );
+        })
       )}
     </div>
   );
@@ -206,12 +225,17 @@ export default function AgentDetailPanel() {
           <Tabs defaultValue="overview" className="px-4 pt-2">
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="messages">Messages</TabsTrigger>
               <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="tools">Tools</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">
               {renderOverviewTab(agent)}
+            </TabsContent>
+
+            <TabsContent value="messages">
+              {renderMessagesTab(events)}
             </TabsContent>
 
             <TabsContent value="events">
