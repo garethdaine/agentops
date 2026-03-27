@@ -114,7 +114,7 @@ describe('REQ-051: Event delivery latency', () => {
 
     const events: WatcherEvent[] = [];
     // Use minimal debounce for latency measurement
-    watcher = new FileWatcher(agentopsDir, 50);
+    watcher = new FileWatcher(agentopsDir, 50, true);
     watcher.onEvent((e) => events.push(e));
     await watcher.start();
 
@@ -145,7 +145,7 @@ describe('REQ-051: Event delivery latency', () => {
     fs.writeFileSync(telemetryFile, '');
 
     const events: WatcherEvent[] = [];
-    watcher = new FileWatcher(agentopsDir, 50);
+    watcher = new FileWatcher(agentopsDir, 50, true);
     watcher.onEvent((e) => events.push(e));
     await watcher.start();
 
@@ -223,7 +223,7 @@ describe('REQ-052: Memory consumption', () => {
     const baselineHeap = process.memoryUsage().heapUsed;
 
     // Create watcher and hydrate all files
-    watcher = new FileWatcher(agentopsDir, 50);
+    watcher = new FileWatcher(agentopsDir, 50, true);
     const events: WatcherEvent[] = [];
     watcher.onEvent((e) => events.push(e));
     await watcher.start();
