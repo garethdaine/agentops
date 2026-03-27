@@ -21,6 +21,8 @@ export interface TelemetryEvent {
   cwd: string;
   /** Assistant message content or tool result (truncated, for dashboard display). */
   content?: string;
+  /** Tool input summary (file path, command, pattern). */
+  toolInput?: string;
   /** Agent ID for subagent tracking. */
   agentId?: string;
 }

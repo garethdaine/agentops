@@ -17,12 +17,38 @@ interface EventEntryData {
   ts: string;
   session: string;
   content?: string;
+  toolInput?: string;
   agentId?: string;
+}
+
+/** Extract a human-readable summary from tool input or content */
+function summarize(entry: EventEntryData): string | null {
+  // For Notifications, show the message text
+  if (entry.event === 'Notification' && entry.content) return entry.content;
+
+  // For tool events, show the tool input summary
+  const input = entry.toolInput || '';
+  if (!input || input === '{}') return null;
+
+  // Try to parse as JSON for a clean summary
+  try {
+    const parsed = JSON.parse(input);
+    if (typeof parsed === 'string') return parsed;
+    if (parsed.command) return `$ ${parsed.command}`;
+    if (parsed.file_path) return parsed.file_path.split('/').slice(-2).join('/');
+    if (parsed.pattern) return `/${parsed.pattern}/`;
+    if (parsed.prompt) return parsed.prompt.slice(0, 100);
+    if (parsed.description) return parsed.description;
+    return null;
+  } catch {
+    // Already a string summary from the hook
+    return input.length > 0 ? input : null;
+  }
 }
 
 function EventEntry({ entry }: { entry: EventEntryData }) {
   const time = new Date(entry.ts).toLocaleTimeString();
-  const hasContent = entry.content && entry.content.length > 0;
+  const summary = summarize(entry);
   return (
     <div data-testid="event-entry" className="py-2 px-3 text-xs border-b border-gray-800">
       <div className="flex items-center justify-between">
@@ -32,13 +58,14 @@ function EventEntry({ entry }: { entry: EventEntryData }) {
           <span className={`text-[10px] px-1.5 py-0.5 rounded ${
             entry.event === 'Notification' ? 'bg-indigo-500/20 text-indigo-300' :
             entry.event === 'PostToolUse' ? 'bg-emerald-500/20 text-emerald-300' :
+            entry.event === 'PreToolUse' ? 'bg-blue-500/20 text-blue-300' :
             'bg-gray-700 text-gray-400'
           }`}>{entry.event}</span>
         </div>
       </div>
-      {hasContent && (
-        <p className="mt-1 text-[11px] text-gray-400 leading-relaxed line-clamp-3 whitespace-pre-wrap">
-          {entry.content}
+      {summary && (
+        <p className="mt-1 text-[11px] text-gray-400 leading-relaxed line-clamp-2 font-mono whitespace-pre-wrap">
+          {summary}
         </p>
       )}
     </div>
