@@ -186,9 +186,9 @@ export default function AgentAvatar({
 
       {/* Left leg (REQ-035) */}
       <mesh ref={leftLegRef} position={[-0.08, legBaseY, 0]} castShadow>
-        <boxGeometry args={[0.08, 0.25, 0.08]} />
+        <boxGeometry args={[0.1, 0.3, 0.1]} />
         <meshStandardMaterial
-          color="#333333"
+          color="#1a1a2e"
           roughness={0.6}
           metalness={0.1}
           transparent={transparent}
@@ -198,9 +198,9 @@ export default function AgentAvatar({
 
       {/* Right leg (REQ-035) */}
       <mesh ref={rightLegRef} position={[0.08, legBaseY, 0]} castShadow>
-        <boxGeometry args={[0.08, 0.25, 0.08]} />
+        <boxGeometry args={[0.1, 0.3, 0.1]} />
         <meshStandardMaterial
-          color="#333333"
+          color="#1a1a2e"
           roughness={0.6}
           metalness={0.1}
           transparent={transparent}

@@ -164,8 +164,14 @@ export default function DayNightCycle() {
 
     updateFog(scene, factor, delta, dayFogColor.current, nightFogColor.current);
 
-    // Clear scene.background so Sky shader is visible as the background
-    scene.background = null;
+    // Set scene.background to match weather/time as a base
+    // The Sky mesh renders on top of this, but this prevents white canvas gaps
+    const targetBg = factor > 0.5 ? dayBgColor.current.clone() : nightBgColor.current.clone();
+    if (!(scene.background instanceof Color)) {
+      scene.background = targetBg;
+    } else {
+      (scene.background as Color).lerp(targetBg, delta * 3);
+    }
 
     // Thunderstorm lightning flash effect
     if (weather === 'thunderstorm' && factor > 0.1) {
