@@ -1,11 +1,18 @@
 import type { StateCreator } from 'zustand';
 import type { Zone } from '@/types/office';
+import {
+  calculateWorkstationSlots,
+  expandWorkstationGrid,
+  type WorkstationSlot,
+} from '@/lib/dynamic-workstations';
 
 /** Zones slice state and actions. */
 export interface ZonesSliceState {
   zoneDefinitions: Zone[];
   zoneOccupancy: Map<string, string[]>;
+  workstationSlots: WorkstationSlot[];
   setZoneOccupancy: (zoneId: string, agentIds: string[]) => void;
+  updateWorkstationCapacity: (agentCount: number) => void;
 }
 
 /** Default zone definitions for the office layout. */
@@ -22,14 +29,26 @@ const DEFAULT_ZONES: Zone[] = [
   { id: 'escalation', name: 'Escalation', position: { x: -6, y: 0, z: 8 }, size: { width: 4, depth: 4 } },
 ];
 
+/** Base workstation grid (9 slots). */
+const BASE_WORKSTATION_SLOTS = expandWorkstationGrid(9);
+
 /** Creates the zones slice with zone definitions and occupancy tracking. */
 export const createZonesSlice: StateCreator<ZonesSliceState, [], [], ZonesSliceState> = (set, get) => ({
   zoneDefinitions: DEFAULT_ZONES,
   zoneOccupancy: new Map<string, string[]>(),
+  workstationSlots: BASE_WORKSTATION_SLOTS,
 
   setZoneOccupancy: (zoneId: string, agentIds: string[]) => {
     const newOccupancy = new Map(get().zoneOccupancy);
     newOccupancy.set(zoneId, agentIds);
     set({ zoneOccupancy: newOccupancy });
+  },
+
+  updateWorkstationCapacity: (agentCount: number) => {
+    const needed = calculateWorkstationSlots(agentCount);
+    const current = get().workstationSlots.length;
+    if (needed !== current) {
+      set({ workstationSlots: expandWorkstationGrid(needed) });
+    }
   },
 });
