@@ -54,7 +54,7 @@ run_hook() {
   [ "$status" -eq 0 ]
   local MSG
   MSG=$(echo "$output" | jq -r '.systemMessage')
-  [[ "$MSG" == *"$5.00"* ]] || [[ "$MSG" == *"5.00"* ]]
+  [[ "$MSG" == *'$5.00'* ]] || [[ "$MSG" == *"5.00"* ]]
   [[ "$MSG" == *"80%"* ]]
 }
 
@@ -193,9 +193,10 @@ EOF
 
 @test "respects custom warn_pct from env when checking existing file" {
   export AGENTOPS_BUDGET_WARN_PCT=50
-  # 60% of $10 = $6 — above 50% threshold
+  # Seed file with warn_pct=80 but env override is 50
+  # 60% of $10 = $6 — above 50% threshold, below 80% file threshold
   cat > "$TEST_PROJECT_DIR/.agentops/budget.json" <<'EOF'
-{"budget_usd":10,"spent":6,"warn_pct":50,"started":"2026-03-27T00:00:00Z"}
+{"budget_usd":10,"spent":6,"warn_pct":80,"started":"2026-03-27T00:00:00Z"}
 EOF
   run run_hook
   [ "$status" -eq 0 ]
@@ -206,9 +207,11 @@ EOF
 
 @test "env budget override applies to threshold calculation" {
   export AGENTOPS_BUDGET_USD=100.00
-  # spent=60, budget=100, 80% threshold=80. 60 < 80 → no warning
+  # Seed file with budget_usd=10 but env override is 100
+  # spent=60, env budget=100, 80% threshold=80. 60 < 80 → no warning
+  # Without env override: 60/10 = 600% → would trigger warning
   cat > "$TEST_PROJECT_DIR/.agentops/budget.json" <<'EOF'
-{"budget_usd":100,"spent":60,"warn_pct":80,"started":"2026-03-27T00:00:00Z"}
+{"budget_usd":10,"spent":60,"warn_pct":80,"started":"2026-03-27T00:00:00Z"}
 EOF
   run run_hook
   [ "$status" -eq 0 ]
@@ -251,7 +254,8 @@ EOF
 
 @test "does not overwrite existing budget.json on subsequent runs" {
   # First run creates the file
-  run_hook >/dev/null
+  run run_hook
+  [ "$status" -eq 0 ]
   # Modify spent to $2
   local TMP
   TMP=$(mktemp)
