@@ -1,14 +1,26 @@
 'use client';
 
 import { BARRIER_GATE } from '@/lib/furniture-geometry';
+import { usePulsingEmissive } from '../hooks/usePulsingEmissive';
+import type { BarrierLedState } from '../zone-feedback';
 
 interface BarrierGateProps {
   position: [number, number, number];
   rotation?: number;
+  /** LED state derived from runtime mode. */
+  ledState?: BarrierLedState;
 }
 
 /** Security barrier gate with post, arm, and LED indicator. */
-export default function BarrierGate({ position, rotation = 0 }: BarrierGateProps) {
+export default function BarrierGate({ position, rotation = 0, ledState }: BarrierGateProps) {
+  const ledColor = ledState?.color ?? BARRIER_GATE.ledColor;
+
+  const matRef = usePulsingEmissive({
+    color: ledColor,
+    mode: 'static',
+    intensity: 0.6,
+  });
+
   return (
     <group position={position} rotation={[0, rotation, 0]}>
       {/* Post */}
@@ -27,9 +39,10 @@ export default function BarrierGate({ position, rotation = 0 }: BarrierGateProps
       <mesh position={[0, BARRIER_GATE.postHeight + 0.1, 0]}>
         <sphereGeometry args={[BARRIER_GATE.ledRadius, 12, 8]} />
         <meshStandardMaterial
-          color={BARRIER_GATE.ledColor}
-          emissive={BARRIER_GATE.ledColor}
-          emissiveIntensity={0.4}
+          ref={matRef}
+          color={ledColor}
+          emissive={ledColor}
+          emissiveIntensity={0.6}
         />
       </mesh>
     </group>

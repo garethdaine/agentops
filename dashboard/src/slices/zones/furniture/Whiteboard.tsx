@@ -1,15 +1,20 @@
 'use client';
 
 import { WHITEBOARD } from '@/lib/furniture-geometry';
+import type { WhiteboardGlow } from '../zone-feedback';
 
 interface WhiteboardProps {
   position: [number, number, number];
   rotation?: number;
+  /** Glow state derived from delegation activity. */
+  glow?: WhiteboardGlow;
 }
 
 /** Whiteboard with frame, surface, and marker tray. */
-export default function Whiteboard({ position, rotation = 0 }: WhiteboardProps) {
+export default function Whiteboard({ position, rotation = 0, glow }: WhiteboardProps) {
   const { width, height, frameDepth, surfaceDepth, surfaceColor } = WHITEBOARD;
+  const emissiveIntensity = glow?.emissiveIntensity ?? 0;
+  const emissiveColor = glow?.emissiveColor ?? '#4488ff';
 
   return (
     <group position={position} rotation={[0, rotation, 0]}>
@@ -22,7 +27,11 @@ export default function Whiteboard({ position, rotation = 0 }: WhiteboardProps) 
       {/* White surface */}
       <mesh position={[0, 0, -frameDepth / 2 + 0.005]}>
         <boxGeometry args={[width, height, surfaceDepth]} />
-        <meshStandardMaterial color={surfaceColor} />
+        <meshStandardMaterial
+          color={surfaceColor}
+          emissive={emissiveColor}
+          emissiveIntensity={emissiveIntensity}
+        />
       </mesh>
 
       {/* Marker tray */}

@@ -1,18 +1,21 @@
 'use client';
 
 import { TRAFFIC_LIGHT } from '@/lib/furniture-geometry';
+import type { TrafficColor } from '../zone-feedback';
 
 interface TrafficLightProps {
   position: [number, number, number];
   rotation?: number;
+  /** Active light derived from system load. */
+  activeColor?: TrafficColor;
 }
 
 /** Traffic light indicator: red (rate limited), amber (high load), green (healthy). */
-export default function TrafficLight({ position, rotation = 0 }: TrafficLightProps) {
+export default function TrafficLight({ position, rotation = 0, activeColor = 'green' }: TrafficLightProps) {
   const lights = [
-    { y: 0.38, color: TRAFFIC_LIGHT.redColor, on: false },
-    { y: 0.25, color: TRAFFIC_LIGHT.amberColor, on: false },
-    { y: 0.12, color: TRAFFIC_LIGHT.greenColor, on: true },
+    { y: 0.38, color: TRAFFIC_LIGHT.redColor, id: 'red' as const },
+    { y: 0.25, color: TRAFFIC_LIGHT.amberColor, id: 'amber' as const },
+    { y: 0.12, color: TRAFFIC_LIGHT.greenColor, id: 'green' as const },
   ];
 
   return (
@@ -24,13 +27,13 @@ export default function TrafficLight({ position, rotation = 0 }: TrafficLightPro
       </mesh>
 
       {/* Light spheres */}
-      {lights.map(({ y, color, on }) => (
+      {lights.map(({ y, color, id }) => (
         <mesh key={y} position={[0, y, -TRAFFIC_LIGHT.depth / 2]}>
           <sphereGeometry args={[TRAFFIC_LIGHT.lightRadius, 12, 8]} />
           <meshStandardMaterial
             color={color}
             emissive={color}
-            emissiveIntensity={on ? 0.8 : 0.05}
+            emissiveIntensity={id === activeColor ? 0.8 : 0.05}
           />
         </mesh>
       ))}

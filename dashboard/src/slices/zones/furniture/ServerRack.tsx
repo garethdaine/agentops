@@ -1,15 +1,29 @@
 'use client';
 
 import { SERVER_RACK } from '@/lib/furniture-geometry';
+import { usePulsingEmissive } from '../hooks/usePulsingEmissive';
+import type { LedState } from '../zone-feedback';
 
 interface ServerRackProps {
   position: [number, number, number];
   rotation?: number;
+  /** Dynamic LED state derived from agent health. */
+  ledState?: LedState;
 }
 
 /** Server rack with LED indicators per shelf. */
-export default function ServerRack({ position, rotation = 0 }: ServerRackProps) {
+export default function ServerRack({ position, rotation = 0, ledState }: ServerRackProps) {
   const { width, height, depth, shelfCount, shelfSpacing, shelfStartY } = SERVER_RACK;
+
+  const ledColor = ledState?.color ?? SERVER_RACK.ledColor;
+  const ledMode = ledState?.mode ?? 'static';
+  const ledIntensity = ledState?.intensity ?? 0.8;
+
+  const matRef = usePulsingEmissive({
+    color: ledColor,
+    mode: ledMode,
+    intensity: ledIntensity,
+  });
 
   return (
     <group position={position} rotation={[0, rotation, 0]}>
@@ -38,9 +52,10 @@ export default function ServerRack({ position, rotation = 0 }: ServerRackProps) 
             <mesh position={[-0.2, y + 0.06, -depth / 2 + 0.01]}>
               <sphereGeometry args={[SERVER_RACK.ledRadius, 12, 8]} />
               <meshStandardMaterial
-                color={SERVER_RACK.ledColor}
-                emissive={SERVER_RACK.ledColor}
-                emissiveIntensity={0.8}
+                ref={i === 0 ? matRef : undefined}
+                color={ledColor}
+                emissive={ledColor}
+                emissiveIntensity={ledIntensity}
               />
             </mesh>
             {/* Activity LED */}
