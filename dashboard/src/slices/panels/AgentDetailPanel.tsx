@@ -149,20 +149,8 @@ function renderEventsTab(events: EventEntryData[]) {
 function renderMessagesTab(events: EventEntryData[]) {
   const messages = events
     .filter((e) => e.content && e.content.length > 2)
-    .filter((e) => e.event === 'Notification' || e.event === 'AssistantMessage' || e.event === 'PostToolUse')
-    .map((e) => {
-      // Extract readable content from PostToolUse JSON responses
-      let displayContent = e.content || '';
-      if (e.event === 'PostToolUse' && displayContent.startsWith('{')) {
-        try {
-          const parsed = JSON.parse(displayContent);
-          if (parsed.stdout) displayContent = parsed.stdout;
-          else if (typeof parsed === 'string') displayContent = parsed;
-          else displayContent = '';
-        } catch { /* keep as-is */ }
-      }
-      return { ...e, displayContent: displayContent.trim() };
-    })
+    .filter((e) => e.event === 'Notification' || e.event === 'AssistantMessage')
+    .map((e) => ({ ...e, displayContent: (e.content || '').trim() }))
     .filter((e) => e.displayContent.length > 2);
   const limited = messages.slice(-50);
   return (

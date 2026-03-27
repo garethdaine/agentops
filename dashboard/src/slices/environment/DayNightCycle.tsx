@@ -18,7 +18,7 @@ export const NIGHT_FOG = '#0a0e1a';
 /* ── Atmosphere config ───────────────────────────────────────────── */
 
 export const ATMOSPHERE_CONFIG = {
-  sky: { turbidity: 2, rayleigh: 1, mieCoefficient: 0.005, mieDirectionalG: 0.8 },
+  sky: { turbidity: 0.5, rayleigh: 2, mieCoefficient: 0.003, mieDirectionalG: 0.7 },
   stars: { count: 6000, radius: 400, depth: 50, factor: 4, fade: true },
   fog: {
     day: { near: 40, far: 140 },
@@ -39,7 +39,7 @@ interface SkyOverrides {
 }
 
 const WEATHER_SKY_OVERRIDES: Record<Weather, SkyOverrides> = {
-  clear: { turbidity: 2, rayleigh: 1, mieCoefficient: 0.005, mieDirectionalG: 0.8 },
+  clear: { turbidity: 0.5, rayleigh: 2, mieCoefficient: 0.003, mieDirectionalG: 0.7 },
   cloudy: { turbidity: 10, rayleigh: 0.5, mieCoefficient: 0.01, mieDirectionalG: 0.7, bgTint: '#8899aa' },
   fog: { turbidity: 10, rayleigh: 0.3, mieCoefficient: 0.03, mieDirectionalG: 0.6, bgTint: '#9999a8' },
   rain: { turbidity: 10, rayleigh: 0.4, mieCoefficient: 0.02, mieDirectionalG: 0.5, bgTint: '#556677' },
