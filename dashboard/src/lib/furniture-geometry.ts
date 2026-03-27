@@ -362,6 +362,40 @@ export const CLUTTER = {
   surfaceOffset: 0.02,
 } as const;
 
+// ─── Wall Decorations ───────────────────────────────────────────
+
+/** Wall picture dimensions. */
+export const WALL_PICTURE = {
+  width: 0.8,
+  height: 0.6,
+  depth: 0.02,
+} as const;
+
+/** Wall poster dimensions. */
+export const WALL_POSTER = {
+  width: 0.6,
+  height: 0.9,
+  depth: 0.02,
+} as const;
+
+/** Wall-mounted TV dimensions. */
+export const WALL_TV = {
+  width: 1.4,
+  height: 0.8,
+  depth: 0.02,
+  color: '#111111',
+  emissive: '#001122',
+  emissiveIntensity: 0.3,
+} as const;
+
+/** Wall clock dimensions. */
+export const WALL_CLOCK = {
+  radius: 0.2,
+  segments: 32,
+  faceColor: '#eeeeee',
+  handColor: '#222222',
+} as const;
+
 // ─── Existing Constants ─────────────────────────────────────────
 
 /** Status colors for desk lamp emissive (hex). */
