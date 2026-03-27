@@ -9,6 +9,7 @@ import { Workstation, ZoneFurniture } from '@/slices/zones';
 import { AgentAvatar } from '@/slices/agents';
 import DayNightCycle from '@/slices/environment/DayNightCycle';
 import WeatherParticles from '@/slices/environment/WeatherParticles';
+import ZoneLabels from '@/slices/zones/ZoneLabels';
 import { WORKSTATION_SLOTS } from '@/lib/floorplan';
 import { FOG_CONFIG } from '@/lib/lighting-config';
 import { useStore } from 'zustand';
@@ -159,6 +160,7 @@ export default function OfficeScene() {
       <OfficeOutdoor />
       <WallDecorations />
       <ZoneFurniture />
+      <ZoneLabels />
 
       {WORKSTATION_SLOTS.map((slot, i) => {
         const agent = activeAgents[i];

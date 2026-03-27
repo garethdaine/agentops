@@ -43,40 +43,64 @@ export default function WeatherIndicator() {
   const temp = deferredData?.temperature;
   const wind = deferredData?.windSpeed;
 
+  const WEATHER_LABELS: Record<string, string> = {
+    clear: 'Clear', cloudy: 'Cloudy', fog: 'Fog', rain: 'Rain',
+    snow: 'Snow', showers: 'Showers', thunderstorm: 'Thunderstorm',
+  };
+
   return (
     <div
       style={{
         position: 'absolute',
-        top: 8,
-        right: 8,
-        background: 'rgba(15, 20, 40, 0.85)',
+        top: 24,
+        left: 24,
+        background: 'rgba(15, 20, 35, 0.8)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         color: '#e0e8ff',
-        padding: '6px 12px',
-        borderRadius: 8,
+        padding: '12px 16px',
+        borderRadius: 12,
+        border: '1px solid rgba(255,255,255,0.08)',
         fontSize: 13,
-        fontFamily: 'monospace',
         display: 'flex',
         alignItems: 'center',
-        gap: 8,
+        gap: 12,
         zIndex: 10,
         pointerEvents: 'auto',
         userSelect: 'none',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
       }}
     >
-      <span>{icon}</span>
-      <span>{deferredWeather}</span>
-      {temp != null && <span>{Math.round(temp)}&deg;C</span>}
-      {wind != null && <span>{Math.round(wind)} km/h</span>}
+      <span style={{ fontSize: 28, lineHeight: 1 }}>{icon}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+          {temp != null && (
+            <span style={{ fontSize: 16, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+              {Math.round(temp)}&deg;C
+            </span>
+          )}
+          <span style={{ fontSize: 12, color: '#9ca3af' }}>
+            {WEATHER_LABELS[deferredWeather] || 'Clear'}
+          </span>
+        </div>
+        {wind != null && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(156,163,175,0.7)' }}>
+            <span>&#x1F4A8;</span>
+            <span>{Math.round(wind)} km/h</span>
+          </div>
+        )}
+      </div>
       <button
         onClick={() => setDemoOverride(nextDemoOverride(demoOverride))}
         style={{
-          background: demoOverride ? '#334' : 'transparent',
-          border: '1px solid #445',
-          color: '#e0e8ff',
-          borderRadius: 4,
-          padding: '2px 6px',
+          background: demoOverride ? 'rgba(51,51,68,0.6)' : 'transparent',
+          border: '1px solid rgba(255,255,255,0.1)',
+          color: '#9ca3af',
+          borderRadius: 6,
+          padding: '3px 8px',
           cursor: 'pointer',
-          fontSize: 11,
+          fontSize: 10,
+          marginLeft: 4,
         }}
         title={demoOverride ? `Demo: ${demoOverride}` : 'Toggle demo weather'}
       >

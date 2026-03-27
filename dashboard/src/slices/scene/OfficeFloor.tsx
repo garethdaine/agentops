@@ -9,6 +9,16 @@ import { ZONES, ZONE_TINTS, BASE_FLOOR_COLOR, FLOOR_WIDTH, FLOOR_DEPTH } from '@
 export default function OfficeFloor() {
   return (
     <group>
+      {/* Grass ground plane extending to horizon */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.02, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color="#4a7c3f" />
+      </mesh>
+
       {/* Base floor */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}

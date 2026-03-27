@@ -7,6 +7,8 @@ import { ConnectionStatus } from '@/components/panels/ConnectionStatus';
 import { connectWebSocket, disconnectWebSocket } from '@/hooks/useWebSocket';
 import SessionSelector from '@/slices/panels/SessionSelector';
 import ActivityFeed from '@/slices/panels/ActivityFeed';
+import WeatherIndicator from '@/slices/panels/WeatherIndicator';
+import StatusBar from '@/slices/panels/StatusBar';
 
 const OfficeCanvas = dynamic(
   () => import('@/components/office/OfficeCanvas'),
@@ -31,7 +33,11 @@ export default function Home() {
       <div className="flex-1 w-full relative flex" style={{ minHeight: 0 }}>
         <div className="flex-1 relative">
           {webglSupported === null ? null : webglSupported ? (
-            <OfficeCanvas />
+            <>
+              <OfficeCanvas />
+              <WeatherIndicator />
+              <StatusBar />
+            </>
           ) : (
             <ActivityTable />
           )}
