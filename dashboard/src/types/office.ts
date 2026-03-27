@@ -1,5 +1,11 @@
 import type { AgentActivity } from './agent';
 
+/** 2D position on the floor plane (x/z). */
+export interface Position2D {
+  x: number;
+  z: number;
+}
+
 /** 3D position vector. */
 export interface Position3D {
   x: number;
