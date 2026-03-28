@@ -1,15 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('OfficeStore — composed slices', () => {
   let store: typeof import('@/stores/office-store').useOfficeStore;
 
   beforeEach(async () => {
+    // Reset module cache to get a fresh store per test
+    vi.resetModules();
     const mod = await import('@/stores/office-store');
     store = mod.useOfficeStore;
-    // Reset to initial state
-    store.setState({
-      ...store.getState(),
-    });
   });
 
   describe('scene slice', () => {
