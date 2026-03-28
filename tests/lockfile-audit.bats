@@ -328,6 +328,8 @@ EOF
   run run_hook
   [ "$status" -eq 0 ]
   echo "$output" | jq -e '.systemMessage | test("8 non-standard registry")' >/dev/null
+  # Verify sample is capped at 5 — 6th URL must not appear in output
+  ! echo "$output" | grep -q 'evil6.example.com'
 }
 
 # ── Check 3: Integrity hash anomalies ──────────────────────────────────────
@@ -562,9 +564,10 @@ EOF
   # Run from a temp dir with a lockfile — should work with default "."
   local TMPD
   TMPD=$(mktemp -d)
+  # Ensure cleanup even on assertion failure
+  trap "rm -rf '$TMPD'" RETURN
   echo '{}' > "$TMPD/package-lock.json"
   run bash -c "cd '$TMPD' && unset CLAUDE_PROJECT_DIR && bash '$HOOKS_DIR/lockfile-audit.sh' </dev/null"
   [ "$status" -eq 0 ]
   echo "$output" | jq -e '.systemMessage | test("1 lockfile")' >/dev/null
-  rm -rf "$TMPD"
 }
