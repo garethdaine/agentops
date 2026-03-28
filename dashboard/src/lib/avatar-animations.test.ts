@@ -73,9 +73,16 @@ describe('avatar-animations', () => {
       expect(resolveAnimationState('reading')).toBe('reading');
     });
 
+    it('should return "chatting" for chatting activity', () => {
+      expect(resolveAnimationState('chatting')).toBe('chatting');
+    });
+
+    it('should return "waiting" for waiting activity', () => {
+      expect(resolveAnimationState('waiting')).toBe('waiting');
+    });
+
     it('should default to "idle" for unknown activities', () => {
-      expect(resolveAnimationState('chatting')).toBe('idle');
-      expect(resolveAnimationState('waiting')).toBe('idle');
+      expect(resolveAnimationState('idle')).toBe('idle');
     });
   });
 

@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils';
 
 const statusConfig: Record<Status, { label: string; colorClass: string }> = {
   connected: { label: 'Connected', colorClass: 'bg-green-500/15 text-green-700 border-green-500/30' },
-  disconnected: { label: 'Disconnected', colorClass: 'bg-red-500/15 text-red-700 border-red-500/30' },
-  reconnecting: { label: 'Reconnecting', colorClass: 'bg-yellow-500/15 text-yellow-700 border-yellow-500/30' },
+  disconnected: { label: 'Disconnected', colorClass: 'bg-red-500/15 text-red-400 border-red-500/30' },
+  reconnecting: { label: 'Reconnecting', colorClass: 'bg-yellow-500/15 text-yellow-600 border-yellow-500/30' },
 };
 
 export function ConnectionStatus() {

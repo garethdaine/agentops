@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { IdleDetector, cleanupPidFile } from './lifecycle';
+import { ClientTracker } from './client-tracker';
 import type { FileWatcher as FileWatcherType } from './file-watcher';
 
 const DEFAULT_PORT = 3099;
@@ -53,6 +54,27 @@ function log(level: 'info' | 'warn' | 'error', message: string): void {
 }
 
 /**
+ * Handle an incoming message from a dashboard client.
+ * Routes command messages to all other connected clients (broadcast-forward).
+ */
+function handleClientMessage(raw: string, sender: WebSocket, clients: Set<WebSocket>): void {
+  try {
+    const data = JSON.parse(raw);
+    if (data.type !== 'command') return;
+
+    log('info', `Command received: ${data.command} → ${data.target} (id: ${data.id})`);
+
+    for (const client of clients) {
+      if (client !== sender && client.readyState === WebSocket.OPEN) {
+        client.send(raw);
+      }
+    }
+  } catch {
+    log('warn', 'Received malformed message from client');
+  }
+}
+
+/**
  * Start the WebSocket relay server.
  * Returns a handle with broadcast() and close() methods.
  */
@@ -60,8 +82,15 @@ export function startRelay(options: RelayOptions = {}): Promise<RelayHandle> {
   const port = options.port ?? DEFAULT_PORT;
   const clients = new Set<WebSocket>();
 
+  const clientTracker = new ClientTracker();
+
   return new Promise((resolve, reject) => {
-    const httpServer = createServer((_req, res) => {
+    const httpServer = createServer((req, res) => {
+      if (req.method === 'GET' && req.url === '/api/clients') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ count: clientTracker.getConnectedCount() }));
+        return;
+      }
       res.writeHead(426, { 'Content-Type': 'text/plain' });
       res.end('WebSocket relay — upgrade required');
     });
@@ -93,25 +122,27 @@ export function startRelay(options: RelayOptions = {}): Promise<RelayHandle> {
     }
 
     function startDisconnectTimer(): void {
-      if (clients.size > 0) return;
-      clearDisconnectTimer();
-      log('info', `All clients disconnected — shutting down in ${DISCONNECT_GRACE_MS / 1000}s unless a client reconnects`);
-      disconnectTimer = setTimeout(() => {
-        if (clients.size === 0) {
-          log('info', 'Grace period expired with no clients — shutting down');
-          wss.emit('all-clients-gone');
-        }
-      }, DISCONNECT_GRACE_MS);
+      // Don't auto-shutdown -- relay should persist across browser refreshes and dev server restarts
+      if (clients.size === 0) {
+        log('info', 'All clients disconnected — relay stays running');
+      }
     }
 
     wss.on('connection', (ws, req) => {
       const origin = req.headers.origin ?? 'unknown';
+      const clientId = `${origin}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       clients.add(ws);
+      clientTracker.onConnect(clientId);
       clearDisconnectTimer();
       log('info', `Client connected (origin: ${origin}, total: ${clients.size})`);
 
+      ws.on('message', (raw) => {
+        handleClientMessage(raw.toString(), ws, clients);
+      });
+
       ws.on('close', () => {
         clients.delete(ws);
+        clientTracker.onDisconnect(clientId);
         log('info', `Client disconnected (total: ${clients.size})`);
         startDisconnectTimer();
       });
@@ -119,6 +150,7 @@ export function startRelay(options: RelayOptions = {}): Promise<RelayHandle> {
       ws.on('error', (err) => {
         log('error', `Client error: ${err.message}`);
         clients.delete(ws);
+        clientTracker.onDisconnect(clientId);
         startDisconnectTimer();
       });
     });

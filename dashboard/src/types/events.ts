@@ -3,6 +3,8 @@ export type TelemetryEventName =
   | 'PreToolUse'
   | 'PostToolUse'
   | 'PostToolUseFailure'
+  | 'Notification'
+  | 'AssistantMessage'
   | 'SessionStart'
   | 'SessionEnd';
 
@@ -18,6 +20,12 @@ export interface TelemetryEvent {
   tool: string;
   /** Working directory at the time of the event. */
   cwd: string;
+  /** Assistant message content or tool result (truncated, for dashboard display). */
+  content?: string;
+  /** Tool input summary (file path, command, pattern). */
+  toolInput?: string;
+  /** Agent ID for subagent tracking. */
+  agentId?: string;
 }
 
 /** An audit event as written to audit.jsonl. */
@@ -51,7 +59,9 @@ export type RelayMessageType =
   | 'delegation'
   | 'failure'
   | 'hydration'
-  | 'session-update';
+  | 'session-update'
+  | 'command'
+  | 'command-ack';
 
 /** A message sent from the WebSocket relay to dashboard clients. */
 export interface RelayMessage {

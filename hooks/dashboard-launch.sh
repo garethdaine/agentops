@@ -123,9 +123,14 @@ fi
     exit 0
   fi
 
-  # Wait for the server to be ready, then open browser
+  # Wait for the server to be ready, then open browser if no client is already connected
   for _i in $(seq 1 30); do
     if curl -s -o /dev/null "http://localhost:$NEXT_PORT" 2>/dev/null; then
+      # Query relay for connected client count — skip browser open if a tab is already open
+      CLIENT_COUNT=$(curl -s "http://localhost:$RELAY_PORT/api/clients" 2>/dev/null | jq -r '.count // 0' 2>/dev/null) || CLIENT_COUNT=0
+      if [ "$CLIENT_COUNT" -gt 0 ] 2>/dev/null; then
+        break
+      fi
       if command -v open >/dev/null 2>&1; then
         open "http://localhost:$NEXT_PORT"
       elif command -v xdg-open >/dev/null 2>&1; then

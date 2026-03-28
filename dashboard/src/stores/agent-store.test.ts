@@ -231,6 +231,13 @@ describe('useWebSocket', () => {
     WebSocketInstances = [];
     vi.useFakeTimers();
 
+    // Mock requestAnimationFrame for event batcher
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      cb(performance.now());
+      return 1;
+    });
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+
     // Mock global WebSocket
     vi.stubGlobal('WebSocket', class MockWebSocket {
       static CONNECTING = 0;
@@ -376,6 +383,9 @@ describe('useWebSocket', () => {
       data: JSON.stringify(event),
     }));
 
+    // Advance past the 100ms throttle window so the batcher flushes
+    vi.advanceTimersByTime(100);
+
     const events = useAgentStore.getState().recentEvents.get('sess-1');
     expect(events).toHaveLength(1);
     expect(events![0]).toEqual(event);
@@ -401,6 +411,9 @@ describe('useWebSocket', () => {
     mockWebSocket.onmessage?.(new MessageEvent('message', {
       data: JSON.stringify(event),
     }));
+
+    // Advance past the 100ms throttle window so the batcher flushes
+    vi.advanceTimersByTime(100);
 
     const state = useAgentStore.getState();
     // Session should have been auto-registered

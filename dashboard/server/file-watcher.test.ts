@@ -140,7 +140,7 @@ describe('FileWatcher', () => {
     fs.writeFileSync(telemetryFile, '');
 
     const events: WatcherEvent[] = [];
-    watcher = new FileWatcher(agentopsDir);
+    watcher = new FileWatcher(agentopsDir, 150, true);
     watcher.onEvent((e) => events.push(e));
     await watcher.start();
 
@@ -176,7 +176,7 @@ describe('FileWatcher', () => {
     fs.writeFileSync(telemetryFile, content);
 
     const events: WatcherEvent[] = [];
-    watcher = new FileWatcher(agentopsDir);
+    watcher = new FileWatcher(agentopsDir, 150, true);
     watcher.onEvent((e) => events.push(e));
     await watcher.start(); // hydration should parse existing content
 
@@ -200,7 +200,7 @@ describe('FileWatcher', () => {
     fs.writeFileSync(telemetryFile, line1 + '\n');
 
     const events: WatcherEvent[] = [];
-    watcher = new FileWatcher(agentopsDir);
+    watcher = new FileWatcher(agentopsDir, 150, true);
     watcher.onEvent((e) => events.push(e));
     await watcher.start();
 
@@ -233,7 +233,7 @@ describe('FileWatcher', () => {
   it('should handle missing directory gracefully', async () => {
     // agentopsDir does NOT exist
     const events: WatcherEvent[] = [];
-    watcher = new FileWatcher(agentopsDir);
+    watcher = new FileWatcher(agentopsDir, 150, true);
     watcher.onEvent((e) => events.push(e));
 
     // Should not throw
@@ -244,7 +244,7 @@ describe('FileWatcher', () => {
 
   it('should emit waiting status when files are missing', async () => {
     const events: WatcherEvent[] = [];
-    watcher = new FileWatcher(agentopsDir);
+    watcher = new FileWatcher(agentopsDir, 150, true);
     watcher.onEvent((e) => events.push(e));
     await watcher.start();
 
@@ -259,7 +259,7 @@ describe('FileWatcher', () => {
   it('should start tailing when files appear', async () => {
     // Start without directory
     const events: WatcherEvent[] = [];
-    watcher = new FileWatcher(agentopsDir);
+    watcher = new FileWatcher(agentopsDir, 150, true);
     watcher.onEvent((e) => events.push(e));
     await watcher.start();
 
@@ -293,7 +293,7 @@ describe('FileWatcher', () => {
     fs.writeFileSync(telemetryFile, lines.join('\n') + '\n');
 
     const events: WatcherEvent[] = [];
-    watcher = new FileWatcher(agentopsDir);
+    watcher = new FileWatcher(agentopsDir, 150, true);
     watcher.onEvent((e) => events.push(e));
     await watcher.start();
 
@@ -307,7 +307,7 @@ describe('FileWatcher', () => {
 
   it('should stop cleanly', async () => {
     fs.mkdirSync(agentopsDir, { recursive: true });
-    watcher = new FileWatcher(agentopsDir);
+    watcher = new FileWatcher(agentopsDir, 150, true);
     await watcher.start();
     expect(watcher.getStatus()).toBe('watching');
 

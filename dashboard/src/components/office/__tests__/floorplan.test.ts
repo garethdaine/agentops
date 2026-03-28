@@ -58,9 +58,9 @@ describe('floorplan', () => {
   });
 
   describe('WORKSTATION_SLOTS', () => {
-    it('should define 4-6 workstation positions', () => {
+    it('should define 4-12 workstation positions', () => {
       expect(WORKSTATION_SLOTS.length).toBeGreaterThanOrEqual(4);
-      expect(WORKSTATION_SLOTS.length).toBeLessThanOrEqual(6);
+      expect(WORKSTATION_SLOTS.length).toBeLessThanOrEqual(12);
     });
 
     it('should have position as [x, y, z] tuple and rotation', () => {

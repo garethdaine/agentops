@@ -67,6 +67,7 @@ export class FileWatcher {
   constructor(
     private readonly watchDir: string,
     private readonly debounceMs: number = 150,
+    private readonly usePolling: boolean = false,
   ) {}
 
   /** Register an event handler. */
@@ -154,6 +155,8 @@ export class FileWatcher {
       persistent: true,
       ignoreInitial: true,
       depth: 0,
+      usePolling: this.usePolling,
+      interval: this.usePolling ? 100 : undefined,
     });
 
     this.watcher.on('change', (filePath: string) => {
@@ -201,6 +204,8 @@ export class FileWatcher {
           persistent: true,
           ignoreInitial: true,
           depth: 0,
+          usePolling: this.usePolling,
+          interval: this.usePolling ? 100 : undefined,
         });
 
         this.dirWatcher.on('addDir', (dirPath: string) => {
