@@ -48,18 +48,18 @@ export const FOG_CONFIG = {
 
 /** Ambient/hemisphere/directional base lighting values. */
 export const AMBIENT_CONFIG = {
-  intensity: 0.6,
+  intensity: 0.35,
 } as const;
 
 export const HEMISPHERE_CONFIG = {
-  skyColor: '#e8d5b7',
-  groundColor: '#4a6fa5',
-  intensity: 0.8,
+  skyColor: '#445577',
+  groundColor: '#111122',
+  intensity: 0.5,
 } as const;
 
 export const DIRECTIONAL_CONFIG = {
   position: [10, 15, 8] as const,
-  intensity: 1.5,
+  intensity: 0.8,
   shadowMapSize: 1024,
   shadowCameraExtent: 15,
   shadowNear: 0.5,

@@ -122,15 +122,10 @@ export function startRelay(options: RelayOptions = {}): Promise<RelayHandle> {
     }
 
     function startDisconnectTimer(): void {
-      if (clients.size > 0) return;
-      clearDisconnectTimer();
-      log('info', `All clients disconnected — shutting down in ${DISCONNECT_GRACE_MS / 1000}s unless a client reconnects`);
-      disconnectTimer = setTimeout(() => {
-        if (clients.size === 0) {
-          log('info', 'Grace period expired with no clients — shutting down');
-          wss.emit('all-clients-gone');
-        }
-      }, DISCONNECT_GRACE_MS);
+      // Don't auto-shutdown -- relay should persist across browser refreshes and dev server restarts
+      if (clients.size === 0) {
+        log('info', 'All clients disconnected — relay stays running');
+      }
     }
 
     wss.on('connection', (ws, req) => {

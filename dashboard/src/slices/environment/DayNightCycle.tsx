@@ -51,7 +51,7 @@ const WEATHER_SKY_OVERRIDES: Record<Weather, SkyOverrides> = {
 /* ── Light intensity ranges ──────────────────────────────────────── */
 
 const LIGHT_RANGES = {
-  sun:     { min: 0.05, max: 1.2 },
+  sun:     { min: 0.05, max: 0.8 },
   ambient: { min: 0.15, max: 0.4 },
   hemi:    { min: 0.2,  max: 0.55 },
   fill:    { min: 0.0,  max: 0.15 },
